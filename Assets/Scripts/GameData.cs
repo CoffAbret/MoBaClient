@@ -23,6 +23,8 @@ public class GameData
     public static Fix64 m_PingTime = Fix64.Zero;
     //所有显示角色列表
     public static List<Player> m_PlayerList = new List<Player>();
+    //所有显示箭塔列表
+    public static List<Tower> m_TowerList = new List<Tower>();
     //所有操作事件的列表
     public static List<FrameKeyData> m_OperationEventList = new List<FrameKeyData>();
     //技能特效路径

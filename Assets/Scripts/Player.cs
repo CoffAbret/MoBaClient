@@ -123,6 +123,8 @@ public class Player
     /// <param name="parameter"></param>
     public void ChangeState(BaseState state, string parameter)
     {
+        if (m_CharData == null)
+            return;
         if (m_State != null && !(m_State is AttackState))
         {
             m_PreState = m_State;
@@ -186,8 +188,21 @@ public class Player
             Fix64 angle = (Fix64)Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
             if (angle <= (Fix64)skillNode.angle / 2 && distance <= (Fix64)skillNode.dist)
-                GameData.m_PlayerList[i].FallDamage(this, skillNode);
+            {
+                int damage = 0;
+                if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
+                    damage = (int)((m_CharData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]) - m_CharData.m_HeroAttrNode.armor);
+                else
+                    damage = (int)((m_CharData.m_HeroAttrNode.attack * 15) - m_CharData.m_HeroAttrNode.armor);
+                if (skillNode.skill_id == 301001006)
+                {
+                    m_State = new HitState();
+                    m_State.OnInit(this);
+                    m_State.OnEnter();
+                }
+                GameData.m_PlayerList[i].FallDamage(damage);
 
+            }
         }
         m_IsCalcDamage = true;
     }
@@ -197,13 +212,8 @@ public class Player
     /// </summary>
     /// <param name="playerAttack">攻击者</param>
     /// <param name="skillNode">攻击技能</param>
-    public void FallDamage(Player playerAttack, SkillNode skillNode)
+    public void FallDamage(int damage)
     {
-        int damage = 0;
-        if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
-            damage = (int)((playerAttack.m_CharData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]) - m_CharData.m_HeroAttrNode.armor);
-        else
-            damage = (int)((playerAttack.m_CharData.m_HeroAttrNode.attack * 15) - m_CharData.m_HeroAttrNode.armor);
         m_CharData.m_HP -= damage;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
@@ -212,13 +222,6 @@ public class Player
             m_HudText.PlayerHUDText.gameObject.SetActive(true);
             m_HudText.gameObject.SetActive(true);
             m_HudText.PlayerHUDText.Add(-damage, Color.red, 0f);
-
-            if (skillNode.skill_id == 301001006)
-            {
-                m_State = new HitState();
-                m_State.OnInit(this);
-                m_State.OnEnter();
-            }
         }
         #endregion
         if (m_CharData.m_HP <= 0)

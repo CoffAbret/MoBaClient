@@ -24,7 +24,7 @@ public class MoveState : BaseState
     public override void OnInit(Player viewPlayer, string parameter = null)
     {
         base.OnInit(viewPlayer, parameter);
-        if (m_Player == null)
+        if (m_Player == null || m_Player.m_CharData == null)
             return;
         if (m_Parameter == null || !m_Parameter.Contains("#"))
             return;
@@ -46,7 +46,7 @@ public class MoveState : BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        if (m_Player == null)
+        if (m_Player == null || m_Player.m_CharData == null)
             return;
         m_Player.m_IsMove = true;
         Quaternion targetRotation = Quaternion.LookRotation((m_Player.m_Pos + m_Player.m_Angles - m_Player.m_Pos).ToVector3(), Vector3.up);
@@ -68,7 +68,7 @@ public class MoveState : BaseState
     public override void UpdateLogic()
     {
         base.UpdateLogic();
-        if (m_Player == null)
+        if (m_Player == null || m_Player.m_CharData == null)
             return;
         if (!m_Player.m_IsMove)
             return;
@@ -86,7 +86,7 @@ public class MoveState : BaseState
     public override void OnExit()
     {
         base.OnExit();
-        if (m_Player == null)
+        if (m_Player == null || m_Player.m_CharData == null)
             return;
         m_Player.m_IsMove = false;
         m_Player.m_IntervalTime = Fix64.Zero;

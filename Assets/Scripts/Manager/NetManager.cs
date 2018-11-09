@@ -17,7 +17,7 @@ public class NetManager
     /// </summary>
     public void InitClient()
     {
-        m_Client = new AsyncUdpClient("192.168.3.27", 8889);
+        m_Client = new AsyncUdpClient("192.168.3.5", 8889);
         m_Client.OnMessage += OnMessage;
     }
 

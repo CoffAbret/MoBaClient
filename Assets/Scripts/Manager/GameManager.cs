@@ -48,7 +48,10 @@ public class GameManager
     {
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
             GameData.m_PlayerList[i].Destroy();
+        for (int i = 0; i < GameData.m_TowerList.Count; i++)
+            GameData.m_TowerList[i].Destroy();
         GameData.m_PlayerList.Clear();
+        GameData.m_TowerList.Clear();
         m_NetManager.OnDisconnect();
         m_DelayManager.DestoryDelay();
     }
@@ -88,6 +91,17 @@ public class GameManager
     }
 
     /// <summary>
+    /// 创建箭塔
+    /// </summary>
+    /// <param name="charData"></param>
+    public void CreateTower(int campId)
+    {
+        Tower towerObj = new Tower();
+        towerObj.Create(campId);
+        GameData.m_TowerList.Add(towerObj);
+    }
+
+    /// <summary>
     /// 创建所有角色
     /// </summary>
     /// <param name="playerStr"></param>
@@ -103,6 +117,11 @@ public class GameManager
             int campId = i % 2 == 0 ? 1 : 2;
             CharData charData = new CharData(roleId, heroId, roleName, playerIndex, campId);
             CreatePlayer(charData, GameData.m_CurrentRoleId == charData.m_Id);
+        }
+        for (int j = 0; j < 2; j++)
+        {
+            int campId = j % 2 == 0 ? 1 : 2;
+            CreateTower(campId);
         }
     }
 
