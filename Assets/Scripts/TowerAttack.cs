@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 显示层对象
+/// 箭塔子弹
 /// </summary>
 public class TowerAttack
 {
@@ -14,6 +14,8 @@ public class TowerAttack
     public Player m_TargetPlayer;
     //攻击距离
     public Fix64 m_AttackDistince = Fix64.FromRaw(1000);
+    //攻击间隔
+    public Fix64 m_AttackTime = Fix64.FromRaw(500);
     //攻击特效
     public GameObject m_Attack;
     /// <summary>
@@ -48,7 +50,7 @@ public class TowerAttack
             FixVector3 relativePos = m_TargetPlayer.m_Pos - new FixVector3((Fix64)m_Attack.transform.position.x, (Fix64)m_Attack.transform.position.y, (Fix64)m_Attack.transform.position.z);
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Attack.transform.rotation = rotation;
-            m_Attack.transform.position += m_Attack.transform.forward * 0.1f;
+            m_Attack.transform.position += m_Attack.transform.forward * (float)m_AttackTime;
         }
     }
 
@@ -58,9 +60,12 @@ public class TowerAttack
     public void Destroy()
     {
         m_Pos = FixVector3.Zero;
-        m_Attack.SetActive(false);
-        m_Attack.transform.localPosition = new Vector3(0, 1, 0);
-        m_Attack.transform.rotation = Quaternion.Euler(Vector3.zero);
         m_TargetPlayer = null;
+        if (m_Attack != null)
+        {
+            m_Attack.SetActive(false);
+            m_Attack.transform.localPosition = new Vector3(0, 1, 0);
+            m_Attack.transform.rotation = Quaternion.Euler(Vector3.zero);
+        }
     }
 }

@@ -17,6 +17,8 @@ public class Player
     public FixVector3 m_Scale;
     //攻击目标
     public Player m_TargetPlayer;
+    //攻击目标
+    public Tower m_TargetTower;
     //显示对象角度
     public FixVector3 m_Angles;
     //对象数据
@@ -171,6 +173,31 @@ public class Player
     }
 
     /// <summary>
+    /// 查找目标
+    /// </summary>
+    /// <param name="skillNode"></param>
+    /// <returns></returns>
+    public Tower FindTowerTarget(SkillNode skillNode)
+    {
+        for (int i = 0; i < GameData.m_TowerList.Count; i++)
+        {
+            if (GameData.m_TowerList[i].m_CampId == m_CharData.m_CampId)
+                continue;
+            Fix64 distance = FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos);
+            if (distance <= (Fix64)skillNode.dist)
+            {
+                if (m_TargetTower != null && m_TargetTower.m_SelectedGo != null)
+                    m_TargetTower.m_SelectedGo.SetActive(false);
+                m_TargetTower = GameData.m_TowerList[i];
+                if (m_TargetTower != null && m_TargetTower.m_SelectedGo != null)
+                    m_TargetTower.m_SelectedGo.SetActive(true);
+                return GameData.m_TowerList[i];
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
     /// 判断击中目标
     /// </summary>
     public void CalcDamage(SkillNode skillNode)
@@ -204,7 +231,27 @@ public class Player
 
             }
         }
-        m_IsCalcDamage = true;
+
+        for (int i = 0; i < GameData.m_TowerList.Count; i++)
+        {
+            if (GameData.m_TowerList[i].m_CampId == m_CharData.m_CampId)
+                continue;
+            //玩家与敌人的方向向量
+            FixVector3 targetV3 = GameData.m_TowerList[i].m_Pos - m_Pos;
+            //求玩家正前方、玩家与敌人方向两个向量的夹角
+            //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
+            Fix64 angle = (Fix64)Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
+            Fix64 distance = FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos);
+            if (angle <= (Fix64)skillNode.angle / 2 && distance <= (Fix64)skillNode.dist)
+            {
+                int damage = 0;
+                if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
+                    damage = (int)((m_CharData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]) - m_CharData.m_HeroAttrNode.armor);
+                else
+                    damage = (int)((m_CharData.m_HeroAttrNode.attack * 15) - m_CharData.m_HeroAttrNode.armor);
+                GameData.m_TowerList[i].FallDamage(damage);
+            }
+        }
     }
 
     /// <summary>

@@ -84,13 +84,19 @@ public class AttackState : BaseState
         m_Player.m_SkillNode = m_Player.m_CharData.GetSkillNode(m_Player.m_SkillIndex);
         if (m_Player.m_SkillNode == null)
             return;
-        Player target = m_Player.FindTarget(m_Player.m_SkillNode);
+        FixVector3 pos = FixVector3.Zero;
+        Player targetPlayer = m_Player.FindTarget(m_Player.m_SkillNode);
+        Tower targetTower = m_Player.FindTowerTarget(m_Player.m_SkillNode);
+        if (targetTower != null)
+            pos = targetTower.m_Pos;
+        if (targetPlayer != null)
+            pos = targetPlayer.m_Pos;
         m_Player.m_IsAttack = true;
         m_Player.m_IsCalcDamage = false;
-        if (target != null)
+        if (pos != FixVector3.Zero)
         {
             //普通攻击自动改变朝向
-            FixVector3 relativePos = target.m_Pos - m_Player.m_Pos;
+            FixVector3 relativePos = pos - m_Player.m_Pos;
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
             #region 显示层

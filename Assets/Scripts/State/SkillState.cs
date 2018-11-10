@@ -54,10 +54,16 @@ public class SkillState : BaseState
             return;
         if (m_Player.m_SkillNode == null)
             return;
-        Player target = m_Player.FindTarget(m_Player.m_SkillNode);
-        if (target != null)
+        FixVector3 pos = FixVector3.Zero;
+        Player targetPlayer = m_Player.FindTarget(m_Player.m_SkillNode);
+        Tower targetTower = m_Player.FindTowerTarget(m_Player.m_SkillNode);
+        if (targetTower != null)
+            pos = targetTower.m_Pos;
+        if (targetPlayer != null)
+            pos = targetPlayer.m_Pos;
+        if (pos != FixVector3.Zero)
         {
-            FixVector3 relativePos = target.m_Pos - m_Player.m_Pos;
+            FixVector3 relativePos = pos - m_Player.m_Pos;
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
             #region 显示层

@@ -94,10 +94,23 @@ public class GameManager
     /// 创建箭塔
     /// </summary>
     /// <param name="charData"></param>
-    public void CreateTower(int campId)
+    public void CreateTower(int campId, int type)
     {
         Tower towerObj = new Tower();
-        towerObj.Create(campId);
+        int hp = type == 2 ? 200 : 100;
+        towerObj.Create(campId, hp, type);
+        GameData.m_TowerList.Add(towerObj);
+    }
+
+    /// <summary>
+    /// 创建小兵
+    /// </summary>
+    /// <param name="charData"></param>
+    public void CreateMonster(int campId, int type)
+    {
+        Tower towerObj = new Tower();
+        int hp = type == 2 ? 200 : 100;
+        towerObj.Create(campId, hp, type);
         GameData.m_TowerList.Add(towerObj);
     }
 
@@ -121,7 +134,17 @@ public class GameManager
         for (int j = 0; j < 2; j++)
         {
             int campId = j % 2 == 0 ? 1 : 2;
-            CreateTower(campId);
+            CreateTower(campId, 1);
+        }
+        for (int j = 0; j < 2; j++)
+        {
+            int campId = j % 2 == 0 ? 1 : 2;
+            CreateTower(campId, 2);
+        }
+
+        for (int k = 0; k < 2; k++)
+        {
+
         }
     }
 
