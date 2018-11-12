@@ -79,10 +79,10 @@ public class GameManager
     /// 创建角色
     /// </summary>
     /// <param name="charData"></param>
-    public void CreatePlayer(CharData charData, bool isMainPlayer = false)
+    public void CreatePlayer(PlayerData playerData, bool isMainPlayer = false)
     {
         Player plyerObj = new Player(isMainPlayer);
-        plyerObj.Create(charData);
+        plyerObj.Create(playerData);
         GameData.m_PlayerList.Add(plyerObj);
         if (isMainPlayer)
         {
@@ -103,18 +103,6 @@ public class GameManager
     }
 
     /// <summary>
-    /// 创建小兵
-    /// </summary>
-    /// <param name="charData"></param>
-    public void CreateMonster(int campId, int type)
-    {
-        Tower towerObj = new Tower();
-        int hp = type == 2 ? 200 : 100;
-        towerObj.Create(campId, hp, type);
-        GameData.m_TowerList.Add(towerObj);
-    }
-
-    /// <summary>
     /// 创建所有角色
     /// </summary>
     /// <param name="playerStr"></param>
@@ -126,26 +114,52 @@ public class GameManager
             int roleId = playerDic.TryGetInt("id");
             string roleName = playerDic.TryGetString("name");
             int heroId = i % 2 == 0 ? 201001000 : 201003300;
-            int playerIndex = i + 1;
             int campId = i % 2 == 0 ? 1 : 2;
-            CharData charData = new CharData(roleId, heroId, roleName, playerIndex, campId);
+            PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 1);
             CreatePlayer(charData, GameData.m_CurrentRoleId == charData.m_Id);
         }
-        for (int j = 0; j < 2; j++)
+        for (int i = 0; i < 2; i++)
         {
-            int campId = j % 2 == 0 ? 1 : 2;
+            int campId = i % 2 == 0 ? 1 : 2;
             CreateTower(campId, 1);
         }
-        for (int j = 0; j < 2; j++)
+        for (int i = 0; i < 2; i++)
         {
-            int campId = j % 2 == 0 ? 1 : 2;
+            int campId = i % 2 == 0 ? 1 : 2;
             CreateTower(campId, 2);
         }
 
-        for (int k = 0; k < 2; k++)
-        {
 
+        for (int i = 0; i < 2; i++)
+        {
+            int roleId = 0;
+            string roleName = "";
+            int heroId = i % 2 == 0 ? 202100200 : 202100500;
+            int campId = i % 2 == 0 ? 1 : 2;
+            PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 2);
+            CreatePlayer(charData, GameData.m_CurrentRoleId == charData.m_Id);
         }
+
+        for (int i = 0; i < 2; i++)
+        {
+            int roleId = 0;
+            string roleName = "";
+            int heroId = i % 2 == 0 ? 202100100 : 202100400;
+            int campId = i % 2 == 0 ? 1 : 2;
+            PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 3);
+            CreatePlayer(charData, GameData.m_CurrentRoleId == charData.m_Id);
+        }
+
+        //for (int i = 0; i < 2; i++)
+        //{
+        //    int roleId = 0;
+        //    string roleName = "";
+        //    int heroId = i % 2 == 0 ? 202100300 : 202100600;
+        //    int playerIndex = i + 1;
+        //    int campId = i % 2 == 0 ? 1 : 2;
+        //    PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 4);
+        //    CreatePlayer(charData, GameData.m_CurrentRoleId == charData.m_Id);
+        //}
     }
 
     public void SyncKey(Dictionary<string, object> data)
@@ -182,10 +196,15 @@ public class GameManager
     /// </summary>
     public void LoadJsonData()
     {
-        FSDataNodeTable<SkillNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("skill_hero")); //技能表
-        FSDataNodeTable<HeroNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("hero"));        //英雄表
-        FSDataNodeTable<HeroSkinNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("skin"));    //英雄皮肤表
-        FSDataNodeTable<ModelNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("model"));      //模型表
-        FSDataNodeTable<HeroAttrNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("heroAttr"));//英雄属性表
+        FSDataNodeTable<SkillNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("skill_hero"));            //技能表
+        FSDataNodeTable<ModelNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("model"));                 //模型表
+        FSDataNodeTable<HeroNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("hero"));                   //英雄表
+        FSDataNodeTable<HeroSkinNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("skin"));               //英雄皮肤表
+        FSDataNodeTable<HeroAttrNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("heroAttr"));           //英雄属性表
+
+        FSDataNodeTable<MonsterAttrNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("monsterAttr"));     //怪物属性表
+        FSDataNodeTable<MonsterSkillNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("skill_monster"));  //怪物技能表
+
+        FSDataNodeTable<Moba3v3NaviNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("Moba3v3NaviNode")); //地图寻路表
     }
 }

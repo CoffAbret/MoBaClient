@@ -48,7 +48,7 @@ public class BattleLogicManager
     {
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
-            if (GameData.m_PlayerList[i] == null || GameData.m_PlayerList[i].m_CharData == null)
+            if (GameData.m_PlayerList[i] == null || GameData.m_PlayerList[i].m_PlayerData == null)
                 continue;
             GameData.m_PlayerList[i].UpdateLogic();
         }
@@ -70,7 +70,7 @@ public class BattleLogicManager
 
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
-            if (GameData.m_PlayerList[i].m_CharData.m_Id == roleId)
+            if (GameData.m_PlayerList[i].m_PlayerData.m_Id == roleId)
             {
                 return GameData.m_PlayerList[i];
             }

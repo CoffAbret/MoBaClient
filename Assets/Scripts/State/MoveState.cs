@@ -24,13 +24,13 @@ public class MoveState : BaseState
     public override void OnInit(Player viewPlayer, string parameter = null)
     {
         base.OnInit(viewPlayer, parameter);
-        if (m_Player == null || m_Player.m_CharData == null)
+        if (m_Player == null || m_Player.m_PlayerData == null)
             return;
         if (m_Parameter == null || !m_Parameter.Contains("#"))
             return;
         float x = float.Parse(m_Parameter.Split('#')[0]);
         float z = float.Parse(m_Parameter.Split('#')[2]);
-        m_Player.m_Angles = m_Player.m_CharData.m_CampId == 1 ? new FixVector3((Fix64)x, Fix64.Zero, (Fix64)z) : new FixVector3(-(Fix64)x, Fix64.Zero, -(Fix64)z);
+        m_Player.m_Angles = m_Player.m_PlayerData.m_CampId == 1 ? new FixVector3((Fix64)x, Fix64.Zero, (Fix64)z) : new FixVector3(-(Fix64)x, Fix64.Zero, -(Fix64)z);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -46,7 +46,7 @@ public class MoveState : BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        if (m_Player == null || m_Player.m_CharData == null)
+        if (m_Player == null || m_Player.m_PlayerData == null)
             return;
         m_Player.m_IsMove = true;
         Quaternion targetRotation = Quaternion.LookRotation((m_Player.m_Pos + m_Player.m_Angles - m_Player.m_Pos).ToVector3(), Vector3.up);
@@ -68,7 +68,7 @@ public class MoveState : BaseState
     public override void UpdateLogic()
     {
         base.UpdateLogic();
-        if (m_Player == null || m_Player.m_CharData == null)
+        if (m_Player == null || m_Player.m_PlayerData == null)
             return;
         if (!m_Player.m_IsMove)
             return;
@@ -86,7 +86,7 @@ public class MoveState : BaseState
     public override void OnExit()
     {
         base.OnExit();
-        if (m_Player == null || m_Player.m_CharData == null)
+        if (m_Player == null || m_Player.m_PlayerData == null)
             return;
         m_Player.m_IsMove = false;
         m_Player.m_IntervalTime = Fix64.Zero;

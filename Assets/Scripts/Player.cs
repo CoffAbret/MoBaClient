@@ -22,7 +22,7 @@ public class Player
     //显示对象角度
     public FixVector3 m_Angles;
     //对象数据
-    public CharData m_CharData;
+    public PlayerData m_PlayerData;
     //角色索引
     public int m_PlayerIndex = 0;
     //是否主角
@@ -43,8 +43,6 @@ public class Player
     public bool m_IsDie = false;
     //是否后仰
     public bool m_IsHit = false;
-    //上一次状态
-    public BaseState m_PreState;
     //当前状态
     public BaseState m_State;
     //技能间隔时间
@@ -81,11 +79,19 @@ public class Player
     /// 创建对象
     /// </summary>
     /// <param name="charData">对象数据</param>
-    public void Create(CharData charData)
+    public void Create(PlayerData playerData)
     {
         #region 逻辑层
-        m_CharData = new CharData(charData.m_Id, charData.m_HeroId, charData.m_Name, charData.m_PlayerIndex, charData.m_CampId);
-        GameObject posGo = GameObject.Find(string.Format("Pos{0}", m_CharData.m_PlayerIndex));
+        m_PlayerData = new PlayerData(playerData.m_Id, playerData.m_HeroId, playerData.m_Name, playerData.m_CampId, playerData.m_Type);
+        GameObject posGo = null;
+        if (playerData.m_Type == 1)
+            posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/Pos{0}", m_PlayerData.m_CampId));
+        if (playerData.m_Type == 2)
+            posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/JinZhan{0}", m_PlayerData.m_CampId));
+        if (playerData.m_Type == 3)
+            posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/YuanCheng{0}", m_PlayerData.m_CampId));
+        if (playerData.m_Type == 4)
+            posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/PaoChe{0}", m_PlayerData.m_CampId));
         m_Pos = new FixVector3((Fix64)posGo.transform.localPosition.x, (Fix64)posGo.transform.localPosition.y, (Fix64)posGo.transform.localPosition.z);
         m_Rotation = new FixVector3((Fix64)posGo.transform.localRotation.eulerAngles.x, (Fix64)posGo.transform.localRotation.eulerAngles.y, (Fix64)posGo.transform.localRotation.eulerAngles.z);
         m_Scale = new FixVector3((Fix64)posGo.transform.localScale.x, (Fix64)posGo.transform.localScale.y, (Fix64)posGo.transform.localScale.z);
@@ -95,8 +101,9 @@ public class Player
         //是否执行显示层逻辑
         if (GameData.m_IsExecuteViewLogic)
         {
-            GameObject go = Resources.Load<GameObject>(m_CharData.m_ModelPath);
+            GameObject go = Resources.Load<GameObject>(m_PlayerData.m_ModelPath);
             m_VGo = GameObject.Instantiate(go);
+            m_VGo.transform.parent = posGo.transform.parent;
             m_VGo.transform.localPosition = m_Pos.ToVector3();
             m_VGo.transform.localRotation = Quaternion.Euler(m_Rotation.ToVector3());
             m_VGo.transform.localScale = m_Scale.ToVector3();
@@ -104,12 +111,12 @@ public class Player
             m_SelectedGo.SetActive(false);
             m_Health = m_VGo.GetComponent<PlayerHealth>();
             m_HudText = m_VGo.GetComponent<PlayerHudText>();
-            m_VGo.name = charData.m_Id.ToString();
-            m_Health.m_Health = m_CharData.m_HP;
+            m_VGo.name = playerData.m_Id.ToString();
+            m_Health.m_Health = m_PlayerData.m_HP;
             if (m_IsMe)
             {
                 m_VGo.tag = "Player";
-                GameObject cameraPosGo = GameObject.Find(string.Format("CameraPos{0}", m_CharData.m_CampId));
+                GameObject cameraPosGo = GameObject.Find(string.Format("CameraPos{0}", m_PlayerData.m_CampId));
                 Camera.main.transform.localPosition = cameraPosGo.transform.localPosition;
                 Camera.main.transform.localRotation = cameraPosGo.transform.localRotation;
                 Camera.main.transform.localScale = cameraPosGo.transform.localScale;
@@ -125,13 +132,10 @@ public class Player
     /// <param name="parameter"></param>
     public void ChangeState(BaseState state, string parameter)
     {
-        if (m_CharData == null)
+        if (m_PlayerData == null)
             return;
         if (m_State != null && !(m_State is AttackState))
-        {
-            m_PreState = m_State;
             m_State.OnExit();
-        }
         m_State = state;
         m_State.OnInit(this, parameter);
         m_State.OnEnter();
@@ -145,6 +149,7 @@ public class Player
         if (m_State == null)
             return;
         m_State.UpdateLogic();
+
     }
 
     /// <summary>
@@ -156,7 +161,7 @@ public class Player
     {
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
-            if (GameData.m_PlayerList[i].m_CharData.m_CampId == m_CharData.m_CampId)
+            if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_PlayerData.m_CampId)
                 continue;
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
             if (distance <= (Fix64)skillNode.dist)
@@ -181,7 +186,7 @@ public class Player
     {
         for (int i = 0; i < GameData.m_TowerList.Count; i++)
         {
-            if (GameData.m_TowerList[i].m_CampId == m_CharData.m_CampId)
+            if (GameData.m_TowerList[i].m_CampId == m_PlayerData.m_CampId)
                 continue;
             Fix64 distance = FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos);
             if (distance <= (Fix64)skillNode.dist)
@@ -204,9 +209,9 @@ public class Player
     {
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
-            if (GameData.m_PlayerList[i].m_CharData.m_CampId == m_CharData.m_CampId)
+            if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_PlayerData.m_CampId)
                 continue;
-            if (GameData.m_PlayerList[i].m_CharData.m_Id == m_CharData.m_Id)
+            if (GameData.m_PlayerList[i].m_PlayerData.m_Id == m_PlayerData.m_Id)
                 continue;
             //玩家与敌人的方向向量
             FixVector3 targetV3 = GameData.m_PlayerList[i].m_Pos - m_Pos;
@@ -218,9 +223,9 @@ public class Player
             {
                 int damage = 0;
                 if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
-                    damage = (int)((m_CharData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]) - m_CharData.m_HeroAttrNode.armor);
+                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]) - m_PlayerData.m_HeroAttrNode.armor);
                 else
-                    damage = (int)((m_CharData.m_HeroAttrNode.attack * 15) - m_CharData.m_HeroAttrNode.armor);
+                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15) - m_PlayerData.m_HeroAttrNode.armor);
                 if (skillNode.skill_id == 301001006)
                 {
                     m_State = new HitState();
@@ -234,7 +239,7 @@ public class Player
 
         for (int i = 0; i < GameData.m_TowerList.Count; i++)
         {
-            if (GameData.m_TowerList[i].m_CampId == m_CharData.m_CampId)
+            if (GameData.m_TowerList[i].m_CampId == m_PlayerData.m_CampId)
                 continue;
             //玩家与敌人的方向向量
             FixVector3 targetV3 = GameData.m_TowerList[i].m_Pos - m_Pos;
@@ -246,9 +251,9 @@ public class Player
             {
                 int damage = 0;
                 if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
-                    damage = (int)((m_CharData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]) - m_CharData.m_HeroAttrNode.armor);
+                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]) - m_PlayerData.m_HeroAttrNode.armor);
                 else
-                    damage = (int)((m_CharData.m_HeroAttrNode.attack * 15) - m_CharData.m_HeroAttrNode.armor);
+                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15) - m_PlayerData.m_HeroAttrNode.armor);
                 GameData.m_TowerList[i].FallDamage(damage);
             }
         }
@@ -261,7 +266,7 @@ public class Player
     /// <param name="skillNode">攻击技能</param>
     public void FallDamage(int damage)
     {
-        m_CharData.m_HP -= damage;
+        m_PlayerData.m_HP -= damage;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -271,7 +276,7 @@ public class Player
             m_HudText.PlayerHUDText.Add(-damage, Color.red, 0f);
         }
         #endregion
-        if (m_CharData.m_HP <= 0)
+        if (m_PlayerData.m_HP <= 0)
         {
             m_State = new DieState();
             m_State.OnInit(this);
@@ -287,7 +292,7 @@ public class Player
         GameData.m_PlayerList.Remove(this);
         if (m_TargetPlayer != null && m_TargetPlayer.m_SelectedGo != null)
             m_TargetPlayer.m_SelectedGo.SetActive(false);
-        m_CharData = null;
+        m_PlayerData = null;
         m_IsMe = false;
         m_IsMove = false;
         m_IsAttack = false;

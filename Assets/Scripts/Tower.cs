@@ -94,7 +94,7 @@ public class Tower
     {
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
-            if (GameData.m_PlayerList[i].m_CharData.m_CampId == m_CampId)
+            if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_CampId)
                 continue;
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
             if (distance <= attackDistince)

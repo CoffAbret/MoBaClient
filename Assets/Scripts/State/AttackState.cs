@@ -81,7 +81,7 @@ public class AttackState : BaseState
             m_Player.m_IntervalTime = Fix64.Zero;
         }
         #endregion
-        m_Player.m_SkillNode = m_Player.m_CharData.GetSkillNode(m_Player.m_SkillIndex);
+        m_Player.m_SkillNode = m_Player.m_PlayerData.GetSkillNode(m_Player.m_SkillIndex);
         if (m_Player.m_SkillNode == null)
             return;
         FixVector3 pos = FixVector3.Zero;
@@ -109,7 +109,7 @@ public class AttackState : BaseState
         if (GameData.m_IsExecuteViewLogic)
         {
             m_Animator.SetInteger(m_StateParameter, m_Player.m_SkillIndex);
-            m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}", GameData.m_EffectPath, m_Player.m_CharData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
+            m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}", GameData.m_EffectPath, m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
             m_AniEffect.transform.parent = m_Player.m_VGo.transform;
             m_AniEffect.transform.localPosition = Vector3.zero;
             m_AniEffect.transform.localRotation = Quaternion.Euler(Vector3.zero);
