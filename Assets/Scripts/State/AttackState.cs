@@ -49,38 +49,46 @@ public class AttackState : BaseState
         base.OnEnter();
         if (m_Player == null)
             return;
-        #region 普攻连击逻辑
-        //普攻状态并且技能数据为空不执行
-        //if (m_Player.m_IsAttack && m_Player.m_SkillNode == null)
-        //    return;
-        //普攻状态并且动作没有播完不执行
-        if (m_Player.m_IsAttack && m_Player.m_SkillIndex != 0 && m_Player.m_IntervalTime < (Fix64)m_Player.m_SkillNode.animatorTime * m_AttackTime)
-            return;
-        //普攻状态并且没有播放普攻动作
-        if ((m_Player.m_IsAttack && m_Player.m_SkillIndex == 0) || (!m_Player.m_IsAttack && m_Player.m_SkillIndex == 0))
+        if (m_Player.m_PlayerData.m_Type == 1)
+        {
+            #region 普攻连击逻辑
+            //普攻状态并且技能数据为空不执行
+            //if (m_Player.m_IsAttack && m_Player.m_SkillNode == null)
+            //    return;
+            //普攻状态并且动作没有播完不执行
+            if (m_Player.m_IsAttack && m_Player.m_SkillIndex != 0 && m_Player.m_IntervalTime < (Fix64)m_Player.m_SkillNode.animatorTime * m_AttackTime)
+                return;
+            //普攻状态并且没有播放普攻动作
+            if ((m_Player.m_IsAttack && m_Player.m_SkillIndex == 0) || (!m_Player.m_IsAttack && m_Player.m_SkillIndex == 0))
+            {
+                m_Player.m_SkillIndex = 1;
+                m_Player.m_IntervalTime = Fix64.Zero;
+            }
+            //普攻状态并且是第一个连击并且动作已经播放结束
+            else if (m_Player.m_IsAttack && m_Player.m_SkillIndex == 1 && m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime * m_AttackTime)
+            {
+                m_Player.m_SkillIndex = 2;
+                m_Player.m_IntervalTime = Fix64.Zero;
+            }
+            //普攻状态并且是第二个连击并且动作已经播放结束
+            else if (m_Player.m_IsAttack && m_Player.m_SkillIndex == 2 && m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime * m_AttackTime)
+            {
+                m_Player.m_SkillIndex = 3;
+                m_Player.m_IntervalTime = Fix64.Zero;
+            }
+            //普攻状态并且是第三个连击并且动作已经播放结束不执行，这儿自动走OnExit退出
+            else if (m_Player.m_IsAttack && m_Player.m_SkillIndex == 3 && m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime * m_AttackTime)
+            {
+                m_Player.m_SkillIndex = 0;
+                m_Player.m_IntervalTime = Fix64.Zero;
+            }
+            #endregion
+        }
+        else
         {
             m_Player.m_SkillIndex = 1;
             m_Player.m_IntervalTime = Fix64.Zero;
         }
-        //普攻状态并且是第一个连击并且动作已经播放结束
-        else if (m_Player.m_IsAttack && m_Player.m_SkillIndex == 1 && m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime * m_AttackTime)
-        {
-            m_Player.m_SkillIndex = 2;
-            m_Player.m_IntervalTime = Fix64.Zero;
-        }
-        //普攻状态并且是第二个连击并且动作已经播放结束
-        else if (m_Player.m_IsAttack && m_Player.m_SkillIndex == 2 && m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime * m_AttackTime)
-        {
-            m_Player.m_SkillIndex = 3;
-            m_Player.m_IntervalTime = Fix64.Zero;
-        }
-        //普攻状态并且是第三个连击并且动作已经播放结束不执行，这儿自动走OnExit退出
-        else if (m_Player.m_IsAttack && m_Player.m_SkillIndex == 3 && m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime * m_AttackTime)
-        {
-            m_Player.m_SkillIndex = 0;
-            m_Player.m_IntervalTime = Fix64.Zero;
-        }
-        #endregion
         m_Player.m_SkillNode = m_Player.m_PlayerData.GetSkillNode(m_Player.m_SkillIndex);
         if (m_Player.m_SkillNode == null)
             return;
@@ -109,7 +117,12 @@ public class AttackState : BaseState
         if (GameData.m_IsExecuteViewLogic)
         {
             m_Animator.SetInteger(m_StateParameter, m_Player.m_SkillIndex);
-            m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}", GameData.m_EffectPath, m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
+            if (m_Player.m_PlayerData.m_Type == 1)
+                m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
+            if (m_Player.m_PlayerData.m_Type == 2)
+                m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Monster", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
+            if (m_AniEffect == null)
+                return;
             m_AniEffect.transform.parent = m_Player.m_VGo.transform;
             m_AniEffect.transform.localPosition = Vector3.zero;
             m_AniEffect.transform.localRotation = Quaternion.Euler(Vector3.zero);

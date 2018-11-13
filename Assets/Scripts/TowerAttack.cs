@@ -41,12 +41,12 @@ public class TowerAttack
         Fix64 distince = FixVector3.Distance(m_TargetPlayer.m_Pos, fixAttackPos);
         if (distince < m_AttackDistince)
         {
-            m_TargetPlayer.FallDamage(50);
+            m_TargetPlayer.FallDamage(5);
             Destroy();
         }
         else
         {
-            //普通攻击自动改变朝向
+            //普通攻击子弹自动改变朝向
             FixVector3 relativePos = m_TargetPlayer.m_Pos - new FixVector3((Fix64)m_Attack.transform.position.x, (Fix64)m_Attack.transform.position.y, (Fix64)m_Attack.transform.position.z);
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Attack.transform.rotation = rotation;

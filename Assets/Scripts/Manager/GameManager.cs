@@ -12,6 +12,8 @@ public class GameManager
     public BattleLogicManager m_BattleLogicManager;
     //延时管理
     public DelayManager m_DelayManager;
+    //游戏物体生成管理器
+    public SpawnManager m_SpawnManager;
     //Log输出
     public UILabel m_LogMessage;
     /// <summary>
@@ -25,6 +27,7 @@ public class GameManager
         m_OpreationManager = new OpreationManager();
         m_BattleLogicManager = new BattleLogicManager();
         m_DelayManager = new DelayManager();
+        m_SpawnManager = new SpawnManager();
         m_LogMessage = GameObject.Find("LogMessage").GetComponent<UILabel>();
     }
 
@@ -39,6 +42,8 @@ public class GameManager
             m_BattleLogicManager.UpdateLogic();
         if (m_DelayManager != null)
             m_DelayManager.UpdateDelay();
+        if (m_SpawnManager != null)
+            m_SpawnManager.UpdateLogic();
     }
 
     /// <summary>
@@ -97,7 +102,7 @@ public class GameManager
     public void CreateTower(int campId, int type)
     {
         Tower towerObj = new Tower();
-        int hp = type == 2 ? 200 : 100;
+        int hp = type == 2 ? 20000 : 10000;
         towerObj.Create(campId, hp, type);
         GameData.m_TowerList.Add(towerObj);
     }
@@ -128,38 +133,6 @@ public class GameManager
             int campId = i % 2 == 0 ? 1 : 2;
             CreateTower(campId, 2);
         }
-
-
-        for (int i = 0; i < 2; i++)
-        {
-            int roleId = 0;
-            string roleName = "";
-            int heroId = i % 2 == 0 ? 202100200 : 202100500;
-            int campId = i % 2 == 0 ? 1 : 2;
-            PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 2);
-            CreatePlayer(charData, GameData.m_CurrentRoleId == charData.m_Id);
-        }
-
-        for (int i = 0; i < 2; i++)
-        {
-            int roleId = 0;
-            string roleName = "";
-            int heroId = i % 2 == 0 ? 202100100 : 202100400;
-            int campId = i % 2 == 0 ? 1 : 2;
-            PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 3);
-            CreatePlayer(charData, GameData.m_CurrentRoleId == charData.m_Id);
-        }
-
-        //for (int i = 0; i < 2; i++)
-        //{
-        //    int roleId = 0;
-        //    string roleName = "";
-        //    int heroId = i % 2 == 0 ? 202100300 : 202100600;
-        //    int playerIndex = i + 1;
-        //    int campId = i % 2 == 0 ? 1 : 2;
-        //    PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 4);
-        //    CreatePlayer(charData, GameData.m_CurrentRoleId == charData.m_Id);
-        //}
     }
 
     public void SyncKey(Dictionary<string, object> data)

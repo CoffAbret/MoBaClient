@@ -135,7 +135,8 @@ public class Tower
     /// </summary>
     public void Destroy()
     {
-        m_Die.SetActive(true);
+        if (m_Die != null)
+            m_Die.SetActive(true);
         GameData.m_TowerList.Remove(this);
         if (m_TowerAttack != null)
             m_TowerAttack.Destroy();

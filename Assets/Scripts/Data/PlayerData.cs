@@ -24,7 +24,7 @@ public class PlayerData
     //索引
     public int m_Index;
     //寻路点
-    public Moba3v3NaviNode m_NaviNode;
+    public FixVector3 m_NaviPos=FixVector3.Zero;
     //当前英雄基础属性
     public CharacterAttrNode m_HeroAttrNode;
     //当前英雄技能
@@ -43,16 +43,22 @@ public class PlayerData
         if (type == 1)
             m_HeroAttrNode = FSDataNodeTable<HeroAttrNode>.GetSingleton().FindDataByType(heroId + 1);
         //获取小兵基础属性
-        if (type > 1)
+        else
         {
             m_HeroAttrNode = FSDataNodeTable<MonsterAttrNode>.GetSingleton().FindDataByType(heroId);
-            m_NaviNode = FSDataNodeTable<Moba3v3NaviNode>.GetSingleton().FindDataByType(type - 1);
+            Moba3v3NaviNode naviNode = FSDataNodeTable<Moba3v3NaviNode>.GetSingleton().FindDataByType(type - 1);
+            m_NaviPos = campId == 1 ? new FixVector3((Fix64)naviNode.naviPoint2.x, (Fix64)naviNode.naviPoint2.y, (Fix64)naviNode.naviPoint2.z) : new FixVector3((Fix64)naviNode.naviPoint1.x, (Fix64)naviNode.naviPoint1.y, (Fix64)naviNode.naviPoint1.z);
+
         }
         if (m_HeroAttrNode == null)
             return;
         for (int i = 0; i < m_HeroAttrNode.skill_id.Length; i++)
         {
-            SkillNode skillNode = FSDataNodeTable<SkillNode>.GetSingleton().FindDataByType(m_HeroAttrNode.skill_id[i]);
+            SkillNode skillNode = null;
+            if (type == 1)
+                skillNode = FSDataNodeTable<SkillNode>.GetSingleton().FindDataByType(m_HeroAttrNode.skill_id[i]);
+            else
+                skillNode = FSDataNodeTable<MonsterSkillNode>.GetSingleton().FindDataByType(m_HeroAttrNode.skill_id[i]);
             m_SkillList.Add(skillNode);
         }
         m_HP = m_HeroAttrNode.hp;

@@ -86,7 +86,7 @@ public class SkillState : BaseState
         if (GameData.m_IsExecuteViewLogic)
         {
             m_Animator.SetInteger(m_StateParameter, m_Player.m_SkillIndex);
-            m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}", GameData.m_EffectPath, m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
+            m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
             if (m_Player.m_IsSkillMove)
             {
                 m_AniEffect.transform.parent = m_Player.m_VGo.transform;

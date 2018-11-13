@@ -28,7 +28,8 @@ public class GameData
     //所有操作事件的列表
     public static List<FrameKeyData> m_OperationEventList = new List<FrameKeyData>();
     //技能特效路径
-    public static string m_EffectPath = "Effect/Prefabs/Heros";
+    public static string m_EffectPath = "Effect/Prefabs";
     //是否执行显示层逻辑
     public static bool m_IsExecuteViewLogic = true;
+    public static bool m_IsStartGame = false;
 }

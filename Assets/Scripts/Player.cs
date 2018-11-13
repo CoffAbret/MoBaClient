@@ -23,6 +23,8 @@ public class Player
     public FixVector3 m_Angles;
     //对象数据
     public PlayerData m_PlayerData;
+    //角色AI
+    public PlayerAI m_PlayerAI;
     //角色索引
     public int m_PlayerIndex = 0;
     //是否主角
@@ -123,6 +125,9 @@ public class Player
             }
         }
         #endregion
+        m_PlayerAI = new PlayerAI();
+        m_PlayerAI.OnInit(this);
+        m_PlayerAI.OnEnter();
     }
 
     /// <summary>
@@ -146,10 +151,12 @@ public class Player
     /// </summary>
     public void UpdateLogic()
     {
+        if (m_PlayerAI == null)
+            return;
+        m_PlayerAI.UpdateLogic();
         if (m_State == null)
             return;
         m_State.UpdateLogic();
-
     }
 
     /// <summary>
@@ -211,8 +218,6 @@ public class Player
         {
             if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_PlayerData.m_CampId)
                 continue;
-            if (GameData.m_PlayerList[i].m_PlayerData.m_Id == m_PlayerData.m_Id)
-                continue;
             //玩家与敌人的方向向量
             FixVector3 targetV3 = GameData.m_PlayerList[i].m_Pos - m_Pos;
             //求玩家正前方、玩家与敌人方向两个向量的夹角
@@ -266,14 +271,16 @@ public class Player
     /// <param name="skillNode">攻击技能</param>
     public void FallDamage(int damage)
     {
+        if (m_PlayerData == null)
+            return;
         m_PlayerData.m_HP -= damage;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
-            m_Health.m_Health -= damage;
-            m_HudText.PlayerHUDText.gameObject.SetActive(true);
-            m_HudText.gameObject.SetActive(true);
-            m_HudText.PlayerHUDText.Add(-damage, Color.red, 0f);
+            if (m_Health != null)
+                m_Health.m_Health -= damage;
+            if (m_HudText != null)
+                m_HudText.PlayerHUDText.Add(-damage, Color.red, 0f);
         }
         #endregion
         if (m_PlayerData.m_HP <= 0)

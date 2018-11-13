@@ -58,6 +58,7 @@ public class NetManager
                 GameData.m_GameManager.SyncKey(data);
                 break;
             case NetProtocol.START:
+                GameData.m_IsStartGame = true;
                 object[] playerObj = data["info"] as object[];
                 GameData.m_GameManager.CreateAllPlayer(playerObj);
                 break;
