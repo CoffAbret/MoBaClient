@@ -224,19 +224,20 @@ public class Player
             //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
             Fix64 angle = (Fix64)Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
-            if (angle <= (Fix64)skillNode.angle / 2 && distance <= (Fix64)skillNode.dist)
+            if ((int)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
             {
                 int damage = 0;
                 if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
-                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]) - m_PlayerData.m_HeroAttrNode.armor);
+                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 20 + skillNode.base_num1[0]) - GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor);
                 else
-                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15) - m_PlayerData.m_HeroAttrNode.armor);
+                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 20) - GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor);
                 if (skillNode.skill_id == 301001006)
                 {
                     m_State = new HitState();
                     m_State.OnInit(this);
                     m_State.OnEnter();
                 }
+                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-伤害:{1},", GameData.m_ClientGameFrame, damage);
                 GameData.m_PlayerList[i].FallDamage(damage);
 
             }
@@ -252,13 +253,14 @@ public class Player
             //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
             Fix64 angle = (Fix64)Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
             Fix64 distance = FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos);
-            if (angle <= (Fix64)skillNode.angle / 2 && distance <= (Fix64)skillNode.dist)
+            if ((int)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
             {
                 int damage = 0;
                 if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
-                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]) - m_PlayerData.m_HeroAttrNode.armor);
+                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]));
                 else
-                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15) - m_PlayerData.m_HeroAttrNode.armor);
+                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15));
+                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-伤害:{1},", GameData.m_ClientGameFrame, damage);
                 GameData.m_TowerList[i].FallDamage(damage);
             }
         }

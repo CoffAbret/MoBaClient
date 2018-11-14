@@ -33,6 +33,7 @@ public class Tower
     //所属阵营
     public int m_CampId;
     public int m_HP;
+    public int m_Type;
     //子弹
     public TowerAttack m_TowerAttack;
     public Tower() { }
@@ -44,6 +45,7 @@ public class Tower
     {
         m_CampId = campId;
         m_HP = hp;
+        m_Type = type;
         m_TowerAttack = new TowerAttack();
         if (m_CampId == 1 && type == 1)
             m_VGo = GameObject.Find("Tower_Blue");
@@ -112,7 +114,7 @@ public class Tower
     /// <param name="skillNode">攻击技能</param>
     public void FallDamage(int damage)
     {
-        m_HP -= damage;
+        m_HP -= Math.Abs(damage);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {

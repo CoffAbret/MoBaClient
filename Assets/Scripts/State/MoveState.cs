@@ -30,7 +30,7 @@ public class MoveState : BaseState
             return;
         float x = float.Parse(m_Parameter.Split('#')[0]);
         float z = float.Parse(m_Parameter.Split('#')[2]);
-        m_Player.m_Angles = m_Player.m_PlayerData.m_CampId == 1 ? new FixVector3((Fix64)x, Fix64.Zero, (Fix64)z) : new FixVector3(-(Fix64)x, Fix64.Zero, -(Fix64)z);
+        m_Player.m_Angles = new FixVector3((Fix64)x, Fix64.Zero, (Fix64)z);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {

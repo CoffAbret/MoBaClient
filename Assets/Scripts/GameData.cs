@@ -31,5 +31,8 @@ public class GameData
     public static string m_EffectPath = "Effect/Prefabs";
     //是否执行显示层逻辑
     public static bool m_IsExecuteViewLogic = true;
+    //游戏是否开始
     public static bool m_IsStartGame = false;
+    //客户端帧数
+    public static int m_ClientGameFrame;
 }

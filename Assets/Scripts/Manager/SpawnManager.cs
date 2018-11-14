@@ -18,7 +18,6 @@ public class SpawnManager
         if (!GameData.m_IsStartGame)
             return;
         m_IntervalTime += GameData.m_FixFrameLen;
-        GameData.m_GameManager.m_LogMessage.text = m_IntervalTime.ToString();
         if (m_IntervalTime >= m_SpawnTime)
         {
             for (int i = 0; i < 2; i++)

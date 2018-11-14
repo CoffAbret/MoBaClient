@@ -36,6 +36,8 @@ public class GameManager
     /// </summary>
     public void UpdateGame()
     {
+        if (GameData.m_IsStartGame)
+            GameData.m_ClientGameFrame++;
         if (m_NetManager != null)
             m_NetManager.UpdateNet();
         if (m_BattleLogicManager != null)
