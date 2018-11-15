@@ -24,11 +24,11 @@ public class PlayerData
     //索引
     public int m_Index;
     //寻路点
-    public FixVector3 m_NaviPos=FixVector3.Zero;
+    public FixVector3 m_NaviPos = FixVector3.Zero;
     //当前英雄基础属性
     public CharacterAttrNode m_HeroAttrNode;
     //当前英雄技能
-    public IList<SkillNode> m_SkillList;
+    public List<SkillNode> m_SkillList;
     public string m_HeroName;
     public PlayerData() { }
     public PlayerData(int id, int heroId, string name, int campId, int type)

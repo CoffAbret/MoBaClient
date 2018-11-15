@@ -114,17 +114,20 @@ public class Tower
     /// <param name="skillNode">攻击技能</param>
     public void FallDamage(int damage)
     {
-        m_HP -= Math.Abs(damage);
-        #region 显示层
-        if (GameData.m_IsExecuteViewLogic)
-        {
-            m_Health.m_Health -= damage;
-        }
-        #endregion
+        damage = Math.Abs(damage);
+        m_HP -= damage;
+
         if (m_HP <= 0)
         {
+            int campId = m_CampId;
             Destroy();
+            if (m_Type == 2)
+                GameData.m_GameManager.GameOver(campId);
         }
+        #region 显示层
+        if (GameData.m_IsExecuteViewLogic)
+            m_Health.m_Health -= damage;
+        #endregion
     }
 
     public void DestoryTowerAttack()
@@ -137,8 +140,6 @@ public class Tower
     /// </summary>
     public void Destroy()
     {
-        if (m_Die != null)
-            m_Die.SetActive(true);
         GameData.m_TowerList.Remove(this);
         if (m_TowerAttack != null)
             m_TowerAttack.Destroy();
@@ -147,6 +148,8 @@ public class Tower
         m_TowerAttack = null;
         m_TargetPlayer = null;
         #region 显示层
+        if (m_Die != null)
+            m_Die.SetActive(true);
         if (GameData.m_IsExecuteViewLogic)
         {
             GameObject.Destroy(m_VGo, (float)m_DestoryDelayTime);

@@ -32,7 +32,11 @@ public class GameData
     //是否执行显示层逻辑
     public static bool m_IsExecuteViewLogic = true;
     //游戏是否开始
-    public static bool m_IsStartGame = false;
+    public static bool m_IsGame = false;
     //客户端帧数
     public static int m_ClientGameFrame;
+    //战斗结果
+    public static bool m_GameResult = false;
+    //死亡次数
+    public static int m_DieCount = 0;
 }

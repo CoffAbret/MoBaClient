@@ -27,8 +27,6 @@ public class Player
     public PlayerAI m_PlayerAI;
     //角色索引
     public int m_PlayerIndex = 0;
-    //是否主角
-    public bool m_IsMe = false;
     //是否移动
     public bool m_IsMove = false;
     //是否技能移动
@@ -76,7 +74,6 @@ public class Player
 #endif
     #endregion
     public Player() { }
-    public Player(bool isMe) { m_IsMe = isMe; }
     /// <summary>
     /// 创建对象
     /// </summary>
@@ -115,13 +112,15 @@ public class Player
             m_HudText = m_VGo.GetComponent<PlayerHudText>();
             m_VGo.name = playerData.m_Id.ToString();
             m_Health.m_Health = m_PlayerData.m_HP;
-            if (m_IsMe)
+            if (playerData.m_Id == GameData.m_CurrentRoleId)
             {
+                GameData.m_CurrentPlayer = this;
                 m_VGo.tag = "Player";
                 GameObject cameraPosGo = GameObject.Find(string.Format("CameraPos{0}", m_PlayerData.m_CampId));
                 Camera.main.transform.localPosition = cameraPosGo.transform.localPosition;
                 Camera.main.transform.localRotation = cameraPosGo.transform.localRotation;
                 Camera.main.transform.localScale = cameraPosGo.transform.localScale;
+                GameData.m_GameManager.m_UIManager.m_UpdateSkillUICallback(m_PlayerData.m_SkillList);
             }
         }
         #endregion
@@ -171,7 +170,7 @@ public class Player
             if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_PlayerData.m_CampId)
                 continue;
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
-            if (distance <= (Fix64)skillNode.dist)
+            if ((float)distance <= skillNode.dist)
             {
                 if (m_TargetPlayer != null && m_TargetPlayer.m_SelectedGo != null)
                     m_TargetPlayer.m_SelectedGo.SetActive(false);
@@ -195,8 +194,8 @@ public class Player
         {
             if (GameData.m_TowerList[i].m_CampId == m_PlayerData.m_CampId)
                 continue;
-            Fix64 distance = FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos);
-            if (distance <= (Fix64)skillNode.dist)
+            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(2000)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
+            if ((float)distance <= skillNode.dist)
             {
                 if (m_TargetTower != null && m_TargetTower.m_SelectedGo != null)
                     m_TargetTower.m_SelectedGo.SetActive(false);
@@ -224,22 +223,22 @@ public class Player
             //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
             Fix64 angle = (Fix64)Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
-            if ((int)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
+            if ((float)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
             {
                 int damage = 0;
                 if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
                     damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 20 + skillNode.base_num1[0]) - GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor);
                 else
                     damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 20) - GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor);
-                if (skillNode.skill_id == 301001006)
-                {
-                    m_State = new HitState();
-                    m_State.OnInit(this);
-                    m_State.OnEnter();
-                }
-                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-伤害:{1},", GameData.m_ClientGameFrame, damage);
                 GameData.m_PlayerList[i].FallDamage(damage);
 
+                if (skillNode.skill_id == 301001006)
+                {
+                    GameData.m_PlayerList[i].m_State = new HitState();
+                    GameData.m_PlayerList[i].m_State.OnInit(GameData.m_PlayerList[i]);
+                    GameData.m_PlayerList[i].m_State.OnEnter();
+                }
+                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-伤害:{1},", GameData.m_ClientGameFrame, damage);
             }
         }
 
@@ -252,7 +251,7 @@ public class Player
             //求玩家正前方、玩家与敌人方向两个向量的夹角
             //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
             Fix64 angle = (Fix64)Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
-            Fix64 distance = FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos);
+            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(2000)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
             if ((int)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
             {
                 int damage = 0;
@@ -276,6 +275,12 @@ public class Player
         if (m_PlayerData == null)
             return;
         m_PlayerData.m_HP -= damage;
+        if (m_PlayerData.m_HP <= 0)
+        {
+            m_State = new DieState();
+            m_State.OnInit(this);
+            m_State.OnEnter();
+        }
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -285,12 +290,6 @@ public class Player
                 m_HudText.PlayerHUDText.Add(-damage, Color.red, 0f);
         }
         #endregion
-        if (m_PlayerData.m_HP <= 0)
-        {
-            m_State = new DieState();
-            m_State.OnInit(this);
-            m_State.OnEnter();
-        }
     }
 
     /// <summary>
@@ -299,20 +298,19 @@ public class Player
     public void Destroy()
     {
         GameData.m_PlayerList.Remove(this);
-        if (m_TargetPlayer != null && m_TargetPlayer.m_SelectedGo != null)
-            m_TargetPlayer.m_SelectedGo.SetActive(false);
         m_PlayerData = null;
-        m_IsMe = false;
         m_IsMove = false;
         m_IsAttack = false;
         m_IsSkill = false;
         m_IsCalcDamage = false;
-        m_IsDie = true;
+        m_IsDie = false;
         m_IsHit = false;
         m_State = null;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
+            if (m_TargetPlayer != null && m_TargetPlayer.m_SelectedGo != null)
+                m_TargetPlayer.m_SelectedGo.SetActive(false);
             if (m_VGo != null)
                 GameObject.Destroy(m_VGo, (float)m_DestoryDelayTime);
             m_VGo = null;

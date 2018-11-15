@@ -2,13 +2,13 @@
   "1": {
     "id": 1,
     "des": "左路",
-    "NaviPoints1": [ -12.85, 0, -6 ],
-    "NaviPoints2": [ 6.2, 0, -6 ]
+    "NaviPoints1": [ -12.85, 0, -6.5 ],
+    "NaviPoints2": [ 6, 0, -6.5 ]
   },
   "2": {
     "id": 2,
     "des": "右路",
     "NaviPoints1": [ -12.85, 0, -8.5 ],
-    "NaviPoints2": [ 6.2, 0, -8.5 ]
+    "NaviPoints2": [ 6, 0, -8.5 ]
   }
 }

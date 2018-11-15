@@ -105,6 +105,7 @@ public class AttackState : BaseState
         {
             //普通攻击自动改变朝向
             FixVector3 relativePos = pos - m_Player.m_Pos;
+            relativePos = new FixVector3(relativePos.x, Fix64.Zero, relativePos.z);
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
             #region 显示层
@@ -128,7 +129,7 @@ public class AttackState : BaseState
             m_AniEffect.transform.localRotation = Quaternion.Euler(Vector3.zero);
             m_AniEffect.transform.localScale = Vector3.one;
             Delay delay = new Delay();
-            delay.Init((Fix64)m_Player.m_SkillNode.efficiency_time, delegate { if (m_AniEffect != null) GameObject.DestroyImmediate(m_AniEffect); });
+            delay.InitDestory(m_AniEffect, (Fix64)m_Player.m_SkillNode.efficiency_time);
             GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
         }
         #endregion

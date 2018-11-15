@@ -47,4 +47,12 @@ public class OperationUIManager : MonoBehaviour
         GameData.m_CurrentPlayer.m_IsSkill = true;
         GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Parameter);
     }
+
+    public void OnUpdateSkillUI(List<SkillNode> skillNodeList)
+    {
+        m_Skill1Go.GetComponent<UISprite>().spriteName = skillNodeList[3].skill_icon;
+        m_Skill2Go.GetComponent<UISprite>().spriteName = skillNodeList[4].skill_icon;
+        m_Skill3Go.GetComponent<UISprite>().spriteName = skillNodeList[5].skill_icon;
+        m_Skill4Go.GetComponent<UISprite>().spriteName = skillNodeList[6].skill_icon;
+    }
 }

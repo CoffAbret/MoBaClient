@@ -14,6 +14,8 @@ public class GameManager
     public DelayManager m_DelayManager;
     //游戏物体生成管理器
     public SpawnManager m_SpawnManager;
+    //UI管理器
+    public UIManager m_UIManager;
     //Log输出
     public UILabel m_LogMessage;
     /// <summary>
@@ -28,6 +30,7 @@ public class GameManager
         m_BattleLogicManager = new BattleLogicManager();
         m_DelayManager = new DelayManager();
         m_SpawnManager = new SpawnManager();
+        m_UIManager = new UIManager();
         m_LogMessage = GameObject.Find("LogMessage").GetComponent<UILabel>();
     }
 
@@ -36,10 +39,11 @@ public class GameManager
     /// </summary>
     public void UpdateGame()
     {
-        if (GameData.m_IsStartGame)
-            GameData.m_ClientGameFrame++;
         if (m_NetManager != null)
             m_NetManager.UpdateNet();
+        if (!GameData.m_IsGame)
+            return;
+        GameData.m_ClientGameFrame++;
         if (m_BattleLogicManager != null)
             m_BattleLogicManager.UpdateLogic();
         if (m_DelayManager != null)
@@ -61,6 +65,23 @@ public class GameManager
         GameData.m_TowerList.Clear();
         m_NetManager.OnDisconnect();
         m_DelayManager.DestoryDelay();
+    }
+
+    /// <summary>
+    /// 游戏结束
+    /// </summary>
+    /// <param name="campId">失败阵营</param>
+    public void GameOver(int campId)
+    {
+        GameData.m_IsGame = false;
+        GameData.m_GameResult = GameData.m_CurrentPlayer.m_PlayerData.m_CampId == campId ? false : true;
+        #region 显示层
+        if (GameData.m_IsExecuteViewLogic)
+        {
+            GameObject.Find("UIMainPanel").SetActive(false);
+            GameObject.Find("UI Root").transform.Find("UITheBattlePanel").gameObject.SetActive(true);
+        }
+        #endregion
     }
     /// <summary>
     /// 准备操作
@@ -86,15 +107,11 @@ public class GameManager
     /// 创建角色
     /// </summary>
     /// <param name="charData"></param>
-    public void CreatePlayer(PlayerData playerData, bool isMainPlayer = false)
+    public void CreatePlayer(PlayerData playerData)
     {
-        Player plyerObj = new Player(isMainPlayer);
+        Player plyerObj = new Player();
         plyerObj.Create(playerData);
         GameData.m_PlayerList.Add(plyerObj);
-        if (isMainPlayer)
-        {
-            GameData.m_CurrentPlayer = plyerObj;
-        }
     }
 
     /// <summary>
@@ -104,7 +121,7 @@ public class GameManager
     public void CreateTower(int campId, int type)
     {
         Tower towerObj = new Tower();
-        int hp = type == 2 ? 20000 : 10000;
+        int hp = type == 2 ? 200 : 100;
         towerObj.Create(campId, hp, type);
         GameData.m_TowerList.Add(towerObj);
     }
@@ -123,7 +140,7 @@ public class GameManager
             int heroId = i % 2 == 0 ? 201001000 : 201003300;
             int campId = i % 2 == 0 ? 1 : 2;
             PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 1);
-            CreatePlayer(charData, GameData.m_CurrentRoleId == charData.m_Id);
+            CreatePlayer(charData);
         }
         for (int i = 0; i < 2; i++)
         {

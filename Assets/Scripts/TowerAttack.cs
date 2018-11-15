@@ -41,7 +41,7 @@ public class TowerAttack
         Fix64 distince = FixVector3.Distance(m_TargetPlayer.m_Pos, fixAttackPos);
         if (distince < m_AttackDistince)
         {
-            m_TargetPlayer.FallDamage(5);
+            m_TargetPlayer.FallDamage(50);
             Destroy();
         }
         else

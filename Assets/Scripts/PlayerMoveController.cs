@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 移动控制
+/// </summary>
 public class PlayerMoveController : MonoBehaviour
 {
     private void LateUpdate()

@@ -28,7 +28,7 @@ public class PlayerAI
     {
         if (m_Player == null || m_Player.m_PlayerData == null || m_Player.m_PlayerData.m_Type == 1 || m_Player.m_PlayerData.m_NaviPos == null)
             return;
-        FixVector3 relativePos = m_Player.m_PlayerData.m_NaviPos - m_Player.m_Pos;
+        FixVector3 relativePos = m_Player.m_PlayerData.m_CampId == 1 ? (m_Player.m_PlayerData.m_NaviPos - m_Player.m_Pos) : (m_Player.m_Pos - m_Player.m_PlayerData.m_NaviPos);
         Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
         m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
         #region 显示层

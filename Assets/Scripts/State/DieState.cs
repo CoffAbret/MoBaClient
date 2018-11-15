@@ -73,6 +73,14 @@ public class DieState : BaseState
         base.OnExit();
         if (m_Player == null)
             return;
+        if (m_Player.m_PlayerData.m_Type == 1)
+        {
+            GameData.m_DieCount++;
+            Fix64 resurgenceTime = Fix64.FromRaw(20000) * GameData.m_DieCount;
+            Delay delay = new Delay();
+            delay.InitResurgence(m_Player.m_PlayerData, resurgenceTime, GameData.m_GameManager.CreatePlayer);
+            GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
+        }
         m_Player.m_IntervalTime = Fix64.Zero;
         m_Player.Destroy();
     }
