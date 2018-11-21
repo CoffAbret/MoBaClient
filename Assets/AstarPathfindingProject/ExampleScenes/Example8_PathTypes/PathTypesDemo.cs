@@ -164,7 +164,7 @@ namespace Pathfinding.Examples {
 #if UNITY_2017_1_OR_NEWER
 			line.positionCount = p.vectorPath.Count;
 #else
-			line.positionCount = p.vectorPath.Count;
+			line.numPositions = p.vectorPath.Count;
 #endif
 #else
 			line.SetWidth(lineWidth, lineWidth);
@@ -269,7 +269,7 @@ namespace Pathfinding.Examples {
 #if UNITY_2017_1_OR_NEWER
 				lr.positionCount = vpath.Count;
 #else
-				lr.positionCount = vpath.Count;
+				lr.numPositions = vpath.Count;
 #endif
 #else
 				lr.SetWidth(lineWidth, lineWidth);

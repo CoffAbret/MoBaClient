@@ -16,6 +16,8 @@ public class GameManager
     public SpawnManager m_SpawnManager;
     //UI管理器
     public UIManager m_UIManager;
+    //网格地图管理器
+    public GridManager m_GridManager;
     //Log输出
     public UILabel m_LogMessage;
     /// <summary>
@@ -31,6 +33,8 @@ public class GameManager
         m_DelayManager = new DelayManager();
         m_SpawnManager = new SpawnManager();
         m_UIManager = new UIManager();
+        m_GridManager = new GridManager();
+        m_GridManager.InitGrid();
         m_LogMessage = GameObject.Find("LogMessage").GetComponent<UILabel>();
     }
 
@@ -44,12 +48,12 @@ public class GameManager
         if (!GameData.m_IsGame)
             return;
         GameData.m_ClientGameFrame++;
-        if (m_BattleLogicManager != null)
-            m_BattleLogicManager.UpdateLogic();
-        if (m_DelayManager != null)
-            m_DelayManager.UpdateDelay();
-        if (m_SpawnManager != null)
-            m_SpawnManager.UpdateLogic();
+        if (GameData.m_GameManager.m_BattleLogicManager != null)
+            GameData.m_GameManager.m_BattleLogicManager.UpdateLogic();
+        if (GameData.m_GameManager.m_DelayManager != null)
+            GameData.m_GameManager.m_DelayManager.UpdateDelay();
+        if (GameData.m_GameManager.m_SpawnManager != null)
+            GameData.m_GameManager.m_SpawnManager.UpdateLogic();
     }
 
     /// <summary>

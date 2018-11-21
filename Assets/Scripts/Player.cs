@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
 /// 显示层对象
@@ -71,6 +72,8 @@ public class Player
     public PlayerHudText m_HudText;
     //选中对象
     public GameObject m_SelectedGo;
+    //角色控制器
+    public CharacterController m_Controller;
 #endif
     #endregion
     public Player() { }
@@ -91,7 +94,7 @@ public class Player
             posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/YuanCheng{0}", m_PlayerData.m_CampId));
         if (playerData.m_Type == 4)
             posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/PaoChe{0}", m_PlayerData.m_CampId));
-        m_Pos = new FixVector3((Fix64)posGo.transform.localPosition.x, (Fix64)posGo.transform.localPosition.y, (Fix64)posGo.transform.localPosition.z);
+        m_Pos = new FixVector3((Fix64)posGo.transform.localPosition.x, (Fix64)(posGo.transform.localPosition.y), (Fix64)posGo.transform.localPosition.z);
         m_Rotation = new FixVector3((Fix64)posGo.transform.localRotation.eulerAngles.x, (Fix64)posGo.transform.localRotation.eulerAngles.y, (Fix64)posGo.transform.localRotation.eulerAngles.z);
         m_Scale = new FixVector3((Fix64)posGo.transform.localScale.x, (Fix64)posGo.transform.localScale.y, (Fix64)posGo.transform.localScale.z);
         m_Angles = new FixVector3((Fix64)posGo.transform.forward.normalized.x, (Fix64)posGo.transform.forward.normalized.y, (Fix64)posGo.transform.forward.normalized.z);
