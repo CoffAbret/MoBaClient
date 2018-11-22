@@ -26,8 +26,6 @@ public class Player
     public PlayerData m_PlayerData;
     //角色AI
     public PlayerAI m_PlayerAI;
-    //角色索引
-    public int m_PlayerIndex = 0;
     //是否移动
     public bool m_IsMove = false;
     //是否技能移动
@@ -52,8 +50,6 @@ public class Player
     public Fix64 m_Speed = Fix64.FromRaw(100);
     //技能移动速度
     public Fix64 m_SkillSpeed = Fix64.FromRaw(500);
-    //旋转速度
-    public Fix64 m_RotationSpeed = Fix64.One;
     //技能索引
     public int m_SkillIndex = 0;
     //当前技能信息
@@ -76,7 +72,29 @@ public class Player
     public CharacterController m_Controller;
 #endif
     #endregion
-    public Player() { }
+    public Player()
+    {
+        m_Pos = FixVector3.Zero;
+        m_Rotation = FixVector3.Zero;
+        m_Angles = FixVector3.Zero;
+        m_Scale = FixVector3.Zero;
+        m_TargetPlayer = null;
+        m_TargetTower = null;
+        m_PlayerData = null;
+        m_IsMove = false;
+        m_IsSkillMove = false;
+        m_IsAttack = false;
+        m_IsSkill = false;
+        m_IsCalcDamage = false;
+        m_IsPlayEffect = false;
+        m_IsDie = false;
+        m_IsHit = false;
+        m_State = null;
+        m_IntervalTime = Fix64.Zero;
+        m_SkillIndex = 0;
+        m_SkillNode = null;
+        m_PlayerAI = null;
+    }
     /// <summary>
     /// 创建对象
     /// </summary>
@@ -94,8 +112,8 @@ public class Player
             posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/YuanCheng{0}", m_PlayerData.m_CampId));
         if (playerData.m_Type == 4)
             posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/PaoChe{0}", m_PlayerData.m_CampId));
-        m_Pos = new FixVector3((Fix64)posGo.transform.localPosition.x, (Fix64)(posGo.transform.localPosition.y), (Fix64)posGo.transform.localPosition.z);
-        m_Rotation = new FixVector3((Fix64)posGo.transform.localRotation.eulerAngles.x, (Fix64)posGo.transform.localRotation.eulerAngles.y, (Fix64)posGo.transform.localRotation.eulerAngles.z);
+        m_Pos = new FixVector3((Fix64)posGo.transform.position.x, (Fix64)(posGo.transform.position.y), (Fix64)posGo.transform.position.z);
+        m_Rotation = new FixVector3((Fix64)posGo.transform.rotation.eulerAngles.x, (Fix64)posGo.transform.rotation.eulerAngles.y, (Fix64)posGo.transform.rotation.eulerAngles.z);
         m_Scale = new FixVector3((Fix64)posGo.transform.localScale.x, (Fix64)posGo.transform.localScale.y, (Fix64)posGo.transform.localScale.z);
         m_Angles = new FixVector3((Fix64)posGo.transform.forward.normalized.x, (Fix64)posGo.transform.forward.normalized.y, (Fix64)posGo.transform.forward.normalized.z);
         #endregion
@@ -289,7 +307,7 @@ public class Player
         {
             if (m_Health != null)
                 m_Health.m_Health -= damage;
-            if (m_HudText != null)
+            if (m_HudText != null && m_PlayerData != null && GameData.m_CurrentPlayer != null && GameData.m_CurrentPlayer.m_PlayerData != null && m_PlayerData.m_Id == GameData.m_CurrentPlayer.m_PlayerData.m_Id)
                 m_HudText.PlayerHUDText.Add(-damage, Color.red, 0f);
         }
         #endregion

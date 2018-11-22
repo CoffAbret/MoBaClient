@@ -123,6 +123,14 @@ public class SkillState : BaseState
         if (m_Player.m_IsSkillMove)
         {
             //技能位移直接设置方向即可
+            FixVector3 pos = m_Player.m_Pos + (m_Player.m_SkillSpeed * m_Player.m_Angles);
+            Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(pos.ToVector3());
+            bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
+            if (!isWalk)
+            {
+                OnExit();
+                return;
+            }
             m_Player.m_Pos = m_Player.m_Pos + m_Player.m_Angles * m_Player.m_SkillSpeed;
             #region 显示层
             if (GameData.m_IsExecuteViewLogic)

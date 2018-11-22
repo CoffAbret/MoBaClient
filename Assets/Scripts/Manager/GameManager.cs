@@ -48,6 +48,7 @@ public class GameManager
         if (!GameData.m_IsGame)
             return;
         GameData.m_ClientGameFrame++;
+        //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0},", GameData.m_ClientGameFrame);
         if (GameData.m_GameManager.m_BattleLogicManager != null)
             GameData.m_GameManager.m_BattleLogicManager.UpdateLogic();
         if (GameData.m_GameManager.m_DelayManager != null)
@@ -125,7 +126,7 @@ public class GameManager
     public void CreateTower(int campId, int type)
     {
         Tower towerObj = new Tower();
-        int hp = type == 2 ? 200 : 100;
+        int hp = type == 2 ? 20000 : 10000;
         towerObj.Create(campId, hp, type);
         GameData.m_TowerList.Add(towerObj);
     }

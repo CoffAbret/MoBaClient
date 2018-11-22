@@ -99,6 +99,7 @@ public class MainBehaviour : MonoBehaviour
             return;
         if (!int.TryParse(go.name.Substring(go.name.Length - 1, 1), out m_Index))
             return;
+        GameData.m_CurrentPlayer.m_IsSkill = true;
         GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Index.ToString());
     }
 

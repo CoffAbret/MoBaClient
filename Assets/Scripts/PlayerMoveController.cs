@@ -25,7 +25,6 @@ public class PlayerMoveController : MonoBehaviour
             if (GameData.m_CurrentPlayer.m_IsSkill || GameData.m_CurrentPlayer.m_IsAttack || GameData.m_CurrentPlayer.m_IsHit)
                 return;
             string parameter = string.Format("{0}#{1}#{2}", x, 0, y);
-            GameData.m_CurrentPlayer.m_IsMove = true;
             GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
         }
     }

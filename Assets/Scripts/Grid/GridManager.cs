@@ -62,7 +62,7 @@ public class GridManager
     {
         var off = pos - center;
         var left = off.x + nodeSize * width / 2;
-        var bottom = off.z + nodeSize * width / 2;
+        var bottom = off.z + nodeSize * height / 2;
         var gx = (int)(left / nodeSize);
         var gy = (int)(bottom / nodeSize);
         gx = Mathf.Clamp(gx, 0, width - 1);
@@ -87,7 +87,7 @@ public class GridManager
     {
         var off = pos - center;
         var left = off.x + nodeSize * width / 2;
-        var bottom = off.z + nodeSize * width / 2;
+        var bottom = off.z + nodeSize * height / 2;
         var gx = (left / nodeSize);
         var gy = (bottom / nodeSize);
         gx = Mathf.Clamp(gx, 0, width - 1);

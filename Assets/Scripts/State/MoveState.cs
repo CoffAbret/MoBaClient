@@ -75,7 +75,8 @@ public class MoveState : BaseState
         FixVector3 pos = m_Player.m_Pos + (m_Player.m_Speed * m_Player.m_Angles);
         Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(pos.ToVector3());
         bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
-        Debug.LogError(isWalk);
+        if (!isWalk)
+            return;
         m_Player.m_IntervalTime += GameData.m_FixFrameLen;
         m_Player.m_Pos = m_Player.m_Pos + (m_Player.m_Speed * m_Player.m_Angles);
         #region 显示层
