@@ -15,7 +15,7 @@ public class DieState : BaseState
     private string m_StateParameter = "State";
 #endif
     #endregion
-    private Fix64 m_AniTime = Fix64.FromRaw(4000);
+    private Fix64 m_AniTime = Fix64.FromRaw(800);
     /// <summary>
     /// 初始化数据
     /// </summary>
@@ -76,7 +76,7 @@ public class DieState : BaseState
         if (m_Player.m_PlayerData.m_Type == 1)
         {
             GameData.m_DieCount++;
-            Fix64 resurgenceTime = Fix64.FromRaw(20000) * GameData.m_DieCount;
+            Fix64 resurgenceTime = Fix64.FromRaw(20000) * (Fix64)GameData.m_DieCount;
             Delay delay = new Delay();
             delay.InitResurgence(m_Player.m_PlayerData, resurgenceTime, GameData.m_GameManager.CreatePlayer);
             GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);

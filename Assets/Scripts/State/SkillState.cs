@@ -16,9 +16,9 @@ public class SkillState : BaseState
     //状态机参数名
     private string m_StateParameter = "State";
     //计算伤害时间
-    private Fix64 m_CalcDamageTime = Fix64.FromRaw(3000);
+    private Fix64 m_CalcDamageTime = Fix64.FromRaw(600);
     //播放特效时间
-    private Fix64 m_PlayEffectTime = Fix64.FromRaw(300);
+    private Fix64 m_PlayEffectTime = Fix64.FromRaw(60);
 #endif
     #endregion
     //普攻段数
@@ -141,7 +141,7 @@ public class SkillState : BaseState
         }
         if (!m_Player.m_IsSkill)
             return;
-        if (m_Player.m_IntervalTime >= ((Fix64)(m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsCalcDamage)
+        if (m_Player.m_IntervalTime >= (((Fix64)m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsCalcDamage)
         {
             m_Player.CalcDamage(m_Player.m_SkillNode);
             m_Player.m_IsCalcDamage = true;

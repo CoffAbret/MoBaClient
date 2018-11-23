@@ -47,15 +47,15 @@ public class Player
     //技能间隔时间
     public Fix64 m_IntervalTime = Fix64.Zero;
     //移动速度
-    public Fix64 m_Speed = Fix64.FromRaw(100);
+    public Fix64 m_Speed = Fix64.FromRaw(20);
     //技能移动速度
-    public Fix64 m_SkillSpeed = Fix64.FromRaw(500);
+    public Fix64 m_SkillSpeed = Fix64.FromRaw(100);
     //技能索引
     public int m_SkillIndex = 0;
     //当前技能信息
     public SkillNode m_SkillNode;
     //销毁延迟时间
-    private Fix64 m_DestoryDelayTime = Fix64.FromRaw(5000);
+    private Fix64 m_DestoryDelayTime = Fix64.FromRaw(1000);
     #endregion
     #region 显示层
 
@@ -112,10 +112,10 @@ public class Player
             posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/YuanCheng{0}", m_PlayerData.m_CampId));
         if (playerData.m_Type == 4)
             posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/PaoChe{0}", m_PlayerData.m_CampId));
-        m_Pos = new FixVector3((Fix64)posGo.transform.position.x, (Fix64)(posGo.transform.position.y), (Fix64)posGo.transform.position.z);
-        m_Rotation = new FixVector3((Fix64)posGo.transform.rotation.eulerAngles.x, (Fix64)posGo.transform.rotation.eulerAngles.y, (Fix64)posGo.transform.rotation.eulerAngles.z);
-        m_Scale = new FixVector3((Fix64)posGo.transform.localScale.x, (Fix64)posGo.transform.localScale.y, (Fix64)posGo.transform.localScale.z);
-        m_Angles = new FixVector3((Fix64)posGo.transform.forward.normalized.x, (Fix64)posGo.transform.forward.normalized.y, (Fix64)posGo.transform.forward.normalized.z);
+        m_Pos = (FixVector3)posGo.transform.position;
+        m_Rotation = (FixVector3)(posGo.transform.rotation.eulerAngles);
+        m_Scale = (FixVector3)(posGo.transform.localScale);
+        m_Angles = (FixVector3)(posGo.transform.forward.normalized);
         #endregion
         #region 显示层
         //是否执行显示层逻辑
@@ -215,7 +215,7 @@ public class Player
         {
             if (GameData.m_TowerList[i].m_CampId == m_PlayerData.m_CampId)
                 continue;
-            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(2000)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
+            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
             if ((float)distance <= skillNode.dist)
             {
                 if (m_TargetTower != null && m_TargetTower.m_SelectedGo != null)
@@ -271,9 +271,9 @@ public class Player
             FixVector3 targetV3 = GameData.m_TowerList[i].m_Pos - m_Pos;
             //求玩家正前方、玩家与敌人方向两个向量的夹角
             //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
-            Fix64 angle = (Fix64)Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
-            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(2000)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-            if ((int)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
+            float angle = Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
+            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
+            if (angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
             {
                 int damage = 0;
                 if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)

@@ -14,7 +14,7 @@ public class GameData
     //当前显示角色
     public static Player m_CurrentPlayer;
     //每帧时间长度
-    public static Fix64 m_FixFrameLen = Fix64.FromRaw(80);
+    public static Fix64 m_FixFrameLen = Fix64.FromRaw(20);
     //随机数
     public static SRandom m_Srandom = new SRandom(1000);
     //游戏逻辑帧数

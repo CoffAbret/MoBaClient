@@ -16,9 +16,9 @@ public class AttackState : BaseState
     //状态机参数名
     private string m_StateParameter = "State";
     //计算伤害时间
-    private Fix64 m_CalcDamageTime = Fix64.FromRaw(2000);
+    private Fix64 m_CalcDamageTime = Fix64.FromRaw(500);
     //普攻切换时间
-    private Fix64 m_AttackTime = Fix64.FromRaw(2500);
+    private Fix64 m_AttackTime = Fix64.FromRaw(600);
 #endif
     #endregion
     //销毁延迟时间
@@ -148,7 +148,7 @@ public class AttackState : BaseState
         if (m_Player.m_SkillNode == null)
             return;
         m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-        if (m_Player.m_IntervalTime >= ((Fix64)(m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsCalcDamage)
+        if (m_Player.m_IntervalTime >= (((Fix64)m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsCalcDamage)
         {
             m_Player.CalcDamage(m_Player.m_SkillNode);
             m_Player.m_IsCalcDamage = true;

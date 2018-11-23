@@ -14,7 +14,6 @@ public class MoveState : BaseState
     private float m_Interpolation = 1;
 #endif
     #endregion
-    private Fix64 m_StateTime = Fix64.FromRaw(600);
 
     /// <summary>
     /// 初始化数据
@@ -78,7 +77,7 @@ public class MoveState : BaseState
         if (!isWalk)
             return;
         m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-        m_Player.m_Pos = m_Player.m_Pos + (m_Player.m_Speed * m_Player.m_Angles);
+        m_Player.m_Pos = pos;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
             m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();

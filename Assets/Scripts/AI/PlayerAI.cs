@@ -9,8 +9,6 @@ using UnityEngine;
 public class PlayerAI
 {
     private Player m_Player;
-    //寻路最小距离
-    private Fix64 m_distince = Fix64.FromRaw(2000);
     //寻路参数
     private string m_Parameter;
     //寻路坐标

@@ -15,7 +15,7 @@ public class HitState : BaseState
     private string m_StateParameter = "State";
 #endif
     #endregion
-    private Fix64 m_AniTime = Fix64.FromRaw(2000);
+    private Fix64 m_AniTime = Fix64.FromRaw(500);
     /// <summary>
     /// 初始化数据
     /// </summary>

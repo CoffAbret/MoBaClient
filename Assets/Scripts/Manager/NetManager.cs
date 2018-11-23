@@ -18,7 +18,7 @@ public class NetManager
     public void InitClient()
     {
         //m_Client = new AsyncUdpClient("103.68.252.97", 18888
-        m_Client = new AsyncUdpClient("192.168.3.251", 18888);
+        m_Client = new AsyncUdpClient("192.168.3.67", 8889);
         m_Client.OnMessage += OnMessage;
     }
 
@@ -27,7 +27,7 @@ public class NetManager
     {
         m_Client.UpdateNet();
         GameData.m_PingTime += GameData.m_FixFrameLen;
-        if (GameData.m_PingTime >= Fix64.FromRaw(40000))
+        if (GameData.m_PingTime >= Fix64.FromRaw(10000))
         {
             m_Client.AsyncSendPing();
             GameData.m_PingTime = Fix64.Zero;

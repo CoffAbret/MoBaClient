@@ -13,9 +13,9 @@ public class TowerAttack
     //攻击目标
     public Player m_TargetPlayer;
     //攻击距离
-    public Fix64 m_AttackDistince = Fix64.FromRaw(1000);
+    public Fix64 m_AttackDistince = Fix64.FromRaw(200);
     //攻击间隔
-    public Fix64 m_AttackTime = Fix64.FromRaw(500);
+    public Fix64 m_AttackSpeed = Fix64.FromRaw(100);
     //攻击特效
     public GameObject m_Attack;
     /// <summary>
@@ -37,7 +37,7 @@ public class TowerAttack
     {
         if (m_Attack == null || !m_Attack.activeSelf)
             return;
-        FixVector3 fixAttackPos = new FixVector3((Fix64)m_Attack.transform.position.x, (Fix64)m_Attack.transform.position.y, (Fix64)m_Attack.transform.position.z);
+        FixVector3 fixAttackPos = (FixVector3)(m_Attack.transform.position);
         Fix64 distince = FixVector3.Distance(m_TargetPlayer.m_Pos, fixAttackPos);
         if (distince < m_AttackDistince)
         {
@@ -47,10 +47,10 @@ public class TowerAttack
         else
         {
             //普通攻击子弹自动改变朝向
-            FixVector3 relativePos = m_TargetPlayer.m_Pos - new FixVector3((Fix64)m_Attack.transform.position.x, (Fix64)m_Attack.transform.position.y, (Fix64)m_Attack.transform.position.z);
+            FixVector3 relativePos = m_TargetPlayer.m_Pos - (FixVector3)(m_Attack.transform.position);
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Attack.transform.rotation = rotation;
-            m_Attack.transform.position += m_Attack.transform.forward * (float)m_AttackTime;
+            m_Attack.transform.position += ((FixVector3)m_Attack.transform.forward * m_AttackSpeed).ToVector3();
         }
     }
 

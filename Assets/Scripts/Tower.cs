@@ -13,9 +13,9 @@ public class Tower
     //攻击目标
     public Player m_TargetPlayer;
     //攻击距离
-    public Fix64 m_AttackDistince = Fix64.FromRaw(10000);
+    public Fix64 m_AttackDistince = Fix64.FromRaw(2500);
     //销毁延迟时间
-    private Fix64 m_DestoryDelayTime = Fix64.FromRaw(5000);
+    private Fix64 m_DestoryDelayTime = Fix64.FromRaw(1000);
     //显示对象
     public GameObject m_VGo;
     //塔攻击范围
@@ -77,7 +77,8 @@ public class Tower
         else
             m_Quan.SetActive(true);
 
-        if (m_IntervalTime / (Fix64.One * 1) > Fix64.One)
+        Fix64 temp = m_IntervalTime / Fix64.One;
+        if (temp > Fix64.One)
             m_IntervalTime = Fix64.Zero;
 
         if (m_TargetPlayer != null && m_IntervalTime == Fix64.Zero)

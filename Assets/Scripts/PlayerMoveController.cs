@@ -10,6 +10,8 @@ public class PlayerMoveController : MonoBehaviour
 {
     private void LateUpdate()
     {
+        if (GameData.m_CurrentPlayer == null)
+            return;
         Vector3 newEulerAngles = Vector3.zero;
         float x = ETCInput.GetAxis("Horizontal");
         float y = ETCInput.GetAxis("Vertical");
