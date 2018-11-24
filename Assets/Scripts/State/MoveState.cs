@@ -29,7 +29,7 @@ public class MoveState : BaseState
             return;
         float x = float.Parse(m_Parameter.Split('#')[0]);
         float z = float.Parse(m_Parameter.Split('#')[2]);
-        m_Player.m_Angles = new FixVector3((Fix64)x, Fix64.Zero, (Fix64)z);
+        m_Player.m_Angles = (FixVector3)(new Vector3(x, 0, z));
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -49,7 +49,7 @@ public class MoveState : BaseState
             return;
         m_Player.m_IsMove = true;
         Quaternion targetRotation = Quaternion.LookRotation((m_Player.m_Pos + m_Player.m_Angles - m_Player.m_Pos).ToVector3(), Vector3.up);
-        m_Player.m_Rotation = new FixVector3((Fix64)targetRotation.eulerAngles.x, (Fix64)targetRotation.eulerAngles.y, (Fix64)targetRotation.eulerAngles.z);
+        m_Player.m_Rotation = (FixVector3)(targetRotation.eulerAngles);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {

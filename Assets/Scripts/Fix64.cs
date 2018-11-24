@@ -213,6 +213,12 @@ public struct FixVector3
         return (Fix64)Vector3.Distance(a.ToVector3(), b.ToVector3());
     }
 
+    public static Fix64 Angle(FixVector3 a, FixVector3 b)
+    {
+        return (Fix64)Vector3.Angle(a.ToVector3(), b.ToVector3());
+    }
+
+
     public void Normalize()
     {
         Vector3 v3 = new Vector3((float)x, (float)y, (float)z);

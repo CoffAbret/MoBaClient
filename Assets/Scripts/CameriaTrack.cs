@@ -12,6 +12,8 @@ public class CameriaTrack : MonoBehaviour
 
     void Update()
     {
+        if (GameData.m_IsDragMinMap)
+            return;
         GameObject playerGo = GameObject.FindGameObjectWithTag("Player");
         if (playerGo == null)
             return;

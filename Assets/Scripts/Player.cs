@@ -47,7 +47,7 @@ public class Player
     //技能间隔时间
     public Fix64 m_IntervalTime = Fix64.Zero;
     //移动速度
-    public Fix64 m_Speed = Fix64.FromRaw(20);
+    public Fix64 m_Speed = Fix64.FromRaw(40);
     //技能移动速度
     public Fix64 m_SkillSpeed = Fix64.FromRaw(100);
     //技能索引
@@ -70,6 +70,11 @@ public class Player
     public GameObject m_SelectedGo;
     //角色控制器
     public CharacterController m_Controller;
+    //小地图Icon
+    public UISprite m_MapIcon;
+    //小地图销毁回调
+    public delegate void DestoryMinMapCallback(Player player);
+    public DestoryMinMapCallback m_DestoryMinMapCallback;
 #endif
     #endregion
     public Player()
@@ -115,7 +120,7 @@ public class Player
         m_Pos = (FixVector3)posGo.transform.position;
         m_Rotation = (FixVector3)(posGo.transform.rotation.eulerAngles);
         m_Scale = (FixVector3)(posGo.transform.localScale);
-        m_Angles = (FixVector3)(posGo.transform.forward.normalized);
+        m_Angles = (FixVector3)(new Vector3(posGo.transform.forward.normalized.x, 0, posGo.transform.forward.normalized.z));
         #endregion
         #region 显示层
         //是否执行显示层逻辑
@@ -133,7 +138,7 @@ public class Player
             m_HudText = m_VGo.GetComponent<PlayerHudText>();
             m_VGo.name = playerData.m_Id.ToString();
             m_Health.m_Health = m_PlayerData.m_HP;
-            if (playerData.m_Id == GameData.m_CurrentRoleId)
+            if (playerData.m_Type == 1 && playerData.m_Id == GameData.m_CurrentRoleId)
             {
                 GameData.m_CurrentPlayer = this;
                 m_VGo.tag = "Player";
@@ -141,8 +146,15 @@ public class Player
                 Camera.main.transform.localPosition = cameraPosGo.transform.localPosition;
                 Camera.main.transform.localRotation = cameraPosGo.transform.localRotation;
                 Camera.main.transform.localScale = cameraPosGo.transform.localScale;
+                //显示主界面UI，关闭复活UI
+                GameData.m_GameManager.m_UIManager.m_UpdatePlayerDieUICallback(false);
+                //更新技能图标
                 GameData.m_GameManager.m_UIManager.m_UpdateSkillUICallback(m_PlayerData.m_SkillList);
             }
+            //关闭敌方复活UI
+            if (playerData.m_Type == 1 && GameData.m_CurrentPlayer != null && playerData.m_CampId != GameData.m_CurrentPlayer.m_PlayerData.m_CampId)
+                GameData.m_GameManager.m_UIManager.m_UpdateEnemyDieUICallback(false, m_PlayerData);
+            MobaMiniMap.instance.AddMapIconByType(this);
         }
         #endregion
         m_PlayerAI = new PlayerAI();
@@ -241,8 +253,7 @@ public class Player
             //玩家与敌人的方向向量
             FixVector3 targetV3 = GameData.m_PlayerList[i].m_Pos - m_Pos;
             //求玩家正前方、玩家与敌人方向两个向量的夹角
-            //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
-            Fix64 angle = (Fix64)Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
+            Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
             if ((float)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
             {
@@ -271,9 +282,9 @@ public class Player
             FixVector3 targetV3 = GameData.m_TowerList[i].m_Pos - m_Pos;
             //求玩家正前方、玩家与敌人方向两个向量的夹角
             //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
-            float angle = Vector3.Angle(m_VGo.transform.forward, targetV3.ToVector3());
+            Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
             Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-            if (angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
+            if ((float)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
             {
                 int damage = 0;
                 if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
@@ -293,15 +304,9 @@ public class Player
     /// <param name="skillNode">攻击技能</param>
     public void FallDamage(int damage)
     {
-        if (m_PlayerData == null)
+        if (m_PlayerData == null || m_PlayerData.m_HP <= 0)
             return;
         m_PlayerData.m_HP -= damage;
-        if (m_PlayerData.m_HP <= 0)
-        {
-            m_State = new DieState();
-            m_State.OnInit(this);
-            m_State.OnEnter();
-        }
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -311,6 +316,21 @@ public class Player
                 m_HudText.PlayerHUDText.Add(-damage, Color.red, 0f);
         }
         #endregion
+        if (m_PlayerData.m_HP <= 0)
+        {
+            m_State = new DieState();
+            m_State.OnInit(this);
+            m_State.OnEnter();
+            #region 显示层
+            if (GameData.m_IsExecuteViewLogic)
+            {
+                if (m_PlayerData.m_Type == 1 && m_PlayerData.m_Id == GameData.m_CurrentRoleId)
+                    GameData.m_GameManager.m_UIManager.m_UpdatePlayerDieUICallback(true);
+                if (m_PlayerData.m_Type == 1 && m_PlayerData.m_CampId != GameData.m_CurrentPlayer.m_PlayerData.m_CampId)
+                    GameData.m_GameManager.m_UIManager.m_UpdateEnemyDieUICallback(true, m_PlayerData);
+            }
+            #endregion
+        }
     }
 
     /// <summary>
@@ -336,6 +356,8 @@ public class Player
                 GameObject.Destroy(m_VGo, (float)m_DestoryDelayTime);
             m_VGo = null;
         }
+        if (m_DestoryMinMapCallback != null)
+            m_DestoryMinMapCallback(this);
         #endregion
     }
 }

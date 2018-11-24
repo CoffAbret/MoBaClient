@@ -13,6 +13,8 @@ public class PlayerAI
     private string m_Parameter;
     //寻路坐标
     private List<FixVector3> m_FixVectorPath;
+    //寻路停止距离
+    private Fix64 m_distince = Fix64.FromRaw(100);
     /// <summary>
     /// 初始化AI数据
     /// </summary>
@@ -29,7 +31,7 @@ public class PlayerAI
         m_FixVectorPath = new List<FixVector3>();
         for (int i = 0; i < p.vectorPath.Count; i++)
         {
-            FixVector3 fixV3 = new FixVector3((Fix64)p.vectorPath[i].x, (Fix64)p.vectorPath[i].y, (Fix64)p.vectorPath[i].z);
+            FixVector3 fixV3 = (FixVector3)(p.vectorPath[i]);
             m_FixVectorPath.Add(fixV3);
         }
     }
@@ -43,11 +45,11 @@ public class PlayerAI
             return;
         FixVector3 relativePos = m_Player.m_PlayerData.m_CampId == 1 ? (m_Player.m_PlayerData.m_NaviPos - m_Player.m_Pos) : (m_Player.m_Pos - m_Player.m_PlayerData.m_NaviPos);
         Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
-        m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
+        m_Player.m_Rotation = (FixVector3)(rotation.eulerAngles);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
             m_Player.m_VGo.transform.rotation = rotation;
-        m_Player.m_Angles = new FixVector3((Fix64)m_Player.m_VGo.transform.forward.x, (Fix64)m_Player.m_VGo.transform.forward.y, (Fix64)m_Player.m_VGo.transform.forward.z).GetNormalized();
+        m_Player.m_Angles = (FixVector3)(new Vector3(m_Player.m_VGo.transform.forward.normalized.x, 0, m_Player.m_VGo.transform.forward.normalized.z));
         #endregion
 
         if (m_Player.m_PlayerData.m_CampId == 1)
@@ -82,33 +84,15 @@ public class PlayerAI
         }
         else
         {
-            if (m_FixVectorPath == null || m_FixVectorPath.Count < 1)
+            m_Player.m_State = new MoveState();
+            m_Player.m_State.OnInit(m_Player, m_Parameter);
+            m_Player.m_State.OnEnter();
+            Fix64 distince = FixVector3.Distance(m_Player.m_PlayerData.m_NaviPos, m_Player.m_Pos);
+            if (distince <= m_distince)
             {
                 m_Player.m_State = new MoveEndState();
                 m_Player.m_State.OnInit(m_Player);
                 m_Player.m_State.OnEnter();
-            }
-            else
-            {
-                FixVector3 relativePos = m_Player.m_PlayerData.m_CampId == 1 ? (m_FixVectorPath[0] - m_Player.m_Pos) : (m_Player.m_Pos - m_FixVectorPath[0]);
-                Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
-                m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
-                #region 显示层
-                if (GameData.m_IsExecuteViewLogic)
-                    m_Player.m_VGo.transform.rotation = rotation;
-                m_Player.m_Angles = new FixVector3((Fix64)m_Player.m_VGo.transform.forward.x, (Fix64)m_Player.m_VGo.transform.forward.y, (Fix64)m_Player.m_VGo.transform.forward.z).GetNormalized();
-                #endregion
-
-                if (m_Player.m_PlayerData.m_CampId == 1)
-                    m_Parameter = string.Format("{0}#{1}#{2}", m_Player.m_Angles.x, m_Player.m_Angles.y, m_Player.m_Angles.z);
-                if (m_Player.m_PlayerData.m_CampId == 2)
-                    m_Parameter = string.Format("{0}#{1}#{2}", -m_Player.m_Angles.x, -m_Player.m_Angles.y, -m_Player.m_Angles.z);
-                m_Player.m_State = new MoveState();
-                m_Player.m_State.OnInit(m_Player, m_Parameter);
-                m_Player.m_State.OnEnter();
-                Fix64 distince = FixVector3.Distance(m_FixVectorPath[0], m_Player.m_Pos);
-                if ((float)distince <= 0.03f)
-                    m_FixVectorPath.RemoveAt(0);
             }
         }
     }

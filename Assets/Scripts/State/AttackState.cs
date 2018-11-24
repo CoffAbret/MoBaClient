@@ -111,7 +111,7 @@ public class AttackState : BaseState
             #region 显示层
             if (GameData.m_IsExecuteViewLogic)
                 m_Player.m_VGo.transform.rotation = rotation;
-            m_Player.m_Angles = new FixVector3((Fix64)m_Player.m_VGo.transform.forward.x, (Fix64)m_Player.m_VGo.transform.forward.y, (Fix64)m_Player.m_VGo.transform.forward.z).GetNormalized();
+            m_Player.m_Angles = (FixVector3)(new Vector3(m_Player.m_VGo.transform.forward.normalized.x, 0, m_Player.m_VGo.transform.forward.normalized.z));
             #endregion
         }
         #region 显示层

@@ -24,6 +24,13 @@ public class Delay
     public void updateLogic()
     {
         m_FixElapseTime = m_FixElapseTime + GameData.m_FixFrameLen;
+        if (m_ResurgencePlayerData != null)
+        {
+            if (m_ResurgencePlayerData.m_Id == GameData.m_CurrentRoleId)
+                GameData.m_GameManager.m_UIManager.m_ResurrectionLabel.text = string.Format("复活：{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
+            else
+                GameData.m_GameManager.m_UIManager.m_EnemyResurrectionLabel.text = string.Format("{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
+        }
         if (m_FixElapseTime >= m_FixPlanTime)
         {
             if (m_DestoryGo != null)

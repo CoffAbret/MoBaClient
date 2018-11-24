@@ -39,4 +39,6 @@ public class GameData
     public static bool m_GameResult = false;
     //死亡次数
     public static int m_DieCount = 0;
+    //是否正在查看小地图
+    public static bool m_IsDragMinMap;
 }

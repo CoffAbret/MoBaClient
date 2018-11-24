@@ -17,6 +17,15 @@ public class MainBehaviour : MonoBehaviour
     public GameObject m_Skill3Go;
     //技能四
     public GameObject m_Skill4Go;
+    //主界面UI
+    public GameObject m_MainUIGo;
+    //复活界面UI
+    public GameObject m_ResurrectionUIGo;
+    public UILabel m_ResurrectionLabel;
+    //敌方复活UI
+    public GameObject m_EnemyResurrectionUIGo;
+    public UILabel m_EnemyResurrectionLabel;
+    public UISprite m_EnemyResurrectionSprite;
     //技能索引
     private int m_Index = 0;
     /// <summary>
@@ -46,7 +55,14 @@ public class MainBehaviour : MonoBehaviour
         UIEventListener.Get(m_Skill2Go).onClick = OnSkillClick;
         UIEventListener.Get(m_Skill3Go).onClick = OnSkillClick;
         UIEventListener.Get(m_Skill4Go).onClick = OnSkillClick;
+
         GameData.m_GameManager.m_UIManager.m_UpdateSkillUICallback = OnUpdateSkillUI;
+
+        GameData.m_GameManager.m_UIManager.m_UpdatePlayerDieUICallback = OnUpdatePlayerDieUI;
+        GameData.m_GameManager.m_UIManager.m_ResurrectionLabel = m_ResurrectionLabel;
+
+        GameData.m_GameManager.m_UIManager.m_UpdateEnemyDieUICallback = OnUpdateEnemyResurrectionUI;
+        GameData.m_GameManager.m_UIManager.m_EnemyResurrectionLabel = m_EnemyResurrectionLabel;
     }
 
     /// <summary>
@@ -104,7 +120,7 @@ public class MainBehaviour : MonoBehaviour
     }
 
     /// <summary>
-    /// 刷新UI
+    /// 刷新当前角色技能UI
     /// </summary>
     /// <param name="skillNodeList"></param>
     private void OnUpdateSkillUI(List<SkillNode> skillNodeList)
@@ -118,5 +134,42 @@ public class MainBehaviour : MonoBehaviour
         m_Skill2Go.GetComponent<UIButton>().normalSprite = skillNodeList[4].skill_icon;
         m_Skill3Go.GetComponent<UIButton>().normalSprite = skillNodeList[5].skill_icon;
         m_Skill4Go.GetComponent<UIButton>().normalSprite = skillNodeList[6].skill_icon;
+    }
+
+    /// <summary>
+    /// 刷新当前角色死亡UI
+    /// </summary>
+    /// <param name="skillNodeList"></param>
+    private void OnUpdatePlayerDieUI(bool isDie)
+    {
+        if (isDie)
+        {
+            m_MainUIGo.SetActive(false);
+            m_ResurrectionUIGo.SetActive(true);
+            m_ResurrectionLabel.text = "";
+        }
+        else
+        {
+            m_MainUIGo.SetActive(true);
+            m_ResurrectionUIGo.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 刷新敌方死亡UI
+    /// </summary>
+    /// <param name="isDie"></param>
+    private void OnUpdateEnemyResurrectionUI(bool isDie, PlayerData data)
+    {
+        if (isDie)
+        {
+            m_EnemyResurrectionUIGo.SetActive(true);
+            m_EnemyResurrectionLabel.text = "";
+            m_EnemyResurrectionSprite.spriteName = data.m_HeroAttrNode.icon_name;
+        }
+        else
+        {
+            m_EnemyResurrectionUIGo.SetActive(false);
+        }
     }
 }

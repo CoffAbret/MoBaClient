@@ -36,6 +36,11 @@ public class Tower
     public int m_Type;
     //子弹
     public TowerAttack m_TowerAttack;
+    //小地图Icon
+    public UISprite m_MapIcon;
+    //小地图销毁回调
+    public delegate void DestoryMinMapCallback(Tower player);
+    public DestoryMinMapCallback m_DestoryMinMapCallback;
     public Tower() { }
     /// <summary>
     /// 创建对象
@@ -62,6 +67,7 @@ public class Tower
         m_Health = m_VGo.GetComponent<PlayerHealth>();
         m_Health.m_Health = hp;
         m_Pos = new FixVector3((Fix64)m_VGo.transform.position.x, (Fix64)m_VGo.transform.position.y, (Fix64)m_VGo.transform.position.z);
+        MobaMiniMap.instance.AddMapIconByTower(this);
     }
 
     /// <summary>
@@ -121,9 +127,9 @@ public class Tower
         if (m_HP <= 0)
         {
             int campId = m_CampId;
-            Destroy();
             if (m_Type == 2)
                 GameData.m_GameManager.GameOver(campId);
+            Destroy();
         }
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
@@ -155,6 +161,8 @@ public class Tower
         {
             GameObject.Destroy(m_VGo, (float)m_DestoryDelayTime);
         }
+        if (m_DestoryMinMapCallback != null)
+            m_DestoryMinMapCallback(this);
         #endregion
         m_Die = null;
         m_Quan = null;
