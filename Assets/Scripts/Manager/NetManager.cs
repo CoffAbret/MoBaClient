@@ -18,7 +18,8 @@ public class NetManager
     public void InitClient()
     {
         //m_Client = new AsyncUdpClient("103.68.252.97", 18888
-        m_Client = new AsyncUdpClient("192.168.3.67", 8889);
+        //m_Client = new AsyncUdpClient("161.117.4.204", 5669);
+        m_Client = new AsyncUdpClient(GameData.m_IP, GameData.m_Port);
         m_Client.OnMessage += OnMessage;
     }
 

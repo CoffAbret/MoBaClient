@@ -18,8 +18,12 @@ public class UIManager
     public UILabel m_ResurrectionLabel;
 
     //刷新敌方死亡UI
-    public delegate void UpdateEnemyDieUICallback(bool isDie,PlayerData data);
+    public delegate void UpdateEnemyDieUICallback(bool isDie, PlayerData data);
     public UpdateEnemyDieUICallback m_UpdateEnemyDieUICallback = null;
     //敌方角色死亡倒计时
     public UILabel m_EnemyResurrectionLabel;
+
+    //游戏结束UI
+    public delegate void GameOverUICallback();
+    public GameOverUICallback m_GameOverUICallback;
 }

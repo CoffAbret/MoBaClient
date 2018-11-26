@@ -44,7 +44,8 @@ public class MoveEndState : BaseState
         m_Player.m_IntervalTime = Fix64.Zero;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
-            m_Animator.SetInteger(m_StateParameter, 0);
+            if (m_Animator != null)
+                m_Animator.SetInteger(m_StateParameter, 0);
         #endregion
     }
 

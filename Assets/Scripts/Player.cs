@@ -47,7 +47,7 @@ public class Player
     //技能间隔时间
     public Fix64 m_IntervalTime = Fix64.Zero;
     //移动速度
-    public Fix64 m_Speed = Fix64.FromRaw(40);
+    public Fix64 m_Speed = Fix64.FromRaw(30);
     //技能移动速度
     public Fix64 m_SkillSpeed = Fix64.FromRaw(100);
     //技能索引
@@ -152,7 +152,7 @@ public class Player
                 GameData.m_GameManager.m_UIManager.m_UpdateSkillUICallback(m_PlayerData.m_SkillList);
             }
             //关闭敌方复活UI
-            if (playerData.m_Type == 1 && GameData.m_CurrentPlayer != null && playerData.m_CampId != GameData.m_CurrentPlayer.m_PlayerData.m_CampId)
+            if (playerData.m_Type == 1 && playerData.m_Id != GameData.m_CurrentRoleId)
                 GameData.m_GameManager.m_UIManager.m_UpdateEnemyDieUICallback(false, m_PlayerData);
             MobaMiniMap.instance.AddMapIconByType(this);
         }
@@ -205,11 +205,6 @@ public class Player
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
             if ((float)distance <= skillNode.dist)
             {
-                if (m_TargetPlayer != null && m_TargetPlayer.m_SelectedGo != null)
-                    m_TargetPlayer.m_SelectedGo.SetActive(false);
-                m_TargetPlayer = GameData.m_PlayerList[i];
-                if (m_TargetPlayer != null && m_TargetPlayer.m_SelectedGo != null)
-                    m_TargetPlayer.m_SelectedGo.SetActive(true);
                 return GameData.m_PlayerList[i];
             }
         }
@@ -230,11 +225,6 @@ public class Player
             Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
             if ((float)distance <= skillNode.dist)
             {
-                if (m_TargetTower != null && m_TargetTower.m_SelectedGo != null)
-                    m_TargetTower.m_SelectedGo.SetActive(false);
-                m_TargetTower = GameData.m_TowerList[i];
-                if (m_TargetTower != null && m_TargetTower.m_SelectedGo != null)
-                    m_TargetTower.m_SelectedGo.SetActive(true);
                 return GameData.m_TowerList[i];
             }
         }
@@ -263,14 +253,13 @@ public class Player
                 else
                     damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 20) - GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor);
                 GameData.m_PlayerList[i].FallDamage(damage);
-
+                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-攻击者:{1}-受击者:{2}-伤害:{3},", GameData.m_ClientGameFrame, m_VGo, GameData.m_PlayerList[i].m_VGo, damage);
                 if (skillNode.skill_id == 301001006)
                 {
                     GameData.m_PlayerList[i].m_State = new HitState();
                     GameData.m_PlayerList[i].m_State.OnInit(GameData.m_PlayerList[i]);
                     GameData.m_PlayerList[i].m_State.OnEnter();
                 }
-                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-伤害:{1},", GameData.m_ClientGameFrame, damage);
             }
         }
 
@@ -291,7 +280,7 @@ public class Player
                     damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]));
                 else
                     damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15));
-                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-伤害:{1},", GameData.m_ClientGameFrame, damage);
+                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-攻击者:{1}-受击者:{2}-伤害:{3},", GameData.m_ClientGameFrame, m_VGo, GameData.m_TowerList[i].m_VGo, damage);
                 GameData.m_TowerList[i].FallDamage(damage);
             }
         }
@@ -326,7 +315,7 @@ public class Player
             {
                 if (m_PlayerData.m_Type == 1 && m_PlayerData.m_Id == GameData.m_CurrentRoleId)
                     GameData.m_GameManager.m_UIManager.m_UpdatePlayerDieUICallback(true);
-                if (m_PlayerData.m_Type == 1 && m_PlayerData.m_CampId != GameData.m_CurrentPlayer.m_PlayerData.m_CampId)
+                if (m_PlayerData.m_Type == 1 && m_PlayerData.m_Id != GameData.m_CurrentRoleId)
                     GameData.m_GameManager.m_UIManager.m_UpdateEnemyDieUICallback(true, m_PlayerData);
             }
             #endregion

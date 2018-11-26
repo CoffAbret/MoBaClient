@@ -96,9 +96,19 @@ public class AttackState : BaseState
         Player targetPlayer = m_Player.FindTarget(m_Player.m_SkillNode);
         Tower targetTower = m_Player.FindTowerTarget(m_Player.m_SkillNode);
         if (targetTower != null)
-            pos = targetTower.m_Pos;
+        {
+            m_Player.m_TargetTower = targetTower;
+            if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
+                m_Player.m_TargetTower.m_SelectedGo.SetActive(true);
+            pos = m_Player.m_TargetTower.m_Pos;
+        }
         if (targetPlayer != null)
-            pos = targetPlayer.m_Pos;
+        {
+            m_Player.m_TargetPlayer = targetPlayer;
+            if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
+                m_Player.m_TargetPlayer.m_SelectedGo.SetActive(true);
+            pos = m_Player.m_TargetPlayer.m_Pos;
+        }
         m_Player.m_IsAttack = true;
         m_Player.m_IsCalcDamage = false;
         if (pos != FixVector3.Zero)

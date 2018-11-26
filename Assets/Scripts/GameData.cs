@@ -11,6 +11,8 @@ public class GameData
     public static GameManager m_GameManager;
     //当前角色id
     public static int m_CurrentRoleId;
+    //当前选择英雄id
+    public static int m_HeroId = 201001000;
     //当前显示角色
     public static Player m_CurrentPlayer;
     //每帧时间长度
@@ -41,4 +43,8 @@ public class GameData
     public static int m_DieCount = 0;
     //是否正在查看小地图
     public static bool m_IsDragMinMap;
+    //IP
+    public static string m_IP;
+    //端口
+    public static int m_Port;
 }

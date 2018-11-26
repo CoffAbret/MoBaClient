@@ -58,9 +58,23 @@ public class SkillState : BaseState
         Player targetPlayer = m_Player.FindTarget(m_Player.m_SkillNode);
         Tower targetTower = m_Player.FindTowerTarget(m_Player.m_SkillNode);
         if (targetTower != null)
-            pos = targetTower.m_Pos;
+        {
+            if (m_Player.m_TargetTower != null && m_Player.m_TargetTower.m_SelectedGo != null && m_Player.m_TargetTower != targetTower)
+                m_Player.m_TargetTower.m_SelectedGo.SetActive(false);
+            m_Player.m_TargetTower = targetTower;
+            if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
+                m_Player.m_TargetTower.m_SelectedGo.SetActive(true);
+            pos = m_Player.m_TargetTower.m_Pos;
+        }
         if (targetPlayer != null)
-            pos = targetPlayer.m_Pos;
+        {
+            if (m_Player.m_TargetPlayer != null && m_Player.m_TargetPlayer.m_SelectedGo != null && m_Player.m_TargetPlayer != targetPlayer)
+                m_Player.m_TargetPlayer.m_SelectedGo.SetActive(false);
+            m_Player.m_TargetPlayer = targetPlayer;
+            if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
+                m_Player.m_TargetPlayer.m_SelectedGo.SetActive(true);
+            pos = m_Player.m_TargetPlayer.m_Pos;
+        }
         if (pos != FixVector3.Zero)
         {
             FixVector3 relativePos = pos - m_Player.m_Pos;

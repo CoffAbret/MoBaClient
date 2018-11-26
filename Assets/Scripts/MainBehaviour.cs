@@ -26,6 +26,20 @@ public class MainBehaviour : MonoBehaviour
     public GameObject m_EnemyResurrectionUIGo;
     public UILabel m_EnemyResurrectionLabel;
     public UISprite m_EnemyResurrectionSprite;
+    //选择英雄UI
+    public GameObject m_UIEmbattleUIGo;
+    public GameObject m_ExitGame;
+    public GameObject m_Hero1;
+    public GameObject m_Hero1Selected;
+    public GameObject m_Hero2;
+    public GameObject m_Hero2Selected;
+    public UILabel m_IPTxt;
+    public UILabel m_PortTxt;
+    public GameObject m_JoinGame;
+    //小地图UI
+    public GameObject m_MiniMapUI;
+    //游戏结束UI
+    public GameObject m_UITheBattleUI;
     //技能索引
     private int m_Index = 0;
     /// <summary>
@@ -46,23 +60,15 @@ public class MainBehaviour : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        GameData.m_GameManager = new GameManager();
-        GameData.m_GameManager.InitGame();
-        GameData.m_GameManager.InputReady();
-
         UIEventListener.Get(m_AttackGo).onClick = OnAttackClick;
         UIEventListener.Get(m_Skill1Go).onClick = OnSkillClick;
         UIEventListener.Get(m_Skill2Go).onClick = OnSkillClick;
         UIEventListener.Get(m_Skill3Go).onClick = OnSkillClick;
         UIEventListener.Get(m_Skill4Go).onClick = OnSkillClick;
-
-        GameData.m_GameManager.m_UIManager.m_UpdateSkillUICallback = OnUpdateSkillUI;
-
-        GameData.m_GameManager.m_UIManager.m_UpdatePlayerDieUICallback = OnUpdatePlayerDieUI;
-        GameData.m_GameManager.m_UIManager.m_ResurrectionLabel = m_ResurrectionLabel;
-
-        GameData.m_GameManager.m_UIManager.m_UpdateEnemyDieUICallback = OnUpdateEnemyResurrectionUI;
-        GameData.m_GameManager.m_UIManager.m_EnemyResurrectionLabel = m_EnemyResurrectionLabel;
+        UIEventListener.Get(m_ExitGame).onClick = OnExitGameClick;
+        UIEventListener.Get(m_JoinGame).onClick = OnJoinGameClick;
+        UIEventListener.Get(m_Hero1).onClick = OnSelectedHeroClick;
+        UIEventListener.Get(m_Hero2).onClick = OnSelectedHeroClick;
     }
 
     /// <summary>
@@ -119,6 +125,47 @@ public class MainBehaviour : MonoBehaviour
         GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Index.ToString());
     }
 
+    private void OnExitGameClick(GameObject go)
+    {
+        Application.Quit();
+    }
+    private void OnJoinGameClick(GameObject go)
+    {
+        int port;
+        GameData.m_IP = m_IPTxt.text.Trim();
+        int.TryParse(m_PortTxt.text.Trim(), out port);
+        GameData.m_Port = port;
+        m_UIEmbattleUIGo.SetActive(false);
+        m_MiniMapUI.SetActive(true);
+        m_MainUIGo.SetActive(true);
+        GameData.m_GameManager = new GameManager();
+        GameData.m_GameManager.InitGame();
+        GameData.m_GameManager.InputReady();
+        GameData.m_GameManager.m_UIManager.m_UpdateSkillUICallback = OnUpdateSkillUI;
+
+        GameData.m_GameManager.m_UIManager.m_UpdatePlayerDieUICallback = OnUpdatePlayerDieUI;
+        GameData.m_GameManager.m_UIManager.m_ResurrectionLabel = m_ResurrectionLabel;
+
+        GameData.m_GameManager.m_UIManager.m_UpdateEnemyDieUICallback = OnUpdateEnemyResurrectionUI;
+        GameData.m_GameManager.m_UIManager.m_EnemyResurrectionLabel = m_EnemyResurrectionLabel;
+        GameData.m_GameManager.m_UIManager.m_GameOverUICallback = OnGameOverUI;
+    }
+    private void OnSelectedHeroClick(GameObject go)
+    {
+        if (go.name.Contains("1"))
+        {
+            GameData.m_HeroId = 201001000;
+            m_Hero1Selected.SetActive(true);
+            m_Hero2Selected.SetActive(false);
+        }
+        else
+        {
+            GameData.m_HeroId = 201003300;
+            m_Hero2Selected.SetActive(true);
+            m_Hero1Selected.SetActive(false);
+        }
+    }
+
     /// <summary>
     /// 刷新当前角色技能UI
     /// </summary>
@@ -171,5 +218,14 @@ public class MainBehaviour : MonoBehaviour
         {
             m_EnemyResurrectionUIGo.SetActive(false);
         }
+    }
+
+    /// <summary>
+    /// 游戏结束UI
+    /// </summary>
+    private void OnGameOverUI()
+    {
+        m_MainUIGo.SetActive(false);
+        m_UITheBattleUI.SetActive(true);
     }
 }

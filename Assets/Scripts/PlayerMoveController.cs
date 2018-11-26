@@ -8,6 +8,7 @@ using UnityEngine;
 /// </summary>
 public class PlayerMoveController : MonoBehaviour
 {
+    private Vector3 prePos = Vector3.zero;
     private void LateUpdate()
     {
         if (GameData.m_CurrentPlayer == null)
@@ -26,6 +27,7 @@ public class PlayerMoveController : MonoBehaviour
         {
             if (GameData.m_CurrentPlayer.m_IsSkill || GameData.m_CurrentPlayer.m_IsAttack || GameData.m_CurrentPlayer.m_IsHit)
                 return;
+            Vector3 pos = new Vector3(x, 0, y);
             string parameter = string.Format("{0}#{1}#{2}", x, 0, y);
             GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
         }

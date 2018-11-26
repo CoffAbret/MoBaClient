@@ -35,7 +35,10 @@ public class GameManager
         m_UIManager = new UIManager();
         m_GridManager = new GridManager();
         m_GridManager.InitGrid();
-        m_LogMessage = GameObject.Find("LogMessage").GetComponent<UILabel>();
+        #region 显示层
+        if (GameData.m_IsExecuteViewLogic)
+            m_LogMessage = GameObject.Find("LogMessage").GetComponent<UILabel>();
+        #endregion
     }
 
     /// <summary>
@@ -48,7 +51,6 @@ public class GameManager
         if (!GameData.m_IsGame)
             return;
         GameData.m_ClientGameFrame++;
-        //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0},", GameData.m_ClientGameFrame);
         if (GameData.m_GameManager.m_BattleLogicManager != null)
             GameData.m_GameManager.m_BattleLogicManager.UpdateLogic();
         if (GameData.m_GameManager.m_DelayManager != null)
@@ -83,8 +85,7 @@ public class GameManager
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
-            GameObject.Find("UIMainPanel").SetActive(false);
-            GameObject.Find("UI Root").transform.Find("UITheBattlePanel").gameObject.SetActive(true);
+            GameData.m_GameManager.m_UIManager.m_GameOverUICallback();
         }
         #endregion
     }
@@ -142,7 +143,7 @@ public class GameManager
             Dictionary<string, object> playerDic = data[i] as Dictionary<string, object>;
             int roleId = playerDic.TryGetInt("id");
             string roleName = playerDic.TryGetString("name");
-            int heroId = i % 2 == 0 ? 201001000 : 201003300;
+            int heroId = int.Parse(playerDic.TryGetString("heroId"));
             int campId = i % 2 == 0 ? 1 : 2;
             PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 1);
             CreatePlayer(charData);
