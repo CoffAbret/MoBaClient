@@ -9,8 +9,7 @@ public class CameriaTrack : MonoBehaviour
 {
     //默认位置
     private Vector3 distincePos = Vector3.zero;
-
-    void Update()
+    void FixedUpdate()
     {
         if (GameData.m_IsDragMinMap)
             return;

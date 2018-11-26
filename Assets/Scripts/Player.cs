@@ -140,6 +140,7 @@ public class Player
             m_Health.m_Health = m_PlayerData.m_HP;
             if (playerData.m_Type == 1 && playerData.m_Id == GameData.m_CurrentRoleId)
             {
+                GameData.m_CampId = playerData.m_CampId;
                 GameData.m_CurrentPlayer = this;
                 m_VGo.tag = "Player";
                 GameObject cameraPosGo = GameObject.Find(string.Format("CameraPos{0}", m_PlayerData.m_CampId));

@@ -14,7 +14,7 @@ public class PlayerAI
     //寻路坐标
     private List<FixVector3> m_FixVectorPath;
     //寻路停止距离
-    private Fix64 m_distince = Fix64.FromRaw(100);
+    private Fix64 m_distince = Fix64.FromRaw(50);
     /// <summary>
     /// 初始化AI数据
     /// </summary>

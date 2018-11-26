@@ -13,6 +13,8 @@ public class GameData
     public static int m_CurrentRoleId;
     //当前选择英雄id
     public static int m_HeroId = 201001000;
+    //当前阵营
+    public static int m_CampId;
     //当前显示角色
     public static Player m_CurrentPlayer;
     //每帧时间长度

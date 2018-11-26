@@ -6,6 +6,7 @@ public class GameManager
 {
     //网络连接管理
     public NetManager m_NetManager;
+    public PlayerMoveManager m_PlayerMoveManager;
     //操作管理
     public OpreationManager m_OpreationManager;
     //战斗管理
@@ -28,6 +29,7 @@ public class GameManager
         LoadJsonData();
         m_NetManager = new NetManager();
         m_NetManager.InitClient();
+        m_PlayerMoveManager = new PlayerMoveManager();
         m_OpreationManager = new OpreationManager();
         m_BattleLogicManager = new BattleLogicManager();
         m_DelayManager = new DelayManager();
@@ -51,6 +53,8 @@ public class GameManager
         if (!GameData.m_IsGame)
             return;
         GameData.m_ClientGameFrame++;
+        if (GameData.m_GameManager.m_PlayerMoveManager != null)
+            GameData.m_GameManager.m_PlayerMoveManager.UpdateMove();
         if (GameData.m_GameManager.m_BattleLogicManager != null)
             GameData.m_GameManager.m_BattleLogicManager.UpdateLogic();
         if (GameData.m_GameManager.m_DelayManager != null)
@@ -81,7 +85,7 @@ public class GameManager
     public void GameOver(int campId)
     {
         GameData.m_IsGame = false;
-        GameData.m_GameResult = GameData.m_CurrentPlayer.m_PlayerData.m_CampId == campId ? false : true;
+        GameData.m_GameResult = GameData.m_CampId == campId ? false : true;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
