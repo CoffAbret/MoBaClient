@@ -147,6 +147,7 @@ public class Tower
     /// </summary>
     public void Destroy()
     {
+        GameData.m_GameManager.m_GridManager.SetWalkable(m_Pos.ToVector3());
         GameData.m_TowerList.Remove(this);
         if (m_TowerAttack != null)
             m_TowerAttack.Destroy();

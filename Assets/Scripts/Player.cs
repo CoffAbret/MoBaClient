@@ -47,7 +47,7 @@ public class Player
     //技能间隔时间
     public Fix64 m_IntervalTime = Fix64.Zero;
     //移动速度
-    public Fix64 m_Speed = Fix64.FromRaw(30);
+    public Fix64 m_Speed = Fix64.FromRaw(20);
     //技能移动速度
     public Fix64 m_SkillSpeed = Fix64.FromRaw(100);
     //技能索引
@@ -190,6 +190,7 @@ public class Player
         if (m_State == null)
             return;
         m_State.UpdateLogic();
+        GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback(this);
     }
 
     /// <summary>

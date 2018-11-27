@@ -11,12 +11,16 @@ public class MainBehaviour : MonoBehaviour
     public GameObject m_AttackGo;
     //技能一
     public GameObject m_Skill1Go;
+    public UISprite m_Skill1CD;
     //技能二
     public GameObject m_Skill2Go;
+    public UISprite m_Skill2CD;
     //技能三
     public GameObject m_Skill3Go;
+    public UISprite m_Skill3CD;
     //技能四
     public GameObject m_Skill4Go;
+    public UISprite m_Skill4CD;
     //主界面UI
     public GameObject m_MainUIGo;
     //复活界面UI
@@ -40,6 +44,10 @@ public class MainBehaviour : MonoBehaviour
     public GameObject m_MiniMapUI;
     //游戏结束UI
     public GameObject m_UITheBattleUI;
+    //红方加血点
+    public GameObject m_RedAddHp;
+    //蓝方加血点
+    public GameObject m_BlueAddHp;
     //技能索引
     private int m_Index = 0;
     /// <summary>
@@ -119,7 +127,17 @@ public class MainBehaviour : MonoBehaviour
             return;
         if (GameData.m_CurrentPlayer.m_IsHit)
             return;
+        if (GameData.m_CurrentPlayer.m_IsDie)
+            return;
         if (!int.TryParse(go.name.Substring(go.name.Length - 1, 1), out m_Index))
+            return;
+        if (m_Index == 4 && m_Skill1CD.fillAmount > 0)
+            return;
+        if (m_Index == 5 && m_Skill2CD.fillAmount > 0)
+            return;
+        if (m_Index == 6 && m_Skill3CD.fillAmount > 0)
+            return;
+        if (m_Index == 7 && m_Skill4CD.fillAmount > 0)
             return;
         GameData.m_CurrentPlayer.m_IsSkill = true;
         GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Index.ToString());
@@ -149,6 +167,9 @@ public class MainBehaviour : MonoBehaviour
         GameData.m_GameManager.m_UIManager.m_UpdateEnemyDieUICallback = OnUpdateEnemyResurrectionUI;
         GameData.m_GameManager.m_UIManager.m_EnemyResurrectionLabel = m_EnemyResurrectionLabel;
         GameData.m_GameManager.m_UIManager.m_GameOverUICallback = OnGameOverUI;
+
+        GameData.m_GameManager.m_UIManager.m_UpdateSkillCDUICallback = InitSkillCD;
+        GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback = UpdateAddHp;
     }
     private void OnSelectedHeroClick(GameObject go)
     {
@@ -217,6 +238,39 @@ public class MainBehaviour : MonoBehaviour
         else
         {
             m_EnemyResurrectionUIGo.SetActive(false);
+        }
+    }
+
+    private void InitSkillCD(SkillNode skill, int index)
+    {
+        Fix64 cd = (Fix64)skill.cooling;
+        UISprite skillCDUISprite = null;
+        if (index == 4)
+            skillCDUISprite = m_Skill1CD;
+        if (index == 5)
+            skillCDUISprite = m_Skill2CD;
+        if (index == 6)
+            skillCDUISprite = m_Skill3CD;
+        if (index == 7)
+            skillCDUISprite = m_Skill4CD;
+        Delay delay = new Delay();
+        delay.InitSkillCD(skillCDUISprite, cd);
+        GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
+    }
+
+    private void UpdateAddHp(Player player)
+    {
+        Fix64 redDistince = FixVector3.Distance(player.m_Pos, (FixVector3)m_BlueAddHp.transform.position);
+        Fix64 blueDistince = FixVector3.Distance(player.m_Pos, (FixVector3)m_BlueAddHp.transform.position);
+        if (m_BlueAddHp.activeSelf && blueDistince <= Fix64.FromRaw(50))
+        {
+            int addHp = player.m_PlayerData.m_HeroAttrNode.hp - player.m_PlayerData.m_HP;
+            if (addHp <= 0)
+                return;
+            addHp = addHp >= 300 ? 300 : addHp;
+            player.m_PlayerData.m_HP += addHp;
+            player.m_Health.m_Health += addHp;
+            m_BlueAddHp.SetActive(false);
         }
     }
 

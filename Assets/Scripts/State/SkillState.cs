@@ -119,6 +119,8 @@ public class SkillState : BaseState
             Delay delay = new Delay();
             delay.InitDestory(m_AniEffect, (Fix64)m_Player.m_SkillNode.efficiency_time);
             GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
+            if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
+                GameData.m_GameManager.m_UIManager.m_UpdateSkillCDUICallback(m_Player.m_SkillNode, m_Player.m_SkillIndex);
         }
         #endregion
     }
@@ -181,9 +183,5 @@ public class SkillState : BaseState
         if (GameData.m_IsExecuteViewLogic)
             m_Animator.SetInteger(m_StateParameter, 0);
         #endregion
-        //if (GameData.m_GameManager != null && GameData.m_GameManager.m_LogMessage != null)
-        //    GameData.m_GameManager.m_LogMessage.text += string.Format("{0}:{1},", GameData.m_GameFrame, m_Player.m_VGo.transform.position);
-        //if (GameData.m_GameManager != null && GameData.m_GameManager.m_LogMessage != null)
-        //    GameData.m_GameManager.m_LogMessage.text += string.Format("{0}:{1},", GameData.m_GameFrame, m_Player.m_Pos);
     }
 }

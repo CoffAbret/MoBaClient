@@ -100,7 +100,7 @@
     "add_state": [ ],
     "base_num1": [ 0 ],
     "growth_ratio1": [ 0 ],
-    "skill_ratio": [ 0.1 ],
+    "skill_ratio": [ 100],
     "stats": [ 3 ]
   },
   "302000103": {

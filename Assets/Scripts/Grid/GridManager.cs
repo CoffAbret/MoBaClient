@@ -79,4 +79,20 @@ public class GridManager
     {
         return grids.IsWalkableAt((int)p.x, (int)p.y);
     }
+
+    public void SetWalkable(Vector3 pos)
+    {
+        Vector2 v2 = MapPosToGrid(pos);
+        int xMin = (int)v2.x - 10;
+        int xMax = (int)v2.x + 10;
+        int yMin = (int)v2.y - 10;
+        int yMax = (int)v2.y + 10;
+        for (int i = xMin; i <= xMax; i++)
+        {
+            for (int y = yMin; y < yMax; y++)
+            {
+                grids.SetWalkableAt(i, y, true);
+            }
+        }
+    }
 }

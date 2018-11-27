@@ -11,6 +11,10 @@ public class UIManager
     public delegate void UpdateSkillUICallback(List<SkillNode> skillNodeList);
     public UpdateSkillUICallback m_UpdateSkillUICallback = null;
 
+    //刷新技能CD
+    public delegate void UpdateSkillCDUICallback(SkillNode node, int index);
+    public UpdateSkillCDUICallback m_UpdateSkillCDUICallback = null;
+
     //刷新主角死亡UI
     public delegate void UpdatePlayerDieUICallback(bool isDie);
     public UpdatePlayerDieUICallback m_UpdatePlayerDieUICallback = null;
@@ -23,7 +27,11 @@ public class UIManager
     //敌方角色死亡倒计时
     public UILabel m_EnemyResurrectionLabel;
 
+    public delegate void UpdateAddHpCallback(Player player);
+    public UpdateAddHpCallback m_UpdateAddHpCallback;
+
     //游戏结束UI
     public delegate void GameOverUICallback();
     public GameOverUICallback m_GameOverUICallback;
+
 }

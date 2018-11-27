@@ -19,9 +19,11 @@ public class Delay
     PlayerData m_ResurgencePlayerData = null;
     //销毁物体
     GameObject m_DestoryGo = null;
+    //CD图片
+    UISprite m_SkillCDUISprite = null;
     //是否开启
     public bool m_Enable;
-    public void updateLogic()
+    public void UpdateLogic()
     {
         m_FixElapseTime = m_FixElapseTime + GameData.m_FixFrameLen;
         if (m_ResurgencePlayerData != null)
@@ -31,12 +33,29 @@ public class Delay
             else
                 GameData.m_GameManager.m_UIManager.m_EnemyResurrectionLabel.text = string.Format("{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
         }
+
+        if (m_SkillCDUISprite != null)
+        {
+            m_SkillCDUISprite.fillAmount = 1 - ((float)m_FixElapseTime / (float)m_FixPlanTime);
+        }
+
         if (m_FixElapseTime >= m_FixPlanTime)
         {
             if (m_DestoryGo != null)
+            {
                 GameObject.DestroyImmediate(m_DestoryGo);
+                m_DestoryGo = null;
+            }
             if (m_ResurgenceCallback != null && m_ResurgencePlayerData != null)
+            {
                 m_ResurgenceCallback(m_ResurgencePlayerData);
+                m_ResurgenceCallback = null;
+                m_ResurgencePlayerData = null;
+            }
+            if (m_SkillCDUISprite != null)
+            {
+                m_SkillCDUISprite = null;
+            }
             m_Enable = false;
         }
     }
@@ -68,6 +87,20 @@ public class Delay
         m_DestoryGo = go;
     }
 
+    /// <summary>
+    /// 初始化CD
+    /// </summary>
+    /// <param name="uiSprite"></param>
+    /// <param name="time"></param>
+    public void InitSkillCD(UISprite uiSprite, Fix64 time)
+    {
+        m_Enable = true;
+        m_FixElapseTime = Fix64.Zero;
+        m_FixPlanTime = time;
+        m_SkillCDUISprite = uiSprite;
+        m_SkillCDUISprite.fillAmount = 1;
+    }
+
     public void Destory()
     {
         m_FixPlanTime = Fix64.Zero;
@@ -75,6 +108,7 @@ public class Delay
         m_DestoryGo = null;
         m_ResurgenceCallback = null;
         m_ResurgencePlayerData = null;
+        m_SkillCDUISprite = null;
         m_Enable = false;
     }
 }
