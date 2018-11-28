@@ -120,7 +120,7 @@ public class SkillState : BaseState
             delay.InitDestory(m_AniEffect, (Fix64)m_Player.m_SkillNode.efficiency_time);
             GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
             if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
-                GameData.m_GameManager.m_UIManager.m_UpdateSkillCDUICallback(m_Player.m_SkillNode, m_Player.m_SkillIndex);
+                GameData.m_GameManager.m_UIManager.m_UpdateSkillCDUICallback((int)m_Player.m_SkillNode.cooling, m_Player.m_SkillIndex);
         }
         #endregion
     }

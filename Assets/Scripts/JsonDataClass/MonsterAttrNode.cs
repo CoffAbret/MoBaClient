@@ -7,7 +7,18 @@ public class MonsterAttrNode : CharacterAttrNode
     public float lv_magic;
     public float lv_armor;
     public float lv_resist;
+
+
+    //public float lv_critical;
+    //public float lv_dodge;
+    //public float lv_ratio;
+    //public float lv_armorpenetration;
+    //public float lv_magicpenetration;
+    //public float lv_suckblood;
+    //public float lv_tenacity;
     public string effect_sign;
+    public int spawnAnimation;
+    //public float correct;
     public float[] attrLvRates;
 
     public override void ParseJson(object jd)
@@ -24,6 +35,11 @@ public class MonsterAttrNode : CharacterAttrNode
         modelNode = FSDataNodeTable<ModelNode>.GetSingleton().FindDataByType(model);
         released = int.Parse(item["released"].ToString());
         is_icon = int.Parse(item["is_icon"].ToString());
+        spawnAnimation = item.TryGetInt("spawnAnimation");
+        if (spawnAnimation!=0)
+        {
+            Debug.Log("出场"+id);
+        }
         if (null != item["skill_id"] && item["skill_id"] is int[])
         {
             int[] node = item["skill_id"] as int[];
@@ -43,6 +59,7 @@ public class MonsterAttrNode : CharacterAttrNode
                     {
                         GameDebug.LogError("策划好好看看怪物表");
                     }
+
                 }
             }
         }
@@ -67,8 +84,20 @@ public class MonsterAttrNode : CharacterAttrNode
             lv_resist = float.Parse(item["lv_resist"].ToString());
         }
 
+        // if (item.ContainsKey("correct"))
+        // {
+        //     correct = float.Parse(item["correct"].ToString());
+        // }
+
+        //lv_critical = float.Parse(item["lv_critical"].ToString());
+        //lv_dodge = float.Parse(item["lv_dodge"].ToString());
+        //lv_ratio = float.Parse(item["lv_ratio"].ToString());
+        //lv_armorpenetration = float.Parse(item["lv_armorpenetration"].ToString());
+        //lv_magicpenetration = float.Parse(item["lv_magicpenetration"].ToString());
+        //lv_suckblood = float.Parse(item["lv_suckblood"].ToString());
+        //lv_tenacity = float.Parse(item["lv_tenacity"].ToString());
         model_size = float.Parse(item["model_size"].ToString());
-        effect_sign = item["effect_sign"].ToString();
+        effect_sign = item.TryGetString("effect_sign");
 
     }
 }

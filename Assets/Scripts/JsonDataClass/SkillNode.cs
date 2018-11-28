@@ -7,7 +7,8 @@ public enum DamageType : byte
 {
     physics = 1,//物理
     magic = 2,//魔法
-    fix = 3//真实伤害
+    fix = 3,//真实伤害
+    cure = 4,//治疗
 }
 //技能类型 0：近战攻击；1：投掷；2：飞行；3：闪现；4：冲锋最大距离；5：冲击波；6：追踪目标；7：中心式；8：陷阱触发；9：召唤类；10：区域型；11：链式；12：移动中心式；13：链接式；14：爆炸；15:弹射；16：多目标追踪;
 //17:移动扩散收缩；18：掘地；19：跳砍；20：多目标弹射；21:生成障碍物；22：扩散型；23：牵引；24：发射扩散米字型；25：游走；26：冲锋指定位置
@@ -51,6 +52,7 @@ public enum SkillCastType
     AoeSKillMove = 35,
     MultiTrap = 36,
     Boom = 37,
+    Around = 38,
 }
 //作用类型 0：自己：1：我方英雄；2：我方小兵；3：敌方英雄；4：敌方小兵；5：敌方防御塔；6：敌方基地；
 public enum influence_type
@@ -104,13 +106,6 @@ public class RangenValue
     public float innerRadius;
     public float angle;
 }
-
-public enum TargetState
-{
-    None = 0,
-    Need = 1
-}
-
 
 public class SkillNode : FSDataNodeBase
 {
@@ -168,10 +163,11 @@ public class SkillNode : FSDataNodeBase
 
     public long[] skill_parts;
 
+    public int alerted_position;//boss预警位置：0特效位置 1目标位置
+
     public float range;
     public object[] battleEffects;
     public bool Cancelable = true;
-    public TargetState target;
     public ChoseTarget choseTarget;
     public RangenValue rangenValue = new RangenValue();   //按下技能按键时，显示在英雄身边的作用范围数据
 
@@ -180,6 +176,9 @@ public class SkillNode : FSDataNodeBase
     public float animatorTime = 1;//动画时长
 
     public float warn_time = 1;
+
+
+    public object[] life_drain;//技能吸血参数 [a,b]a:1固定值2百分比b:参数（大于0）
     public override void ParseJson(object jd)
     {
         Dictionary<string, object> item = (Dictionary<string, object>)jd;
@@ -228,10 +227,6 @@ public class SkillNode : FSDataNodeBase
         alertedType = item.TryGetInt("alerted_type");
         length_base = item.TryGetFloat("length_base");
         energy = item.TryGetInt("energy");
-        if (item.ContainsKey("target"))
-        {
-            target = (TargetState)(int.Parse(item["target"].ToString()));
-        }
         if (item.ContainsKey("choose_target"))
         {
             choseTarget = (ChoseTarget)(int.Parse(item["choose_target"].ToString()));
@@ -318,7 +313,7 @@ public class SkillNode : FSDataNodeBase
         {
             skill_ratio = FSDataNodeTable<SkillNode>.GetSingleton().ParseToFloatArray(item["skill_ratio"]);
             if (skill_ratio == null)
-                Debug.LogError("skill_ratio null");
+                GameDebug.LogError("skill_ratio null");
         }
         if (item.ContainsKey("stats"))
         {
@@ -342,7 +337,16 @@ public class SkillNode : FSDataNodeBase
         }
         range = item.TryGetFloat("dist");
         warn_time = item.TryGetFloat("warn_time");
+        // nullity_type = byte.Parse(item["nullity_type"].ToString());
         animatorTime = item.TryGetFloat("actuation time");
+        if (item.ContainsKey("life_drain"))
+        {
+            life_drain = item["life_drain"] as object[];
+        }
+        if (item.ContainsKey("alerted_position"))
+        {
+            alerted_position = item.TryGetInt("alerted_position");
+        }
     }
 
     public bool IsSerialSkill()
@@ -361,30 +365,7 @@ public class SkillNode : FSDataNodeBase
     private string c4 = "6ae878";
     private string c5 = "FF9933";
 
-    public string JointExtraDamageString(string extra, int index)
-    {
-        string temStr = "";
-        if (float.Parse(extra) > 0)
-        {
-            if (index == 1 || index == 3)
-            {
-                temStr = "[" + c3 + "](+" + extra + ")[-]";
-            }
-            else if (index == 4)
-            {
-                temStr = "[" + c4 + "](+" + extra + ")[-]";
-            }
-            else
-            {
-                temStr = extra;
-            }
-        }
-        else
-        {
-            //GameDebug.LogError("加成值为0");
-        }
-        return temStr;
-    }
+
 
     static double[] GetEffectsConfig(object config)
     {
@@ -404,5 +385,14 @@ public class SkillNode : FSDataNodeBase
     public bool isNormalAttack()
     {
         return spell_motion.StartsWith("attack");
+    }
+
+    long GetBuffId(object buffConfig)
+    {
+        if (buffConfig is Array && ((Array)buffConfig).Length > 0)
+        {
+            return Convert.ToInt64(((Array)buffConfig).GetValue(0));
+        }
+        return 0;
     }
 }

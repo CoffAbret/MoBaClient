@@ -172,12 +172,37 @@ public class Player
     {
         if (m_PlayerData == null)
             return;
-        if (m_State != null && !(m_State is AttackState))
-            m_State.OnExit();
-        m_State = state;
-        m_State.OnInit(this, parameter);
-        m_State.OnEnter();
+        if (state is SkillState && parameter.Equals("8"))
+        {
+            AddHp(500);
+            if (m_PlayerData.m_Id == GameData.m_CurrentRoleId)
+                GameData.m_GameManager.m_UIManager.m_UpdateSkillCDUICallback(30, 8);
+        }
+        else
+        {
+            if (m_State != null && !(m_State is AttackState))
+                m_State.OnExit();
+            m_State = state;
+            m_State.OnInit(this, parameter);
+            m_State.OnEnter();
+        }
     }
+
+    /// <summary>
+    /// 加血
+    /// </summary>
+    public void AddHp(int hp)
+    {
+        int addHp = m_PlayerData.m_HeroAttrNode.hp - m_PlayerData.m_HP;
+        if (addHp <= 0)
+            return;
+        addHp = addHp >= hp ? hp : addHp;
+        m_PlayerData.m_HP += addHp;
+        m_Health.m_Health += addHp;
+        if (m_PlayerData.m_Id == GameData.m_CurrentRoleId)
+            m_HudText.PlayerHUDText.Add(addHp, new Color(0.09F, 0.9F, 0.09F, 1), 1);
+    }
+
 
     /// <summary>
     /// 遍历状态
@@ -190,7 +215,8 @@ public class Player
         if (m_State == null)
             return;
         m_State.UpdateLogic();
-        GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback(this);
+        if (m_PlayerData != null && m_PlayerData.m_Type == 1)
+            GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback(this);
     }
 
     /// <summary>
@@ -247,15 +273,20 @@ public class Player
             //求玩家正前方、玩家与敌人方向两个向量的夹角
             Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
-            if ((float)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
+            if (((float)angle <= skillNode.angle / 2 || skillNode.angle <= 0) && (float)distance <= skillNode.dist)
             {
-                int damage = 0;
-                if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
-                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 20 + skillNode.base_num1[0]) - GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor);
-                else
-                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 20) - GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor);
+                float base_num1 = skillNode.base_num1[0];
+                float growth_ratio = skillNode.growth_ratio1[0];
+                float skill_ratio = skillNode.stats[0];
+                int stats = skillNode.stats[0];
+                float attack = m_PlayerData.m_HeroAttrNode.attack;
+                float armor = GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor;
+                float attack_hurt = m_PlayerData.m_HeroAttrNode.attack_hurt;
+                float hurt_addition = m_PlayerData.m_HeroAttrNode.hurt_addition;
+                float hurt_remission = GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.hurt_remission;
+                //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
+                int damage = (int)(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
                 GameData.m_PlayerList[i].FallDamage(damage);
-                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-攻击者:{1}-受击者:{2}-伤害:{3},", GameData.m_ClientGameFrame, m_VGo, GameData.m_PlayerList[i].m_VGo, damage);
                 if (skillNode.skill_id == 301001006)
                 {
                     GameData.m_PlayerList[i].m_State = new HitState();
@@ -277,12 +308,17 @@ public class Player
             Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
             if ((float)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
             {
-                int damage = 0;
-                if (skillNode != null && skillNode.base_num1 != null && skillNode.base_num1.Length > 0)
-                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15 + skillNode.base_num1[0]));
-                else
-                    damage = (int)((m_PlayerData.m_HeroAttrNode.attack * 15));
-                //GameData.m_GameManager.m_LogMessage.text += string.Format("帧数:{0}-攻击者:{1}-受击者:{2}-伤害:{3},", GameData.m_ClientGameFrame, m_VGo, GameData.m_TowerList[i].m_VGo, damage);
+                float base_num1 = skillNode.base_num1[0];
+                float growth_ratio = skillNode.growth_ratio1[0];
+                float skill_ratio = skillNode.stats[0];
+                int stats = skillNode.stats[0];
+                float attack = m_PlayerData.m_HeroAttrNode.attack;
+                float armor = 0;
+                float attack_hurt = m_PlayerData.m_HeroAttrNode.attack_hurt;
+                float hurt_addition = m_PlayerData.m_HeroAttrNode.hurt_addition;
+                float hurt_remission = 0;
+                //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
+                int damage = (int)(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
                 GameData.m_TowerList[i].FallDamage(damage);
             }
         }

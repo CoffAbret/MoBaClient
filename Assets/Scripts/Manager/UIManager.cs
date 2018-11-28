@@ -12,7 +12,7 @@ public class UIManager
     public UpdateSkillUICallback m_UpdateSkillUICallback = null;
 
     //刷新技能CD
-    public delegate void UpdateSkillCDUICallback(SkillNode node, int index);
+    public delegate void UpdateSkillCDUICallback(int cdTime, int index);
     public UpdateSkillCDUICallback m_UpdateSkillCDUICallback = null;
 
     //刷新主角死亡UI

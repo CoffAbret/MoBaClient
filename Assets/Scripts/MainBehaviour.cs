@@ -21,6 +21,9 @@ public class MainBehaviour : MonoBehaviour
     //技能四
     public GameObject m_Skill4Go;
     public UISprite m_Skill4CD;
+    //加血技能
+    public GameObject m_Skill5Go;
+    public UISprite m_Skill5CD;
     //主界面UI
     public GameObject m_MainUIGo;
     //复活界面UI
@@ -32,12 +35,13 @@ public class MainBehaviour : MonoBehaviour
     public UISprite m_EnemyResurrectionSprite;
     //选择英雄UI
     public GameObject m_UIEmbattleUIGo;
+    //退出游戏
     public GameObject m_ExitGame;
-    public GameObject m_Hero1;
-    public GameObject m_Hero1Selected;
-    public GameObject m_Hero2;
-    public GameObject m_Hero2Selected;
+    //选择英雄列表
+    public List<GameObject> m_HeroItemArray;
+    //IP
     public UILabel m_IPTxt;
+    //端口
     public UILabel m_PortTxt;
     public GameObject m_JoinGame;
     //小地图UI
@@ -73,10 +77,11 @@ public class MainBehaviour : MonoBehaviour
         UIEventListener.Get(m_Skill2Go).onClick = OnSkillClick;
         UIEventListener.Get(m_Skill3Go).onClick = OnSkillClick;
         UIEventListener.Get(m_Skill4Go).onClick = OnSkillClick;
+        UIEventListener.Get(m_Skill5Go).onClick = OnAddHpSkillClick;
         UIEventListener.Get(m_ExitGame).onClick = OnExitGameClick;
         UIEventListener.Get(m_JoinGame).onClick = OnJoinGameClick;
-        UIEventListener.Get(m_Hero1).onClick = OnSelectedHeroClick;
-        UIEventListener.Get(m_Hero2).onClick = OnSelectedHeroClick;
+        for (int i = 0; i < m_HeroItemArray.Count; i++)
+            UIEventListener.Get(m_HeroItemArray[i]).onClick = OnSelectedHeroClick;
     }
 
     /// <summary>
@@ -143,6 +148,19 @@ public class MainBehaviour : MonoBehaviour
         GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Index.ToString());
     }
 
+    /// <summary>
+    /// 点击技能
+    /// </summary>
+    /// <param name="go"></param>
+    private void OnAddHpSkillClick(GameObject go)
+    {
+        if (!int.TryParse(go.name.Substring(go.name.Length - 1, 1), out m_Index))
+            return;
+        if (m_Skill5CD.fillAmount > 0)
+            return;
+        GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Index.ToString());
+    }
+
     private void OnExitGameClick(GameObject go)
     {
         Application.Quit();
@@ -173,17 +191,16 @@ public class MainBehaviour : MonoBehaviour
     }
     private void OnSelectedHeroClick(GameObject go)
     {
-        if (go.name.Contains("1"))
+        for (int i = 0; i < m_HeroItemArray.Count; i++)
         {
-            GameData.m_HeroId = 201001000;
-            m_Hero1Selected.SetActive(true);
-            m_Hero2Selected.SetActive(false);
-        }
-        else
-        {
-            GameData.m_HeroId = 201003300;
-            m_Hero2Selected.SetActive(true);
-            m_Hero1Selected.SetActive(false);
+            HeroItem item = m_HeroItemArray[i].GetComponent<HeroItem>();
+            if (m_HeroItemArray[i] != go)
+                item.m_SelectedGo.SetActive(false);
+            else
+            {
+                item.m_SelectedGo.SetActive(true);
+                GameData.m_HeroId = item.m_HeroId;
+            }
         }
     }
 
@@ -241,9 +258,9 @@ public class MainBehaviour : MonoBehaviour
         }
     }
 
-    private void InitSkillCD(SkillNode skill, int index)
+    private void InitSkillCD(int cdTime, int index)
     {
-        Fix64 cd = (Fix64)skill.cooling;
+        Fix64 cd = (Fix64)cdTime;
         UISprite skillCDUISprite = null;
         if (index == 4)
             skillCDUISprite = m_Skill1CD;
@@ -253,25 +270,38 @@ public class MainBehaviour : MonoBehaviour
             skillCDUISprite = m_Skill3CD;
         if (index == 7)
             skillCDUISprite = m_Skill4CD;
+        if (index == 8)
+            skillCDUISprite = m_Skill5CD;
         Delay delay = new Delay();
         delay.InitSkillCD(skillCDUISprite, cd);
         GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
     }
 
+    /// <summary>
+    /// 刷新是否触发加血
+    /// </summary>
+    /// <param name="player"></param>
     private void UpdateAddHp(Player player)
     {
-        Fix64 redDistince = FixVector3.Distance(player.m_Pos, (FixVector3)m_BlueAddHp.transform.position);
-        Fix64 blueDistince = FixVector3.Distance(player.m_Pos, (FixVector3)m_BlueAddHp.transform.position);
-        if (m_BlueAddHp.activeSelf && blueDistince <= Fix64.FromRaw(50))
-        {
-            int addHp = player.m_PlayerData.m_HeroAttrNode.hp - player.m_PlayerData.m_HP;
-            if (addHp <= 0)
-                return;
-            addHp = addHp >= 300 ? 300 : addHp;
-            player.m_PlayerData.m_HP += addHp;
-            player.m_Health.m_Health += addHp;
-            m_BlueAddHp.SetActive(false);
-        }
+        GameObject addHpGo = null;
+        Fix64 redDistince = Fix64.Zero;
+        Fix64 blueDistince = Fix64.Zero;
+        if (player == null || player.m_PlayerData == null)
+            return;
+        int addHp = player.m_PlayerData.m_HeroAttrNode.hp - player.m_PlayerData.m_HP;
+        if (addHp <= 0)
+            return;
+        if (m_RedAddHp != null && m_RedAddHp.activeSelf && FixVector3.Distance(player.m_Pos, (FixVector3)m_RedAddHp.transform.position) <= Fix64.FromRaw(100))
+            addHpGo = m_RedAddHp;
+        if (m_BlueAddHp != null && m_BlueAddHp.activeSelf && FixVector3.Distance(player.m_Pos, (FixVector3)m_BlueAddHp.transform.position) <= Fix64.FromRaw(100))
+            addHpGo = m_BlueAddHp;
+        if (addHpGo == null)
+            return;
+        player.AddHp(300);
+        addHpGo.SetActive(false);
+        Delay delay = new Delay();
+        delay.InitAddHP(addHpGo, Fix64.FromRaw(10000));
+        GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
     }
 
     /// <summary>

@@ -21,6 +21,8 @@ public class Delay
     GameObject m_DestoryGo = null;
     //CD图片
     UISprite m_SkillCDUISprite = null;
+    //加血点
+    GameObject m_AddHPGo = null;
     //是否开启
     public bool m_Enable;
     public void UpdateLogic()
@@ -29,7 +31,7 @@ public class Delay
         if (m_ResurgencePlayerData != null)
         {
             if (m_ResurgencePlayerData.m_Id == GameData.m_CurrentRoleId)
-                GameData.m_GameManager.m_UIManager.m_ResurrectionLabel.text = string.Format("复活：{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
+                GameData.m_GameManager.m_UIManager.m_ResurrectionLabel.text = string.Format("{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
             else
                 GameData.m_GameManager.m_UIManager.m_EnemyResurrectionLabel.text = string.Format("{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
         }
@@ -42,26 +44,20 @@ public class Delay
         if (m_FixElapseTime >= m_FixPlanTime)
         {
             if (m_DestoryGo != null)
-            {
                 GameObject.DestroyImmediate(m_DestoryGo);
-                m_DestoryGo = null;
-            }
+
+            if (m_AddHPGo != null)
+                m_AddHPGo.SetActive(true);
+
             if (m_ResurgenceCallback != null && m_ResurgencePlayerData != null)
-            {
                 m_ResurgenceCallback(m_ResurgencePlayerData);
-                m_ResurgenceCallback = null;
-                m_ResurgencePlayerData = null;
-            }
-            if (m_SkillCDUISprite != null)
-            {
-                m_SkillCDUISprite = null;
-            }
+
             m_Enable = false;
         }
     }
 
     /// <summary>
-    /// 初始化延时
+    /// 初始化角色复活
     /// </summary>
     /// <param name="time"></param>
     /// <param name="acb"></param>
@@ -72,6 +68,19 @@ public class Delay
         m_FixPlanTime = time;
         m_ResurgencePlayerData = playerData;
         m_ResurgenceCallback = callback;
+    }
+
+    /// <summary>
+    /// 初始化加血点
+    /// </summary>
+    /// <param name="time"></param>
+    /// <param name="acb"></param>
+    public void InitAddHP(GameObject addHPGo, Fix64 time)
+    {
+        m_Enable = true;
+        m_FixElapseTime = Fix64.Zero;
+        m_FixPlanTime = time;
+        m_AddHPGo = addHPGo;
     }
 
     /// <summary>

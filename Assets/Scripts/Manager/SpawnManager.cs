@@ -22,7 +22,7 @@ public class SpawnManager
             {
                 int roleId = 0;
                 string roleName = "";
-                int heroId = i % 2 == 0 ? 202100200 : 202100500;
+                int heroId = i % 2 == 0 ? 202100100 : 202100400;
                 int campId = i % 2 == 0 ? 1 : 2;
                 PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 2);
                 GameData.m_GameManager.CreatePlayer(charData);

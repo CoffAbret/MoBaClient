@@ -47,7 +47,7 @@ public class AttackState : BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        if (m_Player == null)
+        if (m_Player == null || m_Player.m_PlayerData == null)
             return;
         if (m_Player.m_PlayerData.m_Type == 1)
         {
@@ -129,9 +129,17 @@ public class AttackState : BaseState
         {
             m_Animator.SetInteger(m_StateParameter, m_Player.m_SkillIndex);
             if (m_Player.m_PlayerData.m_Type == 1)
-                m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
-            if (m_Player.m_PlayerData.m_Type == 2)
-                m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Monster", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
+            {
+                GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion));
+                if (effectGo != null)
+                    m_AniEffect = GameObject.Instantiate(effectGo);
+            }
+            if (m_Player.m_PlayerData.m_Type == 2 && !string.IsNullOrEmpty(m_Player.m_SkillNode.spell_motion))
+            {
+                GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Monster", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion));
+                if (effectGo != null)
+                    m_AniEffect = GameObject.Instantiate(effectGo);
+            }
             if (m_AniEffect == null)
                 return;
             m_AniEffect.transform.parent = m_Player.m_VGo.transform;
