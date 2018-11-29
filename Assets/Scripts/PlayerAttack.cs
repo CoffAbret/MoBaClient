@@ -4,30 +4,34 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 角色怪物子弹
+/// 角色子弹
 /// </summary>
 public class PlayerAttack
 {
     //位置
     public FixVector3 m_Pos = FixVector3.Zero;
-    //攻击目标
-    public Player m_TargetPlayer;
+    //朝向
+    public FixVector3 m_Angles = FixVector3.Zero;
     //攻击距离
     public Fix64 m_AttackDistince = Fix64.FromRaw(200);
     //攻击间隔
     public Fix64 m_AttackSpeed = Fix64.FromRaw(100);
-    //攻击特效
-    public GameObject m_Attack;
+    //攻击者
+    public Player m_AttackPlayer;
+    //攻击技能
+    public SkillNode m_SkillNode;
+    //子弹是否有效
+    public bool m_IsActive = false;
     /// <summary>
     /// 创建对象
     /// </summary>
     /// <param name="charData">对象数据</param>
-    public void Create(GameObject towerGo, Player targetPlayer)
+    public void Create(Player player, SkillNode node)
     {
-        m_TargetPlayer = targetPlayer;
-        m_Attack = towerGo.transform.Find("attack0").gameObject;
-        m_Attack.SetActive(true);
-        m_Pos = new FixVector3((Fix64)towerGo.transform.position.x, (Fix64)towerGo.transform.position.y, (Fix64)towerGo.transform.position.z);
+        m_AttackPlayer = player;
+        m_SkillNode = node;
+        m_Pos = player.m_Pos;
+        m_Angles = player.m_Angles;
     }
 
     /// <summary>
@@ -35,37 +39,16 @@ public class PlayerAttack
     /// </summary>
     public void UpdateLogic()
     {
-        if (m_Attack == null || !m_Attack.activeSelf)
+        if (m_AttackPlayer == null)
             return;
-        FixVector3 fixAttackPos = (FixVector3)(m_Attack.transform.position);
-        Fix64 distince = FixVector3.Distance(m_TargetPlayer.m_Pos, fixAttackPos);
-        if (distince < m_AttackDistince)
-        {
-            m_TargetPlayer.FallDamage(50);
-            Destroy();
-        }
-        else
-        {
-            //普通攻击子弹自动改变朝向
-            FixVector3 relativePos = m_TargetPlayer.m_Pos - (FixVector3)(m_Attack.transform.position);
-            Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
-            m_Attack.transform.rotation = rotation;
-            m_Attack.transform.position += ((FixVector3)m_Attack.transform.forward * m_AttackSpeed).ToVector3();
-        }
+
     }
 
     /// <summary>
     /// 销毁
     /// </summary>
-    public void Destroy()
+    public void Destory()
     {
-        m_Pos = FixVector3.Zero;
-        m_TargetPlayer = null;
-        if (m_Attack != null)
-        {
-            m_Attack.SetActive(false);
-            m_Attack.transform.localPosition = new Vector3(0, 1, 0);
-            m_Attack.transform.rotation = Quaternion.Euler(Vector3.zero);
-        }
+
     }
 }
