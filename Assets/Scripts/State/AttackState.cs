@@ -110,7 +110,7 @@ public class AttackState : BaseState
             pos = m_Player.m_TargetPlayer.m_Pos;
         }
         m_Player.m_IsAttack = true;
-        m_Player.m_IsCalcDamage = false;
+        m_Player.m_IsLaunchAttack = false;
         if (pos != FixVector3.Zero)
         {
             //普通攻击自动改变朝向
@@ -166,10 +166,12 @@ public class AttackState : BaseState
         if (m_Player.m_SkillNode == null)
             return;
         m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-        if (m_Player.m_IntervalTime >= (((Fix64)m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsCalcDamage)
+        if (m_Player.m_IntervalTime >= (((Fix64)m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsLaunchAttack)
         {
-            m_Player.CalcDamage(m_Player.m_SkillNode);
-            m_Player.m_IsCalcDamage = true;
+            PlayerAttack attack = new PlayerAttack();
+            attack.Create(m_Player, m_Player.m_SkillNode);
+            GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
+            m_Player.m_IsLaunchAttack = true;
         }
 
         if (m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime)
@@ -185,7 +187,7 @@ public class AttackState : BaseState
         if (m_Player == null)
             return;
         m_Player.m_IsAttack = false;
-        m_Player.m_IsCalcDamage = false;
+        m_Player.m_IsLaunchAttack = false;
         m_Player.m_SkillNode = null;
         m_Player.m_IntervalTime = Fix64.Zero;
         m_Player.m_SkillIndex = 0;
@@ -193,7 +195,5 @@ public class AttackState : BaseState
         if (GameData.m_IsExecuteViewLogic)
             m_Animator.SetInteger(m_StateParameter, 0);
         #endregion
-        //if (GameData.m_GameManager != null && GameData.m_GameManager.m_LogMessage != null)
-        //    GameData.m_GameManager.m_LogMessage.text += string.Format("{0}:{1},", GameData.m_GameFrame, m_Player.m_VGo.transform.position);
     }
 }

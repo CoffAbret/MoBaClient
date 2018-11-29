@@ -52,6 +52,10 @@ public class MainBehaviour : MonoBehaviour
     public GameObject m_RedAddHp;
     //蓝方加血点
     public GameObject m_BlueAddHp;
+    //红方复活点
+    public GameObject m_RedPos;
+    //蓝方复活点
+    public GameObject m_BluePos;
     //技能索引
     private int m_Index = 0;
     /// <summary>
@@ -291,6 +295,10 @@ public class MainBehaviour : MonoBehaviour
         int addHp = player.m_PlayerData.m_HeroAttrNode.hp - player.m_PlayerData.m_HP;
         if (addHp <= 0)
             return;
+        if (m_RedPos != null && player.m_PlayerData.m_CampId == 2 && FixVector3.Distance(player.m_Pos, (FixVector3)m_RedPos.transform.position) <= Fix64.FromRaw(1000))
+            player.AddHp(addHp);
+        if (m_BluePos != null && player.m_PlayerData.m_CampId == 1 && FixVector3.Distance(player.m_Pos, (FixVector3)m_BluePos.transform.position) <= Fix64.FromRaw(1000))
+            player.AddHp(addHp);
         if (m_RedAddHp != null && m_RedAddHp.activeSelf && FixVector3.Distance(player.m_Pos, (FixVector3)m_RedAddHp.transform.position) <= Fix64.FromRaw(100))
             addHpGo = m_RedAddHp;
         if (m_BlueAddHp != null && m_BlueAddHp.activeSelf && FixVector3.Distance(player.m_Pos, (FixVector3)m_BlueAddHp.transform.position) <= Fix64.FromRaw(100))

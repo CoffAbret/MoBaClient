@@ -96,7 +96,10 @@ public class SkillState : BaseState
         else
             m_Player.m_IsSkillMove = false;
         m_Player.m_IsSkill = true;
-        m_Player.m_IsCalcDamage = false;
+        m_Player.m_IsLaunchAttack = false;
+        PlayerAttack attack = new PlayerAttack();
+        attack.Create(m_Player, m_Player.m_SkillNode);
+        GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -139,7 +142,7 @@ public class SkillState : BaseState
         if (m_Player.m_IsSkillMove)
         {
             //技能位移直接设置方向即可
-            FixVector3 pos = m_Player.m_Pos + (m_Player.m_SkillSpeed * m_Player.m_Angles);
+            FixVector3 pos = m_Player.m_Pos + ((Fix64)m_Player.m_SkillNode.flight_speed * m_Player.m_Angles * GameData.m_FixFrameLen);
             Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(pos.ToVector3());
             bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
             if (!isWalk)
@@ -147,7 +150,7 @@ public class SkillState : BaseState
                 OnExit();
                 return;
             }
-            m_Player.m_Pos = m_Player.m_Pos + m_Player.m_Angles * m_Player.m_SkillSpeed;
+            m_Player.m_Pos = pos;
             #region 显示层
             if (GameData.m_IsExecuteViewLogic)
             {
@@ -157,10 +160,12 @@ public class SkillState : BaseState
         }
         if (!m_Player.m_IsSkill)
             return;
-        if (m_Player.m_IntervalTime >= (((Fix64)m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsCalcDamage)
+        if (m_Player.m_IntervalTime >= (((Fix64)m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsLaunchAttack)
         {
-            m_Player.CalcDamage(m_Player.m_SkillNode);
-            m_Player.m_IsCalcDamage = true;
+            PlayerAttack attack = new PlayerAttack();
+            attack.Create(m_Player, m_Player.m_SkillNode);
+            GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
+            m_Player.m_IsLaunchAttack = true;
         }
         if (m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime)
             OnExit();
@@ -176,6 +181,7 @@ public class SkillState : BaseState
             return;
         m_Player.m_IsSkill = false;
         m_Player.m_IsSkillMove = false;
+        m_Player.m_IsLaunchAttack = false;
         m_Player.m_SkillIndex = 0;
         m_Player.m_SkillNode = null;
         m_Player.m_IntervalTime = Fix64.Zero;

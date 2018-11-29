@@ -18,7 +18,7 @@
         "pierce through": 1,
         "range_type": 0,
         "length_base": 0,
-        "aoe_long": 0,
+        "aoe_long": 0.6,
         "aoe_wide": 0,
         "angle": 0,
         "attack_type": 1,

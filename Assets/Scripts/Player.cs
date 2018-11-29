@@ -34,8 +34,8 @@ public class Player
     public bool m_IsAttack = false;
     //是否技能
     public bool m_IsSkill = false;
-    //是否计算伤害
-    public bool m_IsCalcDamage = false;
+    //是否发射子弹
+    public bool m_IsLaunchAttack = false;
     //是否播放特效
     public bool m_IsPlayEffect = false;
     //是否死亡
@@ -49,7 +49,7 @@ public class Player
     //移动速度
     public Fix64 m_Speed = Fix64.FromRaw(20);
     //技能移动速度
-    public Fix64 m_SkillSpeed = Fix64.FromRaw(100);
+    public Fix64 m_SkillSpeed = Fix64.FromRaw(50);
     //技能索引
     public int m_SkillIndex = 0;
     //当前技能信息
@@ -90,7 +90,7 @@ public class Player
         m_IsSkillMove = false;
         m_IsAttack = false;
         m_IsSkill = false;
-        m_IsCalcDamage = false;
+        m_IsLaunchAttack = false;
         m_IsPlayEffect = false;
         m_IsDie = false;
         m_IsHit = false;
@@ -260,71 +260,6 @@ public class Player
     }
 
     /// <summary>
-    /// 判断击中目标
-    /// </summary>
-    public void CalcDamage(SkillNode skillNode)
-    {
-        for (int i = 0; i < GameData.m_PlayerList.Count; i++)
-        {
-            if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_PlayerData.m_CampId)
-                continue;
-            //玩家与敌人的方向向量
-            FixVector3 targetV3 = GameData.m_PlayerList[i].m_Pos - m_Pos;
-            //求玩家正前方、玩家与敌人方向两个向量的夹角
-            Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
-            Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
-            if (((float)angle <= skillNode.angle / 2 || skillNode.angle <= 0) && (float)distance <= skillNode.dist)
-            {
-                float base_num1 = skillNode.base_num1[0];
-                float growth_ratio = skillNode.growth_ratio1[0];
-                float skill_ratio = skillNode.stats[0];
-                int stats = skillNode.stats[0];
-                float attack = m_PlayerData.m_HeroAttrNode.attack;
-                float armor = GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor;
-                float attack_hurt = m_PlayerData.m_HeroAttrNode.attack_hurt;
-                float hurt_addition = m_PlayerData.m_HeroAttrNode.hurt_addition;
-                float hurt_remission = GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.hurt_remission;
-                //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
-                int damage = (int)(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
-                GameData.m_PlayerList[i].FallDamage(damage);
-                if (skillNode.skill_id == 301001006)
-                {
-                    GameData.m_PlayerList[i].m_State = new HitState();
-                    GameData.m_PlayerList[i].m_State.OnInit(GameData.m_PlayerList[i]);
-                    GameData.m_PlayerList[i].m_State.OnEnter();
-                }
-            }
-        }
-
-        for (int i = 0; i < GameData.m_TowerList.Count; i++)
-        {
-            if (GameData.m_TowerList[i].m_CampId == m_PlayerData.m_CampId)
-                continue;
-            //玩家与敌人的方向向量
-            FixVector3 targetV3 = GameData.m_TowerList[i].m_Pos - m_Pos;
-            //求玩家正前方、玩家与敌人方向两个向量的夹角
-            //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
-            Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
-            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-            if ((float)angle <= skillNode.angle / 2 && (float)distance <= skillNode.dist)
-            {
-                float base_num1 = skillNode.base_num1[0];
-                float growth_ratio = skillNode.growth_ratio1[0];
-                float skill_ratio = skillNode.stats[0];
-                int stats = skillNode.stats[0];
-                float attack = m_PlayerData.m_HeroAttrNode.attack;
-                float armor = 0;
-                float attack_hurt = m_PlayerData.m_HeroAttrNode.attack_hurt;
-                float hurt_addition = m_PlayerData.m_HeroAttrNode.hurt_addition;
-                float hurt_remission = 0;
-                //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
-                int damage = (int)(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
-                GameData.m_TowerList[i].FallDamage(damage);
-            }
-        }
-    }
-
-    /// <summary>
     /// 计算伤害
     /// </summary>
     /// <param name="playerAttack">攻击者</param>
@@ -370,7 +305,7 @@ public class Player
         m_IsMove = false;
         m_IsAttack = false;
         m_IsSkill = false;
-        m_IsCalcDamage = false;
+        m_IsLaunchAttack = false;
         m_IsDie = false;
         m_IsHit = false;
         m_State = null;
