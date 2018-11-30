@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ using UnityEngine;
 /// </summary>
 public class Delay
 {
+    public string m_DelayId = string.Empty;
     //时长
     Fix64 m_FixPlanTime = Fix64.Zero;
     //累计时间
@@ -25,6 +27,10 @@ public class Delay
     GameObject m_AddHPGo = null;
     //是否开启
     public bool m_Enable;
+    public Delay()
+    {
+        m_DelayId = Guid.NewGuid().ToString();
+    }
     public void UpdateLogic()
     {
         m_FixElapseTime = m_FixElapseTime + GameData.m_FixFrameLen;
@@ -112,9 +118,11 @@ public class Delay
 
     public void Destory()
     {
+        if (m_DestoryGo != null)
+            GameObject.DestroyImmediate(m_DestoryGo);
+        m_DestoryGo = null;
         m_FixPlanTime = Fix64.Zero;
         m_FixElapseTime = Fix64.Zero;
-        m_DestoryGo = null;
         m_ResurgenceCallback = null;
         m_ResurgencePlayerData = null;
         m_SkillCDUISprite = null;

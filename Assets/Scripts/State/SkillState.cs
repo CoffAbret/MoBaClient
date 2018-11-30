@@ -104,7 +104,10 @@ public class SkillState : BaseState
         if (GameData.m_IsExecuteViewLogic)
         {
             m_Animator.SetInteger(m_StateParameter, m_Player.m_SkillIndex);
-            m_AniEffect = GameObject.Instantiate(Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion)));
+            GameObject effecGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion));
+            if (effecGo == null)
+                return;
+            m_AniEffect = GameObject.Instantiate(effecGo);
             if (m_Player.m_IsSkillMove)
             {
                 m_AniEffect.transform.parent = m_Player.m_VGo.transform;
@@ -119,9 +122,12 @@ public class SkillState : BaseState
             m_AniEffect.transform.localScale = Vector3.one;
             m_AniEffect.SetActive(true);
             m_Player.m_IsPlayEffect = true;
-            Delay delay = new Delay();
-            delay.InitDestory(m_AniEffect, (Fix64)m_Player.m_SkillNode.efficiency_time);
-            GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
+            if (m_Player.m_SkillNode.skill_type == SkillCastType.CenterSkill)
+            {
+                Delay delay = new Delay();
+                delay.InitDestory(m_AniEffect, (Fix64)m_Player.m_SkillNode.efficiency_time);
+                GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
+            }
             if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
                 GameData.m_GameManager.m_UIManager.m_UpdateSkillCDUICallback((int)m_Player.m_SkillNode.cooling, m_Player.m_SkillIndex);
         }
@@ -179,15 +185,21 @@ public class SkillState : BaseState
         base.OnExit();
         if (m_Player == null)
             return;
+        #region 显示层
+        if (GameData.m_IsExecuteViewLogic)
+        {
+            m_Animator.SetInteger(m_StateParameter, 0);
+            if (m_Player.m_SkillNode != null && m_Player.m_SkillNode.skill_type != SkillCastType.CenterSkill && m_AniEffect != null)
+            {
+                GameObject.DestroyImmediate(m_AniEffect);
+            }
+        }
+        #endregion
         m_Player.m_IsSkill = false;
         m_Player.m_IsSkillMove = false;
         m_Player.m_IsLaunchAttack = false;
         m_Player.m_SkillIndex = 0;
         m_Player.m_SkillNode = null;
         m_Player.m_IntervalTime = Fix64.Zero;
-        #region 显示层
-        if (GameData.m_IsExecuteViewLogic)
-            m_Animator.SetInteger(m_StateParameter, 0);
-        #endregion
     }
 }

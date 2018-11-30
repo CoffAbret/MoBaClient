@@ -130,10 +130,10 @@ public class MainBehaviour : MonoBehaviour
     /// <param name="go"></param>
     private void OnSkillClick(GameObject go)
     {
-        if (GameData.m_CurrentPlayer.m_IsSkill)
-            return;
-        if (GameData.m_CurrentPlayer.m_IsAttack)
-            return;
+        //if (GameData.m_CurrentPlayer.m_IsSkill)
+        //    return;
+        //if (GameData.m_CurrentPlayer.m_IsAttack)
+        //    return;
         if (GameData.m_CurrentPlayer.m_IsHit)
             return;
         if (GameData.m_CurrentPlayer.m_IsDie)
@@ -299,9 +299,9 @@ public class MainBehaviour : MonoBehaviour
             player.AddHp(addHp);
         if (m_BluePos != null && player.m_PlayerData.m_CampId == 1 && FixVector3.Distance(player.m_Pos, (FixVector3)m_BluePos.transform.position) <= Fix64.FromRaw(1000))
             player.AddHp(addHp);
-        if (m_RedAddHp != null && m_RedAddHp.activeSelf && FixVector3.Distance(player.m_Pos, (FixVector3)m_RedAddHp.transform.position) <= Fix64.FromRaw(100))
+        if (m_RedAddHp != null && m_RedAddHp.activeSelf && FixVector3.Distance(player.m_Pos, (FixVector3)m_RedAddHp.transform.position) <= Fix64.FromRaw(200))
             addHpGo = m_RedAddHp;
-        if (m_BlueAddHp != null && m_BlueAddHp.activeSelf && FixVector3.Distance(player.m_Pos, (FixVector3)m_BlueAddHp.transform.position) <= Fix64.FromRaw(100))
+        if (m_BlueAddHp != null && m_BlueAddHp.activeSelf && FixVector3.Distance(player.m_Pos, (FixVector3)m_BlueAddHp.transform.position) <= Fix64.FromRaw(200))
             addHpGo = m_BlueAddHp;
         if (addHpGo == null)
             return;

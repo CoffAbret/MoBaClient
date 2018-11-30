@@ -8,6 +8,7 @@ using UnityEngine;
 /// </summary>
 public class PlayerAttack
 {
+    public string m_PlayerAttackId = string.Empty;
     //位置
     public FixVector3 m_Pos = FixVector3.Zero;
     //朝向
@@ -32,6 +33,7 @@ public class PlayerAttack
     /// <param name="charData">对象数据</param>
     public void Create(Player player, SkillNode node)
     {
+        m_PlayerAttackId = Guid.NewGuid().ToString();
         m_IsActive = true;
         m_AttackPlayer = player;
         m_SkillNode = node;
@@ -68,7 +70,7 @@ public class PlayerAttack
             {
                 float base_num1 = m_SkillNode.base_num1[0];
                 float growth_ratio = m_SkillNode.growth_ratio1[0];
-                float skill_ratio = m_SkillNode.stats[0];
+                float skill_ratio = m_SkillNode.skill_ratio[0];
                 int stats = m_SkillNode.stats[0];
                 float attack = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.attack;
                 float armor = GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor;
@@ -99,7 +101,7 @@ public class PlayerAttack
             {
                 float base_num1 = m_SkillNode.base_num1[0];
                 float growth_ratio = m_SkillNode.growth_ratio1[0];
-                float skill_ratio = m_SkillNode.stats[0];
+                float skill_ratio = m_SkillNode.skill_ratio[0];
                 int stats = m_SkillNode.stats[0];
                 float attack = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.attack;
                 float armor = 0;

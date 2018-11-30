@@ -12,7 +12,7 @@ public class GameData
     //当前角色id
     public static int m_CurrentRoleId;
     //当前选择英雄id
-    public static int m_HeroId = 201001000;
+    public static int m_HeroId = 201991000;
     //当前阵营
     public static int m_CampId;
     //当前显示角色
