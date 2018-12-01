@@ -121,7 +121,8 @@ public class Tower
     /// <param name="skillNode">攻击技能</param>
     public void FallDamage(int damage)
     {
-        damage = Math.Abs(damage);
+        if (m_HP <= 0 || damage <= 0)
+            return;
         m_HP -= damage;
 
         if (m_HP <= 0)
@@ -147,7 +148,7 @@ public class Tower
     /// </summary>
     public void Destroy()
     {
-        GameData.m_GameManager.m_GridManager.SetWalkable(m_Pos.ToVector3());
+        GameData.m_GameManager.m_GridManager.SetWalkable(this);
         GameData.m_TowerList.Remove(this);
         if (m_TowerAttack != null)
             m_TowerAttack.Destroy();

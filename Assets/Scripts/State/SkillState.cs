@@ -87,8 +87,6 @@ public class SkillState : BaseState
             #endregion
         }
         m_Player.m_Angles = (FixVector3)(new Vector3(m_Player.m_VGo.transform.forward.normalized.x, 0, m_Player.m_VGo.transform.forward.normalized.z));
-        //为了匹配状态机参数这儿减去普攻段数
-        //m_Player.m_SkillIndex = m_Player.m_SkillIndex - m_AttackSegments;
         if (m_Player.m_SkillNode.skill_type == SkillCastType.FrontSprintSkill)
             m_Player.m_IsSkillMove = true;
         else if (m_Player.m_SkillNode.skill_type == SkillCastType.FrontSprintSkill2)
@@ -97,37 +95,10 @@ public class SkillState : BaseState
             m_Player.m_IsSkillMove = false;
         m_Player.m_IsSkill = true;
         m_Player.m_IsLaunchAttack = false;
-        PlayerAttack attack = new PlayerAttack();
-        attack.Create(m_Player, m_Player.m_SkillNode);
-        GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
             m_Animator.SetInteger(m_StateParameter, m_Player.m_SkillIndex);
-            GameObject effecGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion));
-            if (effecGo == null)
-                return;
-            m_AniEffect = GameObject.Instantiate(effecGo);
-            if (m_Player.m_IsSkillMove)
-            {
-                m_AniEffect.transform.parent = m_Player.m_VGo.transform;
-                m_AniEffect.transform.localPosition = Vector3.zero;
-                m_AniEffect.transform.localRotation = Quaternion.Euler(Vector3.zero);
-            }
-            else
-            {
-                m_AniEffect.transform.localPosition = m_Player.m_VGo.transform.localPosition;
-                m_AniEffect.transform.localRotation = m_Player.m_VGo.transform.localRotation;
-            }
-            m_AniEffect.transform.localScale = Vector3.one;
-            m_AniEffect.SetActive(true);
-            m_Player.m_IsPlayEffect = true;
-            if (m_Player.m_SkillNode.skill_type == SkillCastType.CenterSkill)
-            {
-                Delay delay = new Delay();
-                delay.InitDestory(m_AniEffect, (Fix64)m_Player.m_SkillNode.efficiency_time);
-                GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
-            }
             if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
                 GameData.m_GameManager.m_UIManager.m_UpdateSkillCDUICallback((int)m_Player.m_SkillNode.cooling, m_Player.m_SkillIndex);
         }
@@ -166,12 +137,43 @@ public class SkillState : BaseState
         }
         if (!m_Player.m_IsSkill)
             return;
-        if (m_Player.m_IntervalTime >= (((Fix64)m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsLaunchAttack)
+        if (m_Player.m_IntervalTime == (GameData.m_FixFrameLen * (Fix64)5))
+        {
+            #region 显示层
+            if (GameData.m_IsExecuteViewLogic)
+            {
+                GameObject effecGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion));
+                if (effecGo == null)
+                    return;
+                m_AniEffect = GameObject.Instantiate(effecGo);
+                if (m_Player.m_IsSkillMove)
+                {
+                    m_AniEffect.transform.parent = m_Player.m_VGo.transform;
+                    m_AniEffect.transform.localPosition = Vector3.zero;
+                    m_AniEffect.transform.localRotation = Quaternion.Euler(Vector3.zero);
+                }
+                else
+                {
+                    m_AniEffect.transform.localPosition = m_Player.m_VGo.transform.localPosition;
+                    m_AniEffect.transform.localRotation = m_Player.m_VGo.transform.localRotation;
+                }
+                m_AniEffect.transform.localScale = Vector3.one;
+                m_AniEffect.SetActive(true);
+                m_Player.m_IsPlayEffect = true;
+                if (m_Player.m_SkillNode.skill_type == SkillCastType.CenterSkill)
+                {
+                    Delay delay = new Delay();
+                    delay.InitDestory(m_AniEffect, (Fix64)m_Player.m_SkillNode.efficiency_time);
+                    GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
+                }
+            }
+            #endregion
+        }
+        if (m_Player.m_IntervalTime == (GameData.m_FixFrameLen * (Fix64)10))
         {
             PlayerAttack attack = new PlayerAttack();
             attack.Create(m_Player, m_Player.m_SkillNode);
             GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
-            m_Player.m_IsLaunchAttack = true;
         }
         if (m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime)
             OnExit();

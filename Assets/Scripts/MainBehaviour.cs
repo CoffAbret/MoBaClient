@@ -108,6 +108,8 @@ public class MainBehaviour : MonoBehaviour
         GameData.m_GameManager.DestoryGame();
     }
 
+    //普攻切换时间
+    private Fix64 m_AttackTime = Fix64.FromRaw(500);
     /// <summary>
     /// 点击普攻
     /// </summary>
@@ -120,8 +122,33 @@ public class MainBehaviour : MonoBehaviour
             return;
         if (GameData.m_CurrentPlayer.m_IsHit)
             return;
-        GameData.m_CurrentPlayer.m_IsAttack = true;
-        GameData.m_GameManager.InputCmd(Cmd.Attack);
+        if (!GameData.m_CurrentPlayer.m_IsAttack)
+            GameData.m_AttackClickIndex = 1;
+        else
+        {
+            SkillNode skillNode = GameData.m_CurrentPlayer.m_PlayerData.GetSkillNode(GameData.m_AttackClickIndex);
+            if (skillNode == null)
+                return;
+            if (GameData.m_AttackClickIndex > 0 && GameData.m_CurrentPlayer.m_IntervalTime < ((Fix64)skillNode.animatorTime * m_AttackTime))
+                return;
+            //普攻状态并且没有播放普攻动作
+            if ((GameData.m_AttackClickIndex == 0))
+                GameData.m_AttackClickIndex = 1;
+            //普攻状态并且是第一个连击并且动作已经播放结束
+            else if (GameData.m_AttackClickIndex == 1)
+                GameData.m_AttackClickIndex = 2;
+            //普攻状态并且是第二个连击并且动作已经播放结束
+            else if (GameData.m_AttackClickIndex == 2)
+                GameData.m_AttackClickIndex = 3;
+            //普攻状态并且是第三个连击并且动作已经播放结束
+            else if (GameData.m_AttackClickIndex == 3)
+                GameData.m_AttackClickIndex = 0;
+        }
+        if (GameData.m_AttackClickIndex > 0)
+        {
+            GameData.m_CurrentPlayer.m_IsAttack = true;
+            GameData.m_GameManager.InputCmd(Cmd.Attack, GameData.m_AttackClickIndex.ToString());
+        }
     }
 
     /// <summary>

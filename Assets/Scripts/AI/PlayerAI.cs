@@ -79,7 +79,7 @@ public class PlayerAI
         if (targetPlayer != null || targetTower != null)
         {
             m_Player.m_State = new AttackState();
-            m_Player.m_State.OnInit(m_Player);
+            m_Player.m_State.OnInit(m_Player, "1");
             m_Player.m_State.OnEnter();
         }
         else

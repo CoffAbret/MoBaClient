@@ -78,7 +78,7 @@ public class PlayerAttack
                 float hurt_addition = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.hurt_addition;
                 float hurt_remission = GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.hurt_remission;
                 //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
-                int damage = (int)(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
+                int damage = (int)Math.Ceiling(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
                 damage = Mathf.Abs(damage);
                 GameData.m_PlayerList[i].FallDamage(damage);
                 m_WoundPlayerList.Add(GameData.m_PlayerList[i]);
@@ -109,7 +109,8 @@ public class PlayerAttack
                 float hurt_addition = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.hurt_addition;
                 float hurt_remission = 0;
                 //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
-                int damage = (int)(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
+                int damage = (int)Math.Ceiling(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
+                damage = Mathf.Abs(damage);
                 GameData.m_TowerList[i].FallDamage(damage);
                 m_WoundTowerList.Add(GameData.m_TowerList[i]);
             }

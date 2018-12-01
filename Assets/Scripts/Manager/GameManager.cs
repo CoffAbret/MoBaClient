@@ -169,6 +169,7 @@ public class GameManager
             int campId = i % 2 == 0 ? 1 : 2;
             CreateTower(campId, 2);
         }
+        GameData.m_GameManager.m_GridManager.InitTowerGrid();
     }
 
     public void SyncKey(Dictionary<string, object> data)

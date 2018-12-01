@@ -27,7 +27,7 @@ public class PlayerMoveManager
             if (GameData.m_CurrentPlayer.m_IsSkill || GameData.m_CurrentPlayer.m_IsAttack || GameData.m_CurrentPlayer.m_IsHit || GameData.m_CurrentPlayer == null || GameData.m_CurrentPlayer.m_PlayerData == null)
                 return;
             Vector3 pos = new Vector3(x, 0, y);
-            string parameter = string.Format("{0}#{1}#{2}#{3}#{4}#{5}", x, 0, y, GameData.m_CurrentPlayer.m_Pos.x, GameData.m_CurrentPlayer.m_Pos.y, GameData.m_CurrentPlayer.m_Pos.z);
+            string parameter = string.Format("{0}#{1}#{2}", x, 0, y);
             GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
         }
     }

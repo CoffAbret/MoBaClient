@@ -23,7 +23,7 @@ public struct Fix64 : System.IEquatable<Fix64>
 
     public static explicit operator Fix64(float value)
     {
-        return new Fix64((long)(value * FloatPrecision));
+        return new Fix64((long)(Math.Round(value, 3) * FloatPrecision));
     }
 
     public static Fix64 operator +(Fix64 x, Fix64 y)
@@ -158,7 +158,7 @@ public struct FixVector3
 
     public static explicit operator FixVector3(Vector3 ob)
     {
-        return new FixVector3((Fix64)ob.x, (Fix64)ob.y, (Fix64)ob.z);
+        return new FixVector3((Fix64)Math.Round(ob.x, 3), (Fix64)Math.Round(ob.y, 3), (Fix64)Math.Round(ob.z, 3));
     }
 
     public static FixVector3 operator +(FixVector3 a, FixVector3 b)

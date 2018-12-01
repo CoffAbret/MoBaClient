@@ -80,18 +80,43 @@ public class GridManager
         return grids.IsWalkableAt((int)p.x, (int)p.y);
     }
 
-    public void SetWalkable(Vector3 pos)
+    public void SetWalkable(Tower tower)
     {
-        Vector2 v2 = MapPosToGrid(pos);
-        int xMin = (int)v2.x - 10;
-        int xMax = (int)v2.x + 10;
-        int yMin = (int)v2.y - 10;
-        int yMax = (int)v2.y + 10;
+        Vector2 v2 = MapPosToGrid(tower.m_Pos.ToVector3());
+        int distince = 8;
+        if (tower.m_Type == 1)
+            distince = 5;
+        int xMin = (int)v2.x - distince;
+        int xMax = (int)v2.x + distince;
+        int yMin = (int)v2.y - distince;
+        int yMax = (int)v2.y + distince;
         for (int i = xMin; i <= xMax; i++)
         {
             for (int y = yMin; y < yMax; y++)
             {
                 grids.SetWalkableAt(i, y, true);
+            }
+        }
+    }
+
+    public void InitTowerGrid()
+    {
+        for (int i = 0; i < GameData.m_TowerList.Count; i++)
+        {
+            Vector2 v2 = MapPosToGrid(GameData.m_TowerList[i].m_Pos.ToVector3());
+            int distince = 8;
+            if (GameData.m_TowerList[i].m_Type == 1)
+                distince = 5;
+            int xMin = (int)v2.x - distince;
+            int xMax = (int)v2.x + distince;
+            int yMin = (int)v2.y - distince;
+            int yMax = (int)v2.y + distince;
+            for (int k = xMin; k <= xMax; k++)
+            {
+                for (int u = yMin; u < yMax; u++)
+                {
+                    grids.SetWalkableAt(k, u, false);
+                }
             }
         }
     }

@@ -47,9 +47,7 @@ public class Player
     //技能间隔时间
     public Fix64 m_IntervalTime = Fix64.Zero;
     //移动速度
-    public Fix64 m_Speed = Fix64.FromRaw(20);
-    //技能移动速度
-    public Fix64 m_SkillSpeed = Fix64.FromRaw(50);
+    public Fix64 m_Speed = Fix64.FromRaw(1000);
     //技能索引
     public int m_SkillIndex = 0;
     //当前技能信息
@@ -180,7 +178,7 @@ public class Player
         }
         else
         {
-            if (m_State != null && !(m_State is AttackState))
+            if (m_State != null)
                 m_State.OnExit();
             m_State = state;
             m_State.OnInit(this, parameter);
@@ -200,7 +198,7 @@ public class Player
         m_PlayerData.m_HP += addHp;
         m_Health.m_Health += addHp;
         if (m_PlayerData.m_Id == GameData.m_CurrentRoleId)
-            m_HudText.PlayerHUDText.Add(addHp, new Color(0.09F, 0.9F, 0.09F, 1), 1);
+            m_HudText.PlayerHUDText.AddLocalized(string.Format("+{0}", hp), new Color(0.09F, 0.9F, 0.09F, 1), 1);
     }
 
 
@@ -215,7 +213,7 @@ public class Player
         if (m_State == null)
             return;
         m_State.UpdateLogic();
-        if (m_PlayerData != null && m_PlayerData.m_Type == 1)
+        if (m_PlayerData != null && m_HudText != null && m_PlayerData.m_Type == 1)
             GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback(this);
     }
 
@@ -266,7 +264,7 @@ public class Player
     /// <param name="skillNode">攻击技能</param>
     public void FallDamage(int damage)
     {
-        if (m_PlayerData == null || m_PlayerData.m_HP <= 0)
+        if (m_PlayerData == null || m_PlayerData.m_HP <= 0 || damage <= 0)
             return;
         m_PlayerData.m_HP -= damage;
         #region 显示层
@@ -275,7 +273,7 @@ public class Player
             if (m_Health != null)
                 m_Health.m_Health -= damage;
             if (m_HudText != null && m_PlayerData != null && GameData.m_CurrentPlayer != null && GameData.m_CurrentPlayer.m_PlayerData != null && m_PlayerData.m_Id == GameData.m_CurrentPlayer.m_PlayerData.m_Id)
-                m_HudText.PlayerHUDText.Add(-damage, Color.red, 0f);
+                m_HudText.PlayerHUDText.AddLocalized(string.Format("-{0}", damage), Color.red, 0f);
         }
         #endregion
         if (m_PlayerData.m_HP <= 0)
