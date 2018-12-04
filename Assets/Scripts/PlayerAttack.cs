@@ -61,12 +61,34 @@ public class PlayerAttack
                 continue;
             if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_AttackPlayer.m_PlayerData.m_CampId)
                 continue;
+            if (m_WoundPlayerList.Contains(GameData.m_PlayerList[i]))
+                continue;
             //子弹与敌人的方向向量
-            FixVector3 targetV3 = GameData.m_PlayerList[i].m_Pos - m_Pos;
+            FixVector3 targetFixVec = GameData.m_PlayerList[i].m_Pos - m_Pos;
             //求玩家正前方、玩家与敌人方向两个向量的夹角
-            Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
-            Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
-            if (((float)angle <= m_SkillNode.angle / 2 || m_SkillNode.angle <= 0) && (float)distance <= m_SkillNode.aoe_long && !m_WoundPlayerList.Contains(GameData.m_PlayerList[i]))
+            bool IsFallDamage = false;
+            if (m_SkillNode.aoe_wide <= 0)
+            {
+                float angle = Mathf.Acos(Vector3.Dot(m_Angles.ToVector3().normalized, targetFixVec.ToVector3().normalized)) * Mathf.Rad2Deg;
+                Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
+                if ((angle <= m_SkillNode.angle / 2 || m_SkillNode.angle <= 0) && (float)distance <= m_SkillNode.aoe_long)
+                {
+                    IsFallDamage = true;
+                }
+            }
+            else
+            {
+                float forwardDistance = Vector3.Dot(targetFixVec.ToVector3().normalized, m_Angles.ToVector3().normalized);
+                if (forwardDistance > 0 && forwardDistance <= m_SkillNode.aoe_long)
+                {
+                    float rightDistance = Vector3.Dot(targetFixVec.ToVector3().normalized, m_AttackPlayer.m_VGo.transform.right.normalized);
+                    if (Math.Abs(rightDistance) <= m_SkillNode.aoe_wide)
+                    {
+                        IsFallDamage = true;
+                    }
+                }
+            }
+            if (IsFallDamage)
             {
                 float base_num1 = m_SkillNode.base_num1[0];
                 float growth_ratio = m_SkillNode.growth_ratio1[0];
@@ -91,13 +113,34 @@ public class PlayerAttack
                 continue;
             if (GameData.m_TowerList[i].m_CampId == m_AttackPlayer.m_PlayerData.m_CampId)
                 continue;
-            //玩家与敌人的方向向量
-            FixVector3 targetV3 = GameData.m_TowerList[i].m_Pos - m_Pos;
+            if (m_WoundTowerList.Contains(GameData.m_TowerList[i]))
+                continue;
+            //子弹与敌人的方向向量
+            FixVector3 targetFixVec = GameData.m_TowerList[i].m_Pos - m_Pos;
             //求玩家正前方、玩家与敌人方向两个向量的夹角
-            //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
-            Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
-            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-            if (((float)angle <= m_SkillNode.angle / 2 || m_SkillNode.angle <= 0) && (float)distance <= m_SkillNode.aoe_long && !m_WoundTowerList.Contains(GameData.m_TowerList[i]))
+            bool IsFallDamage = false;
+            if (m_SkillNode.aoe_wide <= 0)
+            {
+                float angle = Mathf.Acos(Vector3.Dot(m_Angles.ToVector3().normalized, targetFixVec.ToVector3().normalized)) * Mathf.Rad2Deg;
+                Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
+                if ((angle <= m_SkillNode.angle / 2 || m_SkillNode.angle <= 0) && (float)distance <= m_SkillNode.aoe_long)
+                {
+                    IsFallDamage = true;
+                }
+            }
+            else
+            {
+                float forwardDistance = Vector3.Dot(targetFixVec.ToVector3(), m_Angles.ToVector3().normalized);
+                if (forwardDistance > 0 && forwardDistance <= m_SkillNode.aoe_long)
+                {
+                    float rightDistance = Vector3.Dot(targetFixVec.ToVector3(), m_AttackPlayer.m_VGo.transform.right.normalized);
+                    if (Math.Abs(rightDistance) <= m_SkillNode.aoe_wide)
+                    {
+                        IsFallDamage = true;
+                    }
+                }
+            }
+            if (IsFallDamage)
             {
                 float base_num1 = m_SkillNode.base_num1[0];
                 float growth_ratio = m_SkillNode.growth_ratio1[0];
