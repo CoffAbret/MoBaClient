@@ -21,6 +21,8 @@ public class AttackState : BaseState
     private Fix64 m_AttackTime = Fix64.FromRaw(600);
 #endif
     #endregion
+    //目标
+    private FixVector3 m_TargetPos = FixVector3.Zero;
     //销毁延迟时间
     /// <summary>
     /// 初始化数据
@@ -52,7 +54,6 @@ public class AttackState : BaseState
         base.OnEnter();
         if (m_Player == null || m_Player.m_PlayerData == null)
             return;
-        FixVector3 pos = FixVector3.Zero;
         Player targetPlayer = m_Player.FindTarget(m_Player.m_SkillNode);
         Tower targetTower = m_Player.FindTowerTarget(m_Player.m_SkillNode);
         if (targetTower != null)
@@ -60,21 +61,20 @@ public class AttackState : BaseState
             m_Player.m_TargetTower = targetTower;
             if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
                 m_Player.m_TargetTower.m_SelectedGo.SetActive(true);
-            pos = m_Player.m_TargetTower.m_Pos;
+            m_TargetPos = m_Player.m_TargetTower.m_Pos;
         }
         if (targetPlayer != null)
         {
             m_Player.m_TargetPlayer = targetPlayer;
             if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
                 m_Player.m_TargetPlayer.m_SelectedGo.SetActive(true);
-            pos = m_Player.m_TargetPlayer.m_Pos;
+            m_TargetPos = m_Player.m_TargetPlayer.m_Pos;
         }
         m_Player.m_IsAttack = true;
-        m_Player.m_IsLaunchAttack = false;
-        if (pos != FixVector3.Zero)
+        if (m_TargetPos != FixVector3.Zero)
         {
             //普通攻击自动改变朝向
-            FixVector3 relativePos = pos - m_Player.m_Pos;
+            FixVector3 relativePos = m_TargetPos - m_Player.m_Pos;
             relativePos = new FixVector3(relativePos.x, Fix64.Zero, relativePos.z);
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
@@ -158,7 +158,6 @@ public class AttackState : BaseState
         }
         #endregion
         m_Player.m_IsAttack = false;
-        m_Player.m_IsLaunchAttack = false;
         m_Player.m_SkillNode = null;
         m_Player.m_IntervalTime = Fix64.Zero;
         m_Player.m_SkillIndex = 0;

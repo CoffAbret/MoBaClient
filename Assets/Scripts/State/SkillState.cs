@@ -23,6 +23,8 @@ public class SkillState : BaseState
     #endregion
     //普攻段数
     private int m_AttackSegments = 3;
+    //目标
+    private FixVector3 m_TargetPos = FixVector3.Zero;
     /// <summary>
     /// 初始化数据
     /// </summary>
@@ -54,7 +56,6 @@ public class SkillState : BaseState
             return;
         if (m_Player.m_SkillNode == null)
             return;
-        FixVector3 pos = FixVector3.Zero;
         Player targetPlayer = m_Player.FindTarget(m_Player.m_SkillNode);
         Tower targetTower = m_Player.FindTowerTarget(m_Player.m_SkillNode);
         if (targetTower != null)
@@ -64,7 +65,7 @@ public class SkillState : BaseState
             m_Player.m_TargetTower = targetTower;
             if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
                 m_Player.m_TargetTower.m_SelectedGo.SetActive(true);
-            pos = m_Player.m_TargetTower.m_Pos;
+            m_TargetPos = m_Player.m_TargetTower.m_Pos;
         }
         if (targetPlayer != null)
         {
@@ -73,11 +74,11 @@ public class SkillState : BaseState
             m_Player.m_TargetPlayer = targetPlayer;
             if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
                 m_Player.m_TargetPlayer.m_SelectedGo.SetActive(true);
-            pos = m_Player.m_TargetPlayer.m_Pos;
+            m_TargetPos = m_Player.m_TargetPlayer.m_Pos;
         }
-        if (pos != FixVector3.Zero)
+        if (m_TargetPos != FixVector3.Zero)
         {
-            FixVector3 relativePos = pos - m_Player.m_Pos;
+            FixVector3 relativePos = m_TargetPos - m_Player.m_Pos;
             relativePos = new FixVector3(relativePos.x, Fix64.Zero, relativePos.z);
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
@@ -87,14 +88,7 @@ public class SkillState : BaseState
             #endregion
         }
         m_Player.m_Angles = (FixVector3)(new Vector3(m_Player.m_VGo.transform.forward.normalized.x, 0, m_Player.m_VGo.transform.forward.normalized.z));
-        if (m_Player.m_SkillNode.skill_type == SkillCastType.FrontSprintSkill)
-            m_Player.m_IsSkillMove = true;
-        else if (m_Player.m_SkillNode.skill_type == SkillCastType.FrontSprintSkill2)
-            m_Player.m_IsSkillMove = true;
-        else
-            m_Player.m_IsSkillMove = false;
         m_Player.m_IsSkill = true;
-        m_Player.m_IsLaunchAttack = false;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -116,24 +110,32 @@ public class SkillState : BaseState
         if (m_Player.m_SkillNode == null)
             return;
         m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-        if (m_Player.m_IsSkillMove)
+        if (m_Player.m_SkillNode.skill_type == SkillCastType.FrontSprintSkill || m_Player.m_SkillNode.skill_type == SkillCastType.FrontSprintSkill2)
         {
             //技能位移直接设置方向即可
             FixVector3 pos = m_Player.m_Pos + ((Fix64)m_Player.m_SkillNode.flight_speed * m_Player.m_Angles * GameData.m_FixFrameLen);
             Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(pos.ToVector3());
-            bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
-            if (!isWalk)
+            bool IsSkillMove = false;
+            bool IsWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
+            if (m_Player.m_SkillNode.skill_type == SkillCastType.FrontSprintSkill)
             {
-                OnExit();
-                return;
+                IsSkillMove = IsWalk;
             }
-            m_Player.m_Pos = pos;
-            #region 显示层
-            if (GameData.m_IsExecuteViewLogic)
+            else
             {
-                m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
+                bool isTargetPos = FixVector3.Distance(m_Player.m_Pos, m_TargetPos) > GameData.m_FixFrameLen * (Fix64)20;
+                IsSkillMove = IsWalk && isTargetPos;
             }
-            #endregion
+            if (IsSkillMove)
+            {
+                m_Player.m_Pos = pos;
+                #region 显示层
+                if (GameData.m_IsExecuteViewLogic)
+                {
+                    m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
+                }
+                #endregion
+            }
         }
         if (!m_Player.m_IsSkill)
             return;
@@ -146,7 +148,8 @@ public class SkillState : BaseState
                 if (effecGo == null)
                     return;
                 m_AniEffect = GameObject.Instantiate(effecGo);
-                if (m_Player.m_IsSkillMove)
+                //带位移的技能需要特效也跟着角色位置移动
+                if (m_Player.m_SkillNode.skill_type == SkillCastType.FrontSprintSkill || m_Player.m_SkillNode.skill_type == SkillCastType.FrontSprintSkill2)
                 {
                     m_AniEffect.transform.parent = m_Player.m_VGo.transform;
                     m_AniEffect.transform.localPosition = Vector3.zero;
@@ -159,7 +162,6 @@ public class SkillState : BaseState
                 }
                 m_AniEffect.transform.localScale = Vector3.one;
                 m_AniEffect.SetActive(true);
-                m_Player.m_IsPlayEffect = true;
                 if (m_Player.m_SkillNode.skill_type == SkillCastType.CenterSkill)
                 {
                     Delay delay = new Delay();
@@ -198,8 +200,6 @@ public class SkillState : BaseState
         }
         #endregion
         m_Player.m_IsSkill = false;
-        m_Player.m_IsSkillMove = false;
-        m_Player.m_IsLaunchAttack = false;
         m_Player.m_SkillIndex = 0;
         m_Player.m_SkillNode = null;
         m_Player.m_IntervalTime = Fix64.Zero;

@@ -11,8 +11,6 @@ public class MoveState : BaseState
     private Animator m_Animator;
     //动画名称
     private string m_StateParameter = "State";
-    //插值时长
-    private float m_Interpolation = 1;
 #endif
     #endregion
 
@@ -55,7 +53,7 @@ public class MoveState : BaseState
         if (GameData.m_IsExecuteViewLogic)
         {
             //插值旋转可以优化旋转抖动，不流畅等问题
-            //m_Player.m_VGo.transform.rotation = Quaternion.Slerp(m_Player.m_VGo.transform.rotation, targetRotation, m_Interpolation);
+            //m_Player.m_VGo.transform.rotation = Quaternion.Slerp(m_Player.m_VGo.transform.rotation, targetRotation, (float)(GameData.m_FixFrameLen * (Fix64)10));
             m_Player.m_VGo.transform.rotation = targetRotation;
             m_Animator.SetInteger(m_StateParameter, 11);
         }

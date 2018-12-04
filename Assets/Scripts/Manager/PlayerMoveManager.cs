@@ -8,6 +8,8 @@ using UnityEngine;
 /// </summary>
 public class PlayerMoveManager
 {
+    private Vector3 m_PrePos = Vector3.zero;
+    private float m_PreAngle = 0f;
     public void UpdateMove()
     {
         if (GameData.m_CurrentPlayer == null)
@@ -20,6 +22,8 @@ public class PlayerMoveManager
             if (GameData.m_CurrentPlayer.m_IsMove)
             {
                 GameData.m_GameManager.InputCmd(Cmd.MoveEnd);
+                m_PrePos = Vector3.zero;
+                m_PreAngle = 0f;
             }
         }
         else
@@ -27,8 +31,14 @@ public class PlayerMoveManager
             if (GameData.m_CurrentPlayer.m_IsSkill || GameData.m_CurrentPlayer.m_IsAttack || GameData.m_CurrentPlayer.m_IsHit || GameData.m_CurrentPlayer == null || GameData.m_CurrentPlayer.m_PlayerData == null)
                 return;
             Vector3 pos = new Vector3(x, 0, y);
-            string parameter = string.Format("{0}#{1}#{2}", x, 0, y);
-            GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
+            float angle = Mathf.Acos(Vector3.Dot(Vector3.forward, pos - m_PrePos)) * Mathf.Rad2Deg;
+            if (m_PrePos == Vector3.zero || Mathf.Abs(angle - m_PreAngle) > 1)
+            {
+                string parameter = string.Format("{0}#{1}#{2}", x, 0, y);
+                GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
+                m_PrePos = pos;
+                m_PreAngle = angle;
+            }
         }
     }
 }

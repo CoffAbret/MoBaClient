@@ -28,16 +28,10 @@ public class Player
     public PlayerAI m_PlayerAI;
     //是否移动
     public bool m_IsMove = false;
-    //是否技能移动
-    public bool m_IsSkillMove = false;
     //是否普攻
     public bool m_IsAttack = false;
     //是否技能
     public bool m_IsSkill = false;
-    //是否发射子弹
-    public bool m_IsLaunchAttack = false;
-    //是否播放特效
-    public bool m_IsPlayEffect = false;
     //是否死亡
     public bool m_IsDie = false;
     //是否后仰
@@ -85,11 +79,8 @@ public class Player
         m_TargetTower = null;
         m_PlayerData = null;
         m_IsMove = false;
-        m_IsSkillMove = false;
         m_IsAttack = false;
         m_IsSkill = false;
-        m_IsLaunchAttack = false;
-        m_IsPlayEffect = false;
         m_IsDie = false;
         m_IsHit = false;
         m_State = null;
@@ -218,43 +209,49 @@ public class Player
     }
 
     /// <summary>
-    /// 查找目标
+    /// 查找离玩家最近的可攻击角色目标
     /// </summary>
     /// <param name="skillNode"></param>
     /// <returns></returns>
     public Player FindTarget(SkillNode skillNode)
     {
+        Fix64 preDistance = Fix64.Zero;
+        Player prePlayer = null;
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
             if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_PlayerData.m_CampId)
                 continue;
             Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
-            if ((float)distance <= skillNode.dist)
+            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.dist)
             {
-                return GameData.m_PlayerList[i];
+                prePlayer = GameData.m_PlayerList[i];
+                preDistance = distance;
             }
         }
-        return null;
+        return prePlayer;
     }
 
     /// <summary>
-    /// 查找目标
+    /// 查找离玩家最近的可攻击箭塔目标
     /// </summary>
     /// <param name="skillNode"></param>
     /// <returns></returns>
     public Tower FindTowerTarget(SkillNode skillNode)
     {
+        Fix64 preDistance = Fix64.Zero;
+        Tower preTower = null;
         for (int i = 0; i < GameData.m_TowerList.Count; i++)
         {
             if (GameData.m_TowerList[i].m_CampId == m_PlayerData.m_CampId)
                 continue;
-            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-            if ((float)distance <= skillNode.dist)
+            Fix64 distance = FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos);
+            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.dist)
             {
-                return GameData.m_TowerList[i];
+                preTower = GameData.m_TowerList[i];
+                preDistance = distance;
             }
         }
-        return null;
+        return preTower;
     }
 
     /// <summary>
@@ -303,7 +300,6 @@ public class Player
         m_IsMove = false;
         m_IsAttack = false;
         m_IsSkill = false;
-        m_IsLaunchAttack = false;
         m_IsDie = false;
         m_IsHit = false;
         m_State = null;
