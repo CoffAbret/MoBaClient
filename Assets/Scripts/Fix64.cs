@@ -156,6 +156,11 @@ public struct FixVector3
         get { return new FixVector3(Fix64.Zero, Fix64.Zero, Fix64.Zero); }
     }
 
+    public Fix64 Magnitude
+    {
+        get { return (Fix64)Math.Round(Math.Sqrt((float)(x * x + y * y + z * z)), 3); }
+    }
+
     public static explicit operator FixVector3(Vector3 ob)
     {
         return new FixVector3((Fix64)Math.Round(ob.x, 3), (Fix64)Math.Round(ob.y, 3), (Fix64)Math.Round(ob.z, 3));
@@ -216,6 +221,18 @@ public struct FixVector3
     public static Fix64 Angle(FixVector3 a, FixVector3 b)
     {
         return (Fix64)Vector3.Angle(a.ToVector3(), b.ToVector3());
+    }
+
+    public static Fix64 AngleTwo(FixVector3 a, FixVector3 b)
+    {
+        Fix64 cos = Dot(a, b) / (a.Magnitude * b.Magnitude);
+        cos = cos < -Fix64.One ? -Fix64.One : (cos > Fix64.One ? Fix64.One : cos);
+        return (Fix64)Math.Round(Math.Acos((float)cos), 3);
+    }
+
+    public static Fix64 Dot(FixVector3 a, FixVector3 b)
+    {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
     }
 
 

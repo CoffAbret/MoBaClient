@@ -28,7 +28,7 @@ public class MoveState : BaseState
             return;
         float x = float.Parse(m_Parameter.Split('#')[0]);
         float z = float.Parse(m_Parameter.Split('#')[2]);
-        m_Player.m_Angles = (FixVector3)(new Vector3(x, 0, z));
+        m_Player.m_Angles = (FixVector3)((new Vector3(x, 0, z).normalized));
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {

@@ -126,16 +126,15 @@ public class MainBehaviour : MonoBehaviour
             GameData.m_AttackClickIndex = 1;
         else
         {
+            if (GameData.m_AttackClickIndex == 0)
+                GameData.m_AttackClickIndex = 1;
             SkillNode skillNode = GameData.m_CurrentPlayer.m_PlayerData.GetSkillNode(GameData.m_AttackClickIndex);
             if (skillNode == null)
                 return;
             if (GameData.m_AttackClickIndex > 0 && GameData.m_CurrentPlayer.m_IntervalTime < ((Fix64)skillNode.animatorTime * m_AttackTime))
                 return;
-            //普攻状态并且没有播放普攻动作
-            if ((GameData.m_AttackClickIndex == 0))
-                GameData.m_AttackClickIndex = 1;
             //普攻状态并且是第一个连击并且动作已经播放结束
-            else if (GameData.m_AttackClickIndex == 1)
+            if (GameData.m_AttackClickIndex == 1)
                 GameData.m_AttackClickIndex = 2;
             //普攻状态并且是第二个连击并且动作已经播放结束
             else if (GameData.m_AttackClickIndex == 2)

@@ -34,7 +34,6 @@ public class AttackState : BaseState
         base.OnInit(player, parameter);
         if (m_Player == null)
             return;
-        GameData.m_CurrentPlayer.m_IntervalTime = Fix64.Zero;
         m_Player.m_SkillIndex = int.Parse(m_Parameter);
         m_Player.m_SkillNode = m_Player.m_PlayerData.GetSkillNode(m_Player.m_SkillIndex);
         #region 显示层

@@ -219,10 +219,12 @@ public class Player
         Player prePlayer = null;
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
+            if (GameData.m_PlayerList[i] == null || GameData.m_PlayerList[i].m_PlayerData == null)
+                continue;
             if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_PlayerData.m_CampId)
                 continue;
-            Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
-            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.dist)
+            Fix64 distance = GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 ? (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(200)) : (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(100));
+            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.aoe_long)
             {
                 prePlayer = GameData.m_PlayerList[i];
                 preDistance = distance;
@@ -242,10 +244,12 @@ public class Player
         Tower preTower = null;
         for (int i = 0; i < GameData.m_TowerList.Count; i++)
         {
+            if (GameData.m_TowerList[i] == null)
+                continue;
             if (GameData.m_TowerList[i].m_CampId == m_PlayerData.m_CampId)
                 continue;
-            Fix64 distance = FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos);
-            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.dist)
+            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
+            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.aoe_long)
             {
                 preTower = GameData.m_TowerList[i];
                 preDistance = distance;
