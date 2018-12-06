@@ -22,7 +22,6 @@ public class PlayerHudText : MonoBehaviour
         m_UIFollowTarget.target = m_Target;
         m_UIFollowTarget.gameCamera = Camera.main;
         m_UIFollowTarget.uiCamera = GameObject.Find("Camera").GetComponent<Camera>();
-        child.SetActive(false);
     }
 
     public HUDText PlayerHUDText

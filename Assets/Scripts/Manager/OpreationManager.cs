@@ -42,6 +42,7 @@ public class OpreationManager
         packet.Add("msgid", NetProtocol.READY);
         packet.Add("frameCount", GameData.m_GameFrame);
         packet.Add("roleid", GameData.m_CurrentRoleId);
+        packet.Add("heroid", GameData.m_HeroId);
         CWritePacket writePacket = new CWritePacket(NetProtocol.READY);
         StringBuilder builder = Jsontext.WriteData(packet);
         string json_Str = builder.ToString();

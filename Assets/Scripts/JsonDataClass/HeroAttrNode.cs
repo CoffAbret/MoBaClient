@@ -41,9 +41,8 @@ public class HeroAttrNode : CharacterAttrNode
                     }
                     else
                     {
-                        Debug.LogError("策划好好看看技能表" + skill_id[i]);
+                        GameDebug.LogError("策划好好看看技能表" + skill_id[i]);
                     }
-
                 }
                 skill1_id = heroNode.skill1_id;
 

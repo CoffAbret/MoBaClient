@@ -4,17 +4,15 @@ using UnityEngine;
 
 public class MoveState : BaseState
 {
+    Fix64 m_MoveSpeed;
     #region 显示层
 #if IS_EXECUTE_VIEWLOGIC
     //动画状态机
     private Animator m_Animator;
     //动画名称
     private string m_StateParameter = "State";
-    //插值时长
-    private float m_Interpolation = 1;
 #endif
     #endregion
-    private Fix64 m_StateTime = Fix64.FromRaw(600);
 
     /// <summary>
     /// 初始化数据
@@ -24,13 +22,13 @@ public class MoveState : BaseState
     public override void OnInit(Player viewPlayer, string parameter = null)
     {
         base.OnInit(viewPlayer, parameter);
-        if (m_Player == null)
+        if (m_Player == null || m_Player.m_PlayerData == null)
             return;
         if (m_Parameter == null || !m_Parameter.Contains("#"))
             return;
         float x = float.Parse(m_Parameter.Split('#')[0]);
         float z = float.Parse(m_Parameter.Split('#')[2]);
-        m_Player.m_Angles = m_Player.m_CharData.m_CampId == 1 ? new FixVector3((Fix64)x, Fix64.Zero, (Fix64)z) : new FixVector3(-(Fix64)x, Fix64.Zero, -(Fix64)z);
+        m_Player.m_Angles = (FixVector3)((new Vector3(x, 0, z).normalized));
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -46,16 +44,16 @@ public class MoveState : BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        if (m_Player == null)
+        if (m_Player == null || m_Player.m_PlayerData == null)
             return;
         m_Player.m_IsMove = true;
         Quaternion targetRotation = Quaternion.LookRotation((m_Player.m_Pos + m_Player.m_Angles - m_Player.m_Pos).ToVector3(), Vector3.up);
-        m_Player.m_Rotation = new FixVector3((Fix64)targetRotation.eulerAngles.x, (Fix64)targetRotation.eulerAngles.y, (Fix64)targetRotation.eulerAngles.z);
+        m_Player.m_Rotation = (FixVector3)(targetRotation.eulerAngles);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
             //插值旋转可以优化旋转抖动，不流畅等问题
-            //m_Player.m_VGo.transform.rotation = Quaternion.Slerp(m_Player.m_VGo.transform.rotation, targetRotation, m_Interpolation);
+            //m_Player.m_VGo.transform.rotation = Quaternion.Slerp(m_Player.m_VGo.transform.rotation, targetRotation, (float)(GameData.m_FixFrameLen * (Fix64)10));
             m_Player.m_VGo.transform.rotation = targetRotation;
             m_Animator.SetInteger(m_StateParameter, 11);
         }
@@ -68,16 +66,22 @@ public class MoveState : BaseState
     public override void UpdateLogic()
     {
         base.UpdateLogic();
-        if (m_Player == null)
+        if (m_Player == null || m_Player.m_PlayerData == null)
             return;
         if (!m_Player.m_IsMove)
             return;
-        m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-        m_Player.m_Pos = m_Player.m_Pos + (m_Player.m_Speed * m_Player.m_Angles);
-        #region 显示层
-        if (GameData.m_IsExecuteViewLogic)
-            m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
-        #endregion
+        FixVector3 fixPos = m_Player.m_Pos + ((Fix64)m_Player.m_PlayerData.m_HeroAttrNode.movement_speed * m_Player.m_Angles * GameData.m_FixFrameLen);
+        Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(fixPos.ToVector3());
+        bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
+        if (isWalk)
+        {
+            m_Player.m_IntervalTime += GameData.m_FixFrameLen;
+            m_Player.m_Pos = fixPos;
+            #region 显示层
+            if (GameData.m_IsExecuteViewLogic)
+                m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
+            #endregion
+        }
     }
 
     /// <summary>
@@ -86,7 +90,7 @@ public class MoveState : BaseState
     public override void OnExit()
     {
         base.OnExit();
-        if (m_Player == null)
+        if (m_Player == null || m_Player.m_PlayerData == null)
             return;
         m_Player.m_IsMove = false;
         m_Player.m_IntervalTime = Fix64.Zero;

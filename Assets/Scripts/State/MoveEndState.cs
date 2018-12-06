@@ -26,6 +26,8 @@ public class MoveEndState : BaseState
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
+            if (m_Player == null || m_Player.m_VGo == null)
+                return;
             if (m_Animator == null)
                 m_Animator = m_Player.m_VGo.GetComponent<Animator>();
         }
@@ -39,14 +41,12 @@ public class MoveEndState : BaseState
     {
         base.OnEnter();
         m_Player.m_IsMove = false;
+        m_Player.m_IntervalTime = Fix64.Zero;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
-            m_Animator.SetInteger(m_StateParameter, 0);
+            if (m_Animator != null)
+                m_Animator.SetInteger(m_StateParameter, 0);
         #endregion
-        //if (GameData.m_GameManager != null && GameData.m_GameManager.m_LogMessage != null)
-        //    GameData.m_GameManager.m_LogMessage.text += string.Format("{0}:{1},", GameData.m_GameFrame, m_Player.m_VGo.transform.position);
-        //if (GameData.m_GameManager != null && GameData.m_GameManager.m_LogMessage != null)
-        //    GameData.m_GameManager.m_LogMessage.text += string.Format("{0}:{1},", GameData.m_GameFrame, m_Player.m_Pos);
     }
 
     /// <summary>

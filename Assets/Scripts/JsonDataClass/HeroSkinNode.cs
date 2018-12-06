@@ -85,12 +85,12 @@ public class HeroSkinNode : FSDataNodeBase
     {
         Dictionary<string, object> item = (Dictionary<string, object>)jd;
         released = item.TryGetInt("released");
-        if (released==1)
+        if (released == 1)
         {
             skinId = item.TryGetLong("skin_id");
 
             grade = item.TryGetString("grade");
-            commodity_id= item.TryGetInt("commodity_id");
+            commodity_id = item.TryGetInt("commodity_id");
             skin_cardId = item.TryGetLong("skin_card");
 
             heroId = item.TryGetLong("hero_id");
@@ -116,8 +116,7 @@ public class HeroSkinNode : FSDataNodeBase
             if (item.ContainsKey("price"))
                 price = item["price"] as int[];
             if (item.ContainsKey("effectName"))
-                effectName = item["effectName"] == null?null: item["effectName"].ToString();
+                effectName = item["effectName"] == null ? null : item["effectName"].ToString();
         }
-
     }
 }

@@ -31,11 +31,11 @@ public class EasyTouchInput{
 	#region Public methods
 	// Return the number of touch
 	public int TouchCount(){
-		
-			#if ((UNITY_ANDROID || UNITY_IOS || UNITY_BLACKBERRY || UNITY_TVOS || UNITY_PSP2) && !UNITY_EDITOR) 
+
+#if ((UNITY_ANDROID || UNITY_IOS || UNITY_BLACKBERRY || UNITY_TVOS || UNITY_PSP2) && !UNITY_EDITOR && !UNITY_STANDALONE_WIN)
 			return getTouchCount(true);
-		#else
-			return getTouchCount(false);
+#else
+            return getTouchCount(false);
 		#endif
 		
 	}

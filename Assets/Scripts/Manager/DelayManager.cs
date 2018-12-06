@@ -18,9 +18,12 @@ public class DelayManager
         for (int i = 0; i < m_DelayList.Count; i++)
         {
             if (m_DelayList[i].m_Enable)
-                m_DelayList[i].updateLogic();
+                m_DelayList[i].UpdateLogic();
             else
+            {
+                m_DelayList[i].Destory();
                 m_DelayList.RemoveAt(i);
+            }
         }
     }
 

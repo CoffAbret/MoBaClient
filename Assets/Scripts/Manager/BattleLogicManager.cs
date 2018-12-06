@@ -14,6 +14,8 @@ public class BattleLogicManager
     public void OnOperation(KeyData data)
     {
         Player m_OperationPlayer = GetOperationPlayer(data.m_RoleId);
+        if (m_OperationPlayer == null)
+            return;
         BaseState state = null;
         switch ((Cmd)data.m_Cmd)
         {
@@ -21,13 +23,13 @@ public class BattleLogicManager
                 state = new MoveEndState();
                 break;
             case Cmd.Move:
-                    state = new MoveState();
+                state = new MoveState();
                 break;
             case Cmd.UseSkill:
-                    state = new SkillState();
+                state = new SkillState();
                 break;
             case Cmd.Attack:
-                    state = new AttackState();
+                state = new AttackState();
                 break;
             case Cmd.Turn:
                 break;
@@ -46,7 +48,15 @@ public class BattleLogicManager
     {
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
+            if (GameData.m_PlayerList[i] == null || GameData.m_PlayerList[i].m_PlayerData == null)
+                continue;
             GameData.m_PlayerList[i].UpdateLogic();
+        }
+        for (int i = 0; i < GameData.m_TowerList.Count; i++)
+        {
+            if (GameData.m_TowerList[i] == null)
+                continue;
+            GameData.m_TowerList[i].UpdateLogic();
         }
     }
 
@@ -60,7 +70,7 @@ public class BattleLogicManager
 
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
-            if (GameData.m_PlayerList[i].m_CharData.m_Id == roleId)
+            if (GameData.m_PlayerList[i].m_PlayerData.m_Id == roleId)
             {
                 return GameData.m_PlayerList[i];
             }

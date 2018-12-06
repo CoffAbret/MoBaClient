@@ -277,14 +277,5 @@ public class CharacterAttrNode : FSDataNodeBase
         {
             magic_resist_addition = float.Parse(item["magic_resist_addition"].ToString());
         }
-        addition_Propers = new float[6] {
-    hp_addition,//生命值加成
-    mp_addition,//法力值加成
-    attack_addition,//物理攻击加成
-    magic_addition,//法术攻击加成
-    armor_addition,//物理防御加成
-    magic_resist_addition//法术防御加成
-    };
-
     }
 }

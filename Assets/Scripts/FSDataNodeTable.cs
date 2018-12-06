@@ -30,13 +30,17 @@ public class FSDataNodeTable<T> : IDisposable where T : FSDataNodeBase, new()
         return null;
     }
 
+    private string jsonNode;
     public void LoadJson(string jsonString)
     {
         Dictionary<string, object> json = (Dictionary<string, object>)Jsontext.ReadeData(jsonString);
 
         foreach (string jsonnode in json.Keys)
         {
-            long typeId = long.Parse(jsonnode);
+            long typeId = 0;
+            typeId = long.Parse(jsonnode);
+            jsonNode = jsonnode;
+
             if (mDataNodeList == null)
             {
                 mDataNodeList = new Dictionary<long, T>();

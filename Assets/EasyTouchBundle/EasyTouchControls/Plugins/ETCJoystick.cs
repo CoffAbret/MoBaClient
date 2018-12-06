@@ -586,8 +586,8 @@ public class ETCJoystick : ETCBase,IPointerEnterHandler,IDragHandler, IBeginDrag
 		int count = GetTouchCount();
 		int i=0;
 		while (i<count && !touchOverArea){
-			#if ((UNITY_ANDROID || UNITY_IOS || UNITY_WINRT || UNITY_BLACKBERRY) && !UNITY_EDITOR) 
-			if (Input.GetTouch(i).phase == TouchPhase.Began){
+#if ((UNITY_ANDROID || UNITY_IOS || UNITY_WINRT || UNITY_BLACKBERRY) && !UNITY_EDITOR &&!UNITY_STANDALONE_WIN)
+            if (Input.GetTouch(i).phase == TouchPhase.Began){
 				screenPosition = Input.GetTouch(i).position;
 				doTest = true;
 			}
@@ -682,8 +682,8 @@ public class ETCJoystick : ETCBase,IPointerEnterHandler,IDragHandler, IBeginDrag
 	}
 	
 	private int GetTouchCount(){
-		#if ((UNITY_ANDROID || UNITY_IOS || UNITY_WINRT || UNITY_BLACKBERRY) && !UNITY_EDITOR) 
-		return Input.touchCount;
+#if ((UNITY_ANDROID || UNITY_IOS || UNITY_WINRT || UNITY_BLACKBERRY) && !UNITY_EDITOR &&!UNITY_STANDALONE_WIN)
+        return Input.touchCount;
 		#else
 		if (Input.GetMouseButton(0) || Input.GetMouseButtonUp(0)){
 			return 1;
