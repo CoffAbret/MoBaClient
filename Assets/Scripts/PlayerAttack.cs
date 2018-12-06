@@ -50,7 +50,7 @@ public class PlayerAttack
     {
         if (m_AttackPlayer == null || m_AttackPlayer.m_PlayerData == null)
             return;
-        if (m_AttackTime >= (Fix64)m_SkillNode.efficiency_time)
+        if (m_AttackTime > (Fix64)m_SkillNode.max_fly)
         {
             m_IsActive = false;
             return;
@@ -71,7 +71,7 @@ public class PlayerAttack
             {
                 float angle = Mathf.Acos(Vector3.Dot(m_Angles.ToVector3().normalized, targetFixVec.ToVector3().normalized)) * Mathf.Rad2Deg;
                 Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-                if ((angle <= m_SkillNode.angle / 2 || m_SkillNode.angle <= 0) && (float)distance <= m_SkillNode.aoe_long)
+                if ((angle <= m_SkillNode.angle * 0.5F || m_SkillNode.angle <= 0) && ((float)distance <= m_SkillNode.aoe_long))
                 {
                     IsFallDamage = true;
                 }
@@ -123,7 +123,7 @@ public class PlayerAttack
             {
                 float angle = Mathf.Acos(Vector3.Dot(m_Angles.ToVector3().normalized, targetFixVec.ToVector3().normalized)) * Mathf.Rad2Deg;
                 Fix64 distance = GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 ? (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(200)) : (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(100));
-                if ((angle <= m_SkillNode.angle / 2 || m_SkillNode.angle <= 0) && ((float)distance <= m_SkillNode.aoe_long))
+                if ((angle <= m_SkillNode.angle * 0.5F || m_SkillNode.angle <= 0) && ((float)distance <= m_SkillNode.aoe_long))
                 {
                     IsFallDamage = true;
                 }

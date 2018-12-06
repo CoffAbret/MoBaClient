@@ -50,5 +50,5 @@ public class GameData
     //端口
     public static int m_Port;
     //普攻按钮点击次数
-    public static int m_AttackClickIndex = 1;
+    public static int m_AttackClickIndex = 0;
 }

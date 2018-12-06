@@ -109,7 +109,7 @@ public class MainBehaviour : MonoBehaviour
     }
 
     //普攻切换时间
-    private Fix64 m_AttackTime = Fix64.FromRaw(500);
+    private Fix64 m_AttackTime = Fix64.FromRaw(800);
     /// <summary>
     /// 点击普攻
     /// </summary>
@@ -123,26 +123,24 @@ public class MainBehaviour : MonoBehaviour
         if (GameData.m_CurrentPlayer.m_IsHit)
             return;
         if (!GameData.m_CurrentPlayer.m_IsAttack)
-            GameData.m_AttackClickIndex = 1;
-        else
+            GameData.m_AttackClickIndex = 0;
+        if (GameData.m_AttackClickIndex > 0)
         {
-            if (GameData.m_AttackClickIndex == 0)
-                GameData.m_AttackClickIndex = 1;
             SkillNode skillNode = GameData.m_CurrentPlayer.m_PlayerData.GetSkillNode(GameData.m_AttackClickIndex);
-            if (skillNode == null)
+            if (GameData.m_CurrentPlayer.m_IntervalTime < ((Fix64)skillNode.animatorTime * m_AttackTime))
                 return;
-            if (GameData.m_AttackClickIndex > 0 && GameData.m_CurrentPlayer.m_IntervalTime < ((Fix64)skillNode.animatorTime * m_AttackTime))
-                return;
-            //普攻状态并且是第一个连击并且动作已经播放结束
-            if (GameData.m_AttackClickIndex == 1)
-                GameData.m_AttackClickIndex = 2;
-            //普攻状态并且是第二个连击并且动作已经播放结束
-            else if (GameData.m_AttackClickIndex == 2)
-                GameData.m_AttackClickIndex = 3;
-            //普攻状态并且是第三个连击并且动作已经播放结束
-            else if (GameData.m_AttackClickIndex == 3)
-                GameData.m_AttackClickIndex = 0;
         }
+        if (GameData.m_AttackClickIndex == 0)
+            GameData.m_AttackClickIndex = 1;
+        //普攻状态并且是第一个连击并且动作已经播放结束
+        else if (GameData.m_AttackClickIndex == 1)
+            GameData.m_AttackClickIndex = 2;
+        //普攻状态并且是第二个连击并且动作已经播放结束
+        else if (GameData.m_AttackClickIndex == 2)
+            GameData.m_AttackClickIndex = 3;
+        //普攻状态并且是第三个连击并且动作已经播放结束
+        else if (GameData.m_AttackClickIndex == 3)
+            GameData.m_AttackClickIndex = 1;
         if (GameData.m_AttackClickIndex > 0)
         {
             GameData.m_CurrentPlayer.m_IsAttack = true;
@@ -156,10 +154,6 @@ public class MainBehaviour : MonoBehaviour
     /// <param name="go"></param>
     private void OnSkillClick(GameObject go)
     {
-        //if (GameData.m_CurrentPlayer.m_IsSkill)
-        //    return;
-        //if (GameData.m_CurrentPlayer.m_IsAttack)
-        //    return;
         if (GameData.m_CurrentPlayer.m_IsHit)
             return;
         if (GameData.m_CurrentPlayer.m_IsDie)
@@ -195,6 +189,7 @@ public class MainBehaviour : MonoBehaviour
     {
         Application.Quit();
     }
+
     private void OnJoinGameClick(GameObject go)
     {
         int port;
@@ -219,6 +214,7 @@ public class MainBehaviour : MonoBehaviour
         GameData.m_GameManager.m_UIManager.m_UpdateSkillCDUICallback = InitSkillCD;
         GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback = UpdateAddHp;
     }
+
     private void OnSelectedHeroClick(GameObject go)
     {
         for (int i = 0; i < m_HeroItemArray.Count; i++)
