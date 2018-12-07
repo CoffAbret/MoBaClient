@@ -58,15 +58,7 @@ public class SkillState : BaseState
             return;
         Player targetPlayer = m_Player.FindTarget(m_Player.m_SkillNode);
         Tower targetTower = m_Player.FindTowerTarget(m_Player.m_SkillNode);
-        if (targetPlayer != null)
-        {
-            if (m_Player.m_TargetPlayer != null && m_Player.m_TargetPlayer.m_SelectedGo != null && m_Player.m_TargetPlayer != targetPlayer)
-                m_Player.m_TargetPlayer.m_SelectedGo.SetActive(false);
-            m_Player.m_TargetPlayer = targetPlayer;
-            if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
-                m_Player.m_TargetPlayer.m_SelectedGo.SetActive(true);
-            m_TargetPos = m_Player.m_TargetPlayer.m_Pos;
-        }
+
         if (targetTower != null)
         {
             if (m_Player.m_TargetTower != null && m_Player.m_TargetTower.m_SelectedGo != null && m_Player.m_TargetTower != targetTower)
@@ -75,6 +67,15 @@ public class SkillState : BaseState
             if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
                 m_Player.m_TargetTower.m_SelectedGo.SetActive(true);
             m_TargetPos = m_Player.m_TargetTower.m_Pos;
+        }
+        if (targetPlayer != null)
+        {
+            if (m_Player.m_TargetPlayer != null && m_Player.m_TargetPlayer.m_SelectedGo != null && m_Player.m_TargetPlayer != targetPlayer)
+                m_Player.m_TargetPlayer.m_SelectedGo.SetActive(false);
+            m_Player.m_TargetPlayer = targetPlayer;
+            if (m_Player.m_PlayerData.m_Id == GameData.m_CurrentRoleId)
+                m_Player.m_TargetPlayer.m_SelectedGo.SetActive(true);
+            m_TargetPos = m_Player.m_TargetPlayer.m_Pos;
         }
         if (m_TargetPos != FixVector3.Zero)
         {
@@ -173,9 +174,9 @@ public class SkillState : BaseState
         }
         if (m_Player.m_IntervalTime == (GameData.m_FixFrameLen * (Fix64)10))
         {
-            PlayerAttack attack = new PlayerAttack();
+            PlayerBullet attack = new PlayerBullet();
             attack.Create(m_Player, m_Player.m_SkillNode);
-            GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
+            GameData.m_GameManager.m_BulletManager.m_AttackList.Add(attack);
         }
         if (m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime)
             OnExit();

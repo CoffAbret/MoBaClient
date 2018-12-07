@@ -13,7 +13,7 @@ public class GameManager
     //战斗管理
     public BattleLogicManager m_BattleLogicManager;
     //技能子弹管理器
-    public AttackManager m_AttackManager;
+    public BulletManager m_BulletManager;
     //延时管理
     public DelayManager m_DelayManager;
     //游戏物体生成管理器
@@ -35,7 +35,7 @@ public class GameManager
         m_PlayerMoveManager = new PlayerMoveManager();
         m_OpreationManager = new OpreationManager();
         m_BattleLogicManager = new BattleLogicManager();
-        m_AttackManager = new AttackManager();
+        m_BulletManager = new BulletManager();
         m_DelayManager = new DelayManager();
         m_SpawnManager = new SpawnManager();
         m_UIManager = new UIManager();
@@ -61,8 +61,8 @@ public class GameManager
             GameData.m_GameManager.m_PlayerMoveManager.UpdateMove();
         if (GameData.m_GameManager.m_BattleLogicManager != null)
             GameData.m_GameManager.m_BattleLogicManager.UpdateLogic();
-        if (GameData.m_GameManager.m_AttackManager != null)
-            GameData.m_GameManager.m_AttackManager.UpdateAttack();
+        if (GameData.m_GameManager.m_BulletManager != null)
+            GameData.m_GameManager.m_BulletManager.UpdateAttack();
         if (GameData.m_GameManager.m_DelayManager != null)
             GameData.m_GameManager.m_DelayManager.UpdateDelay();
         if (GameData.m_GameManager.m_SpawnManager != null)
@@ -82,7 +82,7 @@ public class GameManager
         GameData.m_TowerList.Clear();
         m_NetManager.OnDisconnect();
         m_DelayManager.DestoryDelay();
-        m_AttackManager.DestoryAttack();
+        m_BulletManager.DestoryAttack();
     }
 
     /// <summary>

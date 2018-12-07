@@ -7,6 +7,7 @@ public class OpreationManager
 {
     /// <summary>
     /// 输入操作
+    /// eg:战斗时操作
     /// </summary>
     /// <param name="cmd"></param>
     /// <param name="parameter"></param>
@@ -32,6 +33,7 @@ public class OpreationManager
     }
     /// <summary>
     /// 准备操作
+    /// eg:
     /// </summary>
     /// <param name="cmd"></param>
     /// <param name="parameter"></param>

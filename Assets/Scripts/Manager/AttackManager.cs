@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 延时
+/// 子弹管理器
 /// </summary>
-public class AttackManager
+public class BulletManager
 {
     //子弹列表
-    public List<PlayerAttack> m_AttackList = new List<PlayerAttack>();
+    public List<PlayerBullet> m_AttackList = new List<PlayerBullet>();
 
     /// <summary>
     /// 每帧执行逻辑

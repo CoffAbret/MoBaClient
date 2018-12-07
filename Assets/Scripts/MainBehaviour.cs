@@ -35,6 +35,10 @@ public class MainBehaviour : MonoBehaviour
     public UISprite m_EnemyResurrectionSprite;
     //选择英雄UI
     public GameObject m_UIEmbattleUIGo;
+    //登录UI
+    public GameObject m_LoginUIGo;
+    public GameObject m_LoginLabel;
+    public GameObject m_LoginGo;
     //退出游戏
     public GameObject m_ExitGame;
     //选择英雄列表
@@ -84,6 +88,7 @@ public class MainBehaviour : MonoBehaviour
         UIEventListener.Get(m_Skill5Go).onClick = OnAddHpSkillClick;
         UIEventListener.Get(m_ExitGame).onClick = OnExitGameClick;
         UIEventListener.Get(m_JoinGame).onClick = OnJoinGameClick;
+        UIEventListener.Get(m_LoginGo).onClick = OnLoginClick;
         for (int i = 0; i < m_HeroItemArray.Count; i++)
             UIEventListener.Get(m_HeroItemArray[i]).onClick = OnSelectedHeroClick;
     }
@@ -213,6 +218,11 @@ public class MainBehaviour : MonoBehaviour
 
         GameData.m_GameManager.m_UIManager.m_UpdateSkillCDUICallback = InitSkillCD;
         GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback = UpdateAddHp;
+    }
+
+    private void OnLoginClick(GameObject go)
+    {
+        m_LoginUIGo.SetActive(false);
     }
 
     private void OnSelectedHeroClick(GameObject go)

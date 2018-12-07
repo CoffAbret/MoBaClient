@@ -132,9 +132,9 @@ public class AttackState : BaseState
         }
         if (m_Player.m_IntervalTime == (GameData.m_FixFrameLen * (Fix64)10))
         {
-            PlayerAttack attack = new PlayerAttack();
+            PlayerBullet attack = new PlayerBullet();
             attack.Create(m_Player, m_Player.m_SkillNode);
-            GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
+            GameData.m_GameManager.m_BulletManager.m_AttackList.Add(attack);
         }
         if (m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime)
             OnExit();

@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 角色子弹
+/// 子弹
 /// </summary>
-public class PlayerAttack
+public class PlayerBullet
 {
     public string m_PlayerAttackId = string.Empty;
     //位置
@@ -55,57 +55,6 @@ public class PlayerAttack
             m_IsActive = false;
             return;
         }
-        for (int i = 0; i < GameData.m_TowerList.Count; i++)
-        {
-            if (GameData.m_TowerList[i] == null || GameData.m_TowerList[i].m_VGo == null)
-                continue;
-            if (GameData.m_TowerList[i].m_CampId == m_AttackPlayer.m_PlayerData.m_CampId)
-                continue;
-            if (m_WoundTowerList.Contains(GameData.m_TowerList[i]))
-                continue;
-            //子弹与敌人的方向向量
-            FixVector3 targetFixVec = GameData.m_TowerList[i].m_Pos - m_Pos;
-            //求玩家正前方、玩家与敌人方向两个向量的夹角
-            bool IsFallDamage = false;
-            if (m_SkillNode.aoe_wide <= 0)
-            {
-                float angle = Mathf.Acos(Vector3.Dot(m_Angles.ToVector3().normalized, targetFixVec.ToVector3().normalized)) * Mathf.Rad2Deg;
-                Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-                if ((angle <= m_SkillNode.angle * 0.5F || m_SkillNode.angle <= 0) && ((float)distance <= m_SkillNode.aoe_long))
-                {
-                    IsFallDamage = true;
-                }
-            }
-            else
-            {
-                float forwardDistance = Vector3.Dot(targetFixVec.ToVector3(), m_Angles.ToVector3().normalized);
-                if (forwardDistance > 0 && forwardDistance <= m_SkillNode.aoe_long)
-                {
-                    float rightDistance = Vector3.Dot(targetFixVec.ToVector3(), m_AttackPlayer.m_VGo.transform.right.normalized);
-                    if (Math.Abs(rightDistance) <= m_SkillNode.aoe_wide)
-                    {
-                        IsFallDamage = true;
-                    }
-                }
-            }
-            if (IsFallDamage)
-            {
-                float base_num1 = m_SkillNode.base_num1[0];
-                float growth_ratio = m_SkillNode.growth_ratio1[0];
-                float skill_ratio = m_SkillNode.skill_ratio[0];
-                int stats = m_SkillNode.stats[0];
-                float attack = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.attack;
-                float armor = 0;
-                float attack_hurt = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.attack_hurt;
-                float hurt_addition = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.hurt_addition;
-                float hurt_remission = 0;
-                //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
-                int damage = (int)Math.Ceiling(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
-                damage = Mathf.Abs(damage);
-                GameData.m_TowerList[i].FallDamage(damage);
-                m_WoundTowerList.Add(GameData.m_TowerList[i]);
-            }
-        }
 
         for (int i = 0; i < GameData.m_PlayerList.Count; i++)
         {
@@ -131,7 +80,8 @@ public class PlayerAttack
             else
             {
                 float forwardDistance = Vector3.Dot(targetFixVec.ToVector3().normalized, m_Angles.ToVector3().normalized);
-                if (forwardDistance > 0 && forwardDistance <= m_SkillNode.aoe_long)
+                Fix64 distance = GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 ? (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(200)) : (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(100));
+                if (forwardDistance > 0 && forwardDistance <= m_SkillNode.aoe_long && (float)distance < m_SkillNode.aoe_long)
                 {
                     float rightDistance = Vector3.Dot(targetFixVec.ToVector3().normalized, m_AttackPlayer.m_VGo.transform.right.normalized);
                     if (Math.Abs(rightDistance) <= m_SkillNode.aoe_wide)
@@ -156,6 +106,59 @@ public class PlayerAttack
                 damage = Mathf.Abs(damage);
                 GameData.m_PlayerList[i].FallDamage(damage);
                 m_WoundPlayerList.Add(GameData.m_PlayerList[i]);
+            }
+        }
+
+        for (int i = 0; i < GameData.m_TowerList.Count; i++)
+        {
+            if (GameData.m_TowerList[i] == null || GameData.m_TowerList[i].m_VGo == null)
+                continue;
+            if (GameData.m_TowerList[i].m_CampId == m_AttackPlayer.m_PlayerData.m_CampId)
+                continue;
+            if (m_WoundTowerList.Contains(GameData.m_TowerList[i]))
+                continue;
+            //子弹与敌人的方向向量
+            FixVector3 targetFixVec = GameData.m_TowerList[i].m_Pos - m_Pos;
+            //求玩家正前方、玩家与敌人方向两个向量的夹角
+            bool IsFallDamage = false;
+            if (m_SkillNode.aoe_wide <= 0)
+            {
+                float angle = Mathf.Acos(Vector3.Dot(m_Angles.ToVector3().normalized, targetFixVec.ToVector3().normalized)) * Mathf.Rad2Deg;
+                Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
+                if ((angle <= m_SkillNode.angle * 0.5F || m_SkillNode.angle <= 0) && ((float)distance <= m_SkillNode.aoe_long))
+                {
+                    IsFallDamage = true;
+                }
+            }
+            else
+            {
+                float forwardDistance = Vector3.Dot(targetFixVec.ToVector3(), m_Angles.ToVector3().normalized);
+                Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
+                if (forwardDistance > 0 && forwardDistance <= m_SkillNode.aoe_long && (float)distance <= m_SkillNode.aoe_long)
+                {
+                    float rightDistance = Vector3.Dot(targetFixVec.ToVector3(), m_AttackPlayer.m_VGo.transform.right.normalized);
+                    if (Math.Abs(rightDistance) <= m_SkillNode.aoe_wide)
+                    {
+                        IsFallDamage = true;
+                    }
+                }
+            }
+            if (IsFallDamage)
+            {
+                float base_num1 = m_SkillNode.base_num1[0];
+                float growth_ratio = m_SkillNode.growth_ratio1[0];
+                float skill_ratio = m_SkillNode.skill_ratio[0];
+                int stats = m_SkillNode.stats[0];
+                float attack = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.attack;
+                float armor = 0;
+                float attack_hurt = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.attack_hurt;
+                float hurt_addition = m_AttackPlayer.m_PlayerData.m_HeroAttrNode.hurt_addition;
+                float hurt_remission = 0;
+                //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
+                int damage = (int)Math.Ceiling(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
+                damage = Mathf.Abs(damage);
+                GameData.m_TowerList[i].FallDamage(damage);
+                m_WoundTowerList.Add(GameData.m_TowerList[i]);
             }
         }
         m_Pos = m_Pos + m_Angles * (Fix64)m_SkillNode.flight_speed * GameData.m_FixFrameLen;
