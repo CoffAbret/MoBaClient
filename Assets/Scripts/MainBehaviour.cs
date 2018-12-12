@@ -38,7 +38,8 @@ public class MainBehaviour : MonoBehaviour
     //登录UI
     public GameObject m_LoginUIGo;
     public GameObject m_LoginLabel;
-    public GameObject m_LoginGo;
+    public GameObject m_LoginButton;
+    public GameObject m_LoginExitButton;
     //退出游戏
     public GameObject m_ExitGame;
     //选择英雄列表
@@ -73,6 +74,8 @@ public class MainBehaviour : MonoBehaviour
         Application.runInBackground = true;
         //固定50帧
         Application.targetFrameRate = 50;
+        GameData.m_GameManager = new GameManager();
+        GameData.m_GameManager.InitTcpNet();
     }
     /// <summary>
     /// 开始准备游戏数据以及网络连接
@@ -88,7 +91,8 @@ public class MainBehaviour : MonoBehaviour
         UIEventListener.Get(m_Skill5Go).onClick = OnAddHpSkillClick;
         UIEventListener.Get(m_ExitGame).onClick = OnExitGameClick;
         UIEventListener.Get(m_JoinGame).onClick = OnJoinGameClick;
-        UIEventListener.Get(m_LoginGo).onClick = OnLoginClick;
+        UIEventListener.Get(m_LoginButton).onClick = OnLoginClick;
+        UIEventListener.Get(m_LoginExitButton).onClick = OnExitGameClick;
         for (int i = 0; i < m_HeroItemArray.Count; i++)
             UIEventListener.Get(m_HeroItemArray[i]).onClick = OnSelectedHeroClick;
     }
@@ -220,9 +224,12 @@ public class MainBehaviour : MonoBehaviour
         GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback = UpdateAddHp;
     }
 
+    //登录游戏
     private void OnLoginClick(GameObject go)
     {
         m_LoginUIGo.SetActive(false);
+        string account = m_LoginLabel.GetComponent<UILabel>().text;
+        GameData.m_GameManager.InputLogin(account);
     }
 
     private void OnSelectedHeroClick(GameObject go)

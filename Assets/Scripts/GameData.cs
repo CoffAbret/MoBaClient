@@ -46,9 +46,13 @@ public class GameData
     //是否正在查看小地图
     public static bool m_IsDragMinMap;
     //IP
-    public static string m_IP;
+    public static string m_IP = "192.168.3.55";
     //端口
-    public static int m_Port;
+    public static int m_Port = 8889;
+    //UDPIP
+    public static string m_UdpIP = "192.168.3.55";
+    //UDP端口
+    public static int m_UdpPort = 8888;
     //普攻按钮点击次数
     public static int m_AttackClickIndex = 0;
 }

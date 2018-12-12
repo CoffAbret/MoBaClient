@@ -24,6 +24,15 @@ public class GameManager
     public GridManager m_GridManager;
     //Log输出
     public UILabel m_LogMessage;
+
+    /// <summary>
+    /// 初始化TCP网络
+    /// </summary>
+    public void InitTcpNet()
+    {
+        m_NetManager = new NetManager();
+        m_NetManager.InitClient();
+    }
     /// <summary>
     /// 初始化
     /// </summary>
@@ -117,9 +126,18 @@ public class GameManager
     public void InputCmd(Cmd cmd, string parameter = null)
     {
         CWritePacket packet = m_OpreationManager.InputCmd(cmd, parameter);
-        m_NetManager.Send(packet);
+        m_NetManager.SendUdp(packet);
     }
 
+    /// <summary>
+    /// 登录游戏
+    /// </summary>
+    /// <param name="account"></param>
+    public void InputLogin(string account)
+    {
+        CWritePacket packet = m_OpreationManager.InputLogin(account);
+        m_NetManager.Send(packet);
+    }
     /// <summary>
     /// 创建角色
     /// </summary>
@@ -199,6 +217,13 @@ public class GameManager
         }
         //GameData.m_GameFrame += 1;
         //}
+    }
+
+    public void LoginGame(Dictionary<string, object> data)
+    {
+        int result = data.TryGetInt("ret");
+        int playerId = data.TryGetInt("playerId");
+        GameData.m_CurrentRoleId = playerId;
     }
 
     /// <summary>

@@ -7,7 +7,6 @@ public class OpreationManager
 {
     /// <summary>
     /// 输入操作
-    /// eg:战斗时操作
     /// </summary>
     /// <param name="cmd"></param>
     /// <param name="parameter"></param>
@@ -33,7 +32,6 @@ public class OpreationManager
     }
     /// <summary>
     /// 准备操作
-    /// eg:
     /// </summary>
     /// <param name="cmd"></param>
     /// <param name="parameter"></param>
@@ -46,6 +44,23 @@ public class OpreationManager
         packet.Add("roleid", GameData.m_CurrentRoleId);
         packet.Add("heroid", GameData.m_HeroId);
         CWritePacket writePacket = new CWritePacket(NetProtocol.READY);
+        StringBuilder builder = Jsontext.WriteData(packet);
+        string json_Str = builder.ToString();
+        writePacket.WriteString(json_Str);
+        return writePacket;
+    }
+
+    /// <summary>
+    /// 登录游戏
+    /// </summary>
+    /// <param name="cmd"></param>
+    /// <param name="parameter"></param>
+    public CWritePacket InputLogin(string account)
+    {
+        IDictionary<string, object> packet = new Dictionary<string, object>();
+        packet.Add("msgid", NetProtocol.LOGIN_REQ);
+        packet.Add("account", account);
+        CWritePacket writePacket = new CWritePacket(NetProtocol.LOGIN_REQ);
         StringBuilder builder = Jsontext.WriteData(packet);
         string json_Str = builder.ToString();
         writePacket.WriteString(json_Str);

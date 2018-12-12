@@ -58,7 +58,7 @@ public class AsyncTcpClient
                     return;
                 CReadPacket readPacket = new CReadPacket(m_ReceiveBuffer, m_ReceiveBuffer.Length);
                 readPacket.ReadData();
-                m_ReceivePacketList.Add(readPacket);
+                OnMessage(readPacket);
             }
             catch (Exception ex)
             {
@@ -125,19 +125,5 @@ public class AsyncTcpClient
         m_Client = null;
         m_ReceivePacketList.Clear();
         m_ReceivePacketList = null;
-    }
-
-    /// <summary>
-    /// 每帧处理网络数据
-    /// </summary>
-    public void UpdateNet()
-    {
-        if (m_ReceivePacketList == null)
-            return;
-        while (m_ReceivePacketList.Count > 0)
-        {
-            OnMessage(m_ReceivePacketList[0]);
-            m_ReceivePacketList.RemoveAt(0);
-        }
     }
 }

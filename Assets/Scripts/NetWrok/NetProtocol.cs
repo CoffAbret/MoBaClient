@@ -16,4 +16,8 @@ public class NetProtocol
     public const int START = 104;
     //ping
     public const int PING = 200;
+    //登录发送
+    public const int LOGIN_REQ = 1001;
+    //登录返回
+    public const int LOGIN_RET = 1002;
 }
