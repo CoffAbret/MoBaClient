@@ -247,7 +247,7 @@ public class BaseBullet : BaseState
             return;
         }
         m_AttackTime += GameData.m_FixFrameLen;
-        if (m_BulletNode.fly_max == -1 || (m_BulletNode.fly_max > 0 && (Fix64)m_BulletNode.fly_max < (Fix64)m_BulletNode.fly_speed * m_AttackTime))
+        if (m_BulletNode.fly_max == -1 || (m_BulletNode.fly_max > 0 && (Fix64)m_BulletNode.fly_max >= (Fix64)m_BulletNode.fly_speed * m_AttackTime))
         {
             Target_TypeMove();
             Follow_TypeMove();
