@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 
 /// <summary>
-/// 网络连接
+/// Udp网络连接
 /// </summary>
 public class AsyncUdpClient
 {
@@ -42,22 +42,22 @@ public class AsyncUdpClient
     }
 
     /// <summary>
-    /// 异步接收数据
+    /// 开始监听
     /// </summary>
     private void AsyncReceiveData()
     {
         try
         {
-            m_Client.BeginReceive(new AsyncCallback(ReceiveCallback), null);
+            m_Client.BeginReceive(ReceiveCallback, m_Client);
         }
         catch (Exception ex)
         {
-            throw ex;
+            GameData.m_GameManager.m_LogMessage.text += string.Format("{0},", ex.Message);
         }
     }
 
     /// <summary>
-    /// 接收数据的回调函数
+    /// 开始监听回调
     /// </summary>
     /// <param name="result"></param>
     private void ReceiveCallback(IAsyncResult result)
@@ -67,23 +67,25 @@ public class AsyncUdpClient
             try
             {
                 byte[] data = m_Client.EndReceive(result, ref m_RemoteEP);
+                if (data == null || data.Length < 1)
+                    return;
                 CReadPacket readPacket = new CReadPacket(data, data.Length);
                 readPacket.ReadData();
                 m_ReceivePacketList.Add(readPacket);
             }
             catch (Exception ex)
             {
-                throw ex;
+                GameData.m_GameManager.m_LogMessage.text += string.Format("{0},", ex.Message);
             }
             finally
             {
-                AsyncReceiveData();
+                m_Client.BeginReceive(ReceiveCallback, null);
             }
         }
     }
 
     /// <summary>
-    /// 异步发送数据
+    /// 发送数据
     /// </summary>
     /// <param name="data"></param>
     public void AsyncSendData(CWritePacket data)
@@ -92,7 +94,7 @@ public class AsyncUdpClient
     }
 
     /// <summary>
-    /// Ping包
+    /// 发送ping包
     /// </summary>
     /// <param name="data"></param>
     public void AsyncSendPing()
@@ -107,7 +109,7 @@ public class AsyncUdpClient
     }
 
     /// <summary>
-    /// 发送数据后的回调函数
+    /// 发送数据回调
     /// </summary>
     /// <param name="result"></param>
     private void SendCallback(IAsyncResult result)
@@ -120,7 +122,7 @@ public class AsyncUdpClient
             }
             catch (Exception ex)
             {
-                throw ex;
+                GameData.m_GameManager.m_LogMessage.text += string.Format("{0},", ex.Message);
             }
         }
     }

@@ -9,28 +9,44 @@ using UnityEngine;
 /// </summary>
 public class NetManager
 {
-    //网络连接
-    private AsyncTcpClient m_Client;
+    //Tcp网络连接
+    private AsyncTcpClient m_TcpClient;
+    //Udp网络连接
     private AsyncUdpClient m_UdpClient;
 
     /// <summary>
-    /// 开始网络连接
+    /// 初始化Tcp网络连接
     /// </summary>
-    public void InitClient()
+    public void InitTcpClient()
     {
-        m_Client = new AsyncTcpClient(GameData.m_IP, GameData.m_Port);
-        m_Client.OnMessage += OnMessage;
+        m_TcpClient = new AsyncTcpClient(GameData.m_IP, GameData.m_Port);
+        m_TcpClient.OnMessage += OnTcpMessage;
     }
 
+    /// <summary>
+    /// 初始化Udp网络连接
+    /// </summary>
     public void InitUdpClient()
     {
         m_UdpClient = new AsyncUdpClient(GameData.m_UdpIP, GameData.m_UdpPort);
         m_UdpClient.OnMessage += OnUdpMessage;
     }
 
-    //每帧处理网络数据
+    /// <summary>
+    /// 每帧处理Tcp网络数据
+    /// </summary>
+    public void UpdateTcpNet()
+    {
+        m_TcpClient.UpdateNet();
+    }
+
+    /// <summary>
+    /// 每帧处理Udp网络数据
+    /// </summary>
     public void UpdateNet()
     {
+        if (m_UdpClient == null)
+            return;
         m_UdpClient.UpdateNet();
         GameData.m_PingTime += GameData.m_FixFrameLen;
         if (GameData.m_PingTime >= Fix64.FromRaw(10000))
@@ -46,7 +62,7 @@ public class NetManager
     /// <param name="buffer"></param>
     public void Send(CWritePacket buffer)
     {
-        m_Client.AsyncSendData(buffer);
+        m_TcpClient.AsyncSendData(buffer);
     }
 
     /// <summary>
@@ -55,14 +71,14 @@ public class NetManager
     /// <param name="buffer"></param>
     public void SendUdp(CWritePacket buffer)
     {
-        m_Client.AsyncSendData(buffer);
+        m_UdpClient.AsyncSendData(buffer);
     }
 
     /// <summary>
     /// 解析网络数据
     /// </summary>
     /// <param name="buffer"></param>
-    public void OnMessage(CReadPacket buffer)
+    public void OnTcpMessage(CReadPacket buffer)
     {
         if (buffer == null)
             return;
@@ -73,10 +89,20 @@ public class NetManager
             case NetProtocol.LOGIN_RET:
                 GameData.m_GameManager.LoginGame(data);
                 break;
-            case NetProtocol.START:
-                GameData.m_IsGame = true;
-                object[] playerObj = data["info"] as object[];
-                GameData.m_GameManager.CreateAllPlayer(playerObj);
+            case NetProtocol.MATCH_RET:
+                GameData.m_GameManager.MatchGame(data);
+                break;
+            case NetProtocol.MATCH_SUCCESS_RET:
+                GameData.m_GameManager.MatchGameSuccess(data);
+                break;
+            case NetProtocol.MATCH_JOIN_ROOM_RET:
+                GameData.m_GameManager.JoinMatchRoom(data);
+                break;
+            case NetProtocol.MATCH_HERO_ROOM_RET:
+                GameData.m_GameManager.JoinMatchHeroRoom(data);
+                break;
+            case NetProtocol.MATCH_JOIN_ROOM_IN_POSTION:
+                GameData.m_GameManager.JoinMatchRoomInPos(data);
                 break;
             default:
                 break;
@@ -100,6 +126,7 @@ public class NetManager
                 break;
             case NetProtocol.START:
                 GameData.m_IsGame = true;
+                GameData.m_GameManager.m_UIManager.m_UpdateEmbattleUICallback();
                 object[] playerObj = data["info"] as object[];
                 GameData.m_GameManager.CreateAllPlayer(playerObj);
                 break;
@@ -113,8 +140,15 @@ public class NetManager
     /// </summary>
     public void OnDisconnect()
     {
-        m_Client.OnMessage -= OnMessage;
-        m_Client.Disconnect();
-        m_Client = null;
+        if (m_TcpClient == null)
+            return;
+        m_TcpClient.OnMessage -= OnTcpMessage;
+        m_TcpClient.Disconnect();
+        m_TcpClient = null;
+        if (m_UdpClient == null)
+            return;
+        m_UdpClient.OnMessage -= OnUdpMessage;
+        m_UdpClient.Disconnect();
+        m_UdpClient = null;
     }
 }

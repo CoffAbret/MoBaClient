@@ -40,6 +40,14 @@ public class MainBehaviour : MonoBehaviour
     public GameObject m_LoginLabel;
     public GameObject m_LoginButton;
     public GameObject m_LoginExitButton;
+    //匹配UI
+    public GameObject m_MatchUIGo;
+    public GameObject m_1V1Button;
+    public GameObject m_MathcTime;
+
+    //匹配成功UI
+    public GameObject m_MatchSuccessUIGo;
+    public GameObject m_JoinMatchRoomButton;
     //退出游戏
     public GameObject m_ExitGame;
     //选择英雄列表
@@ -53,6 +61,14 @@ public class MainBehaviour : MonoBehaviour
     public GameObject m_MiniMapUI;
     //游戏结束UI
     public GameObject m_UITheBattleUI;
+    //主摄像机
+    public GameObject m_MainCamera;
+    //登录摄像机
+    public GameObject m_LoginCamera;
+    //MoBa场景
+    public GameObject m_MoBaScene;
+    //登录场景
+    public GameObject m_LoginScene;
     //红方加血点
     public GameObject m_RedAddHp;
     //蓝方加血点
@@ -75,7 +91,6 @@ public class MainBehaviour : MonoBehaviour
         //固定50帧
         Application.targetFrameRate = 50;
         GameData.m_GameManager = new GameManager();
-        GameData.m_GameManager.InitTcpNet();
     }
     /// <summary>
     /// 开始准备游戏数据以及网络连接
@@ -83,6 +98,9 @@ public class MainBehaviour : MonoBehaviour
     /// </summary>
     private void Start()
     {
+        UIEventListener.Get(m_LoginButton).onClick = OnLoginClick;
+        UIEventListener.Get(m_1V1Button).onClick = On1v1Click;
+        UIEventListener.Get(m_JoinMatchRoomButton).onClick = OnJoinMatchRoomClick;
         UIEventListener.Get(m_AttackGo).onClick = OnAttackClick;
         UIEventListener.Get(m_Skill1Go).onClick = OnSkillClick;
         UIEventListener.Get(m_Skill2Go).onClick = OnSkillClick;
@@ -91,7 +109,6 @@ public class MainBehaviour : MonoBehaviour
         UIEventListener.Get(m_Skill5Go).onClick = OnAddHpSkillClick;
         UIEventListener.Get(m_ExitGame).onClick = OnExitGameClick;
         UIEventListener.Get(m_JoinGame).onClick = OnJoinGameClick;
-        UIEventListener.Get(m_LoginButton).onClick = OnLoginClick;
         UIEventListener.Get(m_LoginExitButton).onClick = OnExitGameClick;
         for (int i = 0; i < m_HeroItemArray.Count; i++)
             UIEventListener.Get(m_HeroItemArray[i]).onClick = OnSelectedHeroClick;
@@ -104,6 +121,7 @@ public class MainBehaviour : MonoBehaviour
     {
         if (GameData.m_GameManager == null)
             return;
+        GameData.m_GameManager.UpdateTcpNet();
         GameData.m_GameManager.UpdateGame();
     }
 
@@ -199,18 +217,15 @@ public class MainBehaviour : MonoBehaviour
         Application.Quit();
     }
 
+    /// <summary>
+    /// 进入游戏
+    /// </summary>
+    /// <param name="go"></param>
     private void OnJoinGameClick(GameObject go)
     {
-        int port;
-        GameData.m_IP = m_IPTxt.text.Trim();
-        int.TryParse(m_PortTxt.text.Trim(), out port);
-        GameData.m_Port = port;
-        m_UIEmbattleUIGo.SetActive(false);
-        m_MiniMapUI.SetActive(true);
-        m_MainUIGo.SetActive(true);
-        GameData.m_GameManager = new GameManager();
         GameData.m_GameManager.InitGame();
         GameData.m_GameManager.InputReady();
+        GameData.m_GameManager.m_UIManager.m_UpdateEmbattleUICallback = OnUpdateEmbattleUI;
         GameData.m_GameManager.m_UIManager.m_UpdateSkillUICallback = OnUpdateSkillUI;
 
         GameData.m_GameManager.m_UIManager.m_UpdatePlayerDieUICallback = OnUpdatePlayerDieUI;
@@ -224,14 +239,46 @@ public class MainBehaviour : MonoBehaviour
         GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback = UpdateAddHp;
     }
 
-    //登录游戏
+    /// <summary>
+    /// 登录游戏
+    /// </summary>
+    /// <param name="go"></param>
     private void OnLoginClick(GameObject go)
     {
-        m_LoginUIGo.SetActive(false);
+        int port;
+        GameData.m_IP = m_IPTxt.text.Trim();
+        int.TryParse(m_PortTxt.text.Trim(), out port);
+        GameData.m_Port = port;
+        GameData.m_GameManager.InitTcpNet();
+        GameData.m_GameManager.m_UIManager.m_UpdateMatchUICallback = OnUpdateMatchUI;
+        GameData.m_GameManager.m_UIManager.m_UpdateMatchTimeUICallback = OnUpdateMatchTimeUI;
+        GameData.m_GameManager.m_UIManager.m_UpdateMatchSuccessUICallback = OnUpdateMatchSuccessUI;
+        GameData.m_GameManager.m_UIManager.m_UpdateMatchHeroRoomUICallback = OnUpdateMatchHeroRoomUI;
+        GameData.m_GameManager.m_UIManager.m_UpdateConfirmMatchUICallback = OnUpdateConfirmMatchUI;
         string account = m_LoginLabel.GetComponent<UILabel>().text;
         GameData.m_GameManager.InputLogin(account);
     }
+    /// <summary>
+    /// 1v1匹配
+    /// </summary>
+    /// <param name="go"></param>
+    public void On1v1Click(GameObject go)
+    {
+        GameData.m_GameManager.InputMatch(1);
+        m_MathcTime.SetActive(true);
+        m_MathcTime.GetComponent<UILabel>().text = string.Empty;
+    }
 
+    /// <summary>
+    /// 进入匹配房间
+    /// </summary>
+    /// <param name="go"></param>
+    public void OnJoinMatchRoomClick(GameObject go)
+    {
+        GameData.m_GameManager.InputJoinMatchRoom();
+    }
+
+    //选择英雄
     private void OnSelectedHeroClick(GameObject go)
     {
         for (int i = 0; i < m_HeroItemArray.Count; i++)
@@ -245,6 +292,67 @@ public class MainBehaviour : MonoBehaviour
                 GameData.m_HeroId = item.m_HeroId;
             }
         }
+    }
+
+    /// <summary>
+    /// 刷新匹配UI
+    /// </summary>
+    private void OnUpdateMatchUI()
+    {
+        m_LoginUIGo.SetActive(false);
+        m_MatchUIGo.SetActive(true);
+        m_MathcTime.SetActive(false);
+    }
+
+    /// <summary>
+    /// 刷新匹配倒计时
+    /// </summary>
+    private void OnUpdateMatchTimeUI(int time)
+    {
+        m_MathcTime.GetComponent<UILabel>().text = string.Format("{0}", time);
+    }
+
+    /// <summary>
+    /// 匹配成功UI
+    /// </summary>
+    private void OnUpdateMatchSuccessUI()
+    {
+        m_MatchUIGo.SetActive(false);
+        m_MatchSuccessUIGo.SetActive(true);
+    }
+
+    private void OnUpdateConfirmMatchUI(int campId, int pos)
+    {
+        Transform campTransform = m_MatchSuccessUIGo.transform.Find(string.Format("Camp{0}", campId));
+        if (campTransform == null)
+            return;
+        Transform posTransform = campTransform.Find(string.Format("Player{0}", pos));
+        if (posTransform == null)
+            return;
+        posTransform.Find("selected").gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// 进入选择英雄UI
+    /// </summary>
+    private void OnUpdateMatchHeroRoomUI()
+    {
+        m_MatchSuccessUIGo.SetActive(false);
+        m_UIEmbattleUIGo.SetActive(true);
+    }
+
+    /// <summary>
+    /// 进入游戏后战斗UI
+    /// </summary>
+    private void OnUpdateEmbattleUI()
+    {
+        m_LoginCamera.SetActive(false);
+        m_LoginScene.SetActive(false);
+        m_MainCamera.SetActive(true);
+        m_MoBaScene.SetActive(true);
+        m_UIEmbattleUIGo.SetActive(false);
+        m_MiniMapUI.SetActive(true);
+        m_MainUIGo.SetActive(true);
     }
 
     /// <summary>

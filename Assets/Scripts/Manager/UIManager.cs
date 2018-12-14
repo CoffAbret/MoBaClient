@@ -7,6 +7,25 @@ using UnityEngine;
 /// </summary>
 public class UIManager
 {
+
+    //游戏匹配UI
+    public delegate void UpdateMatchUICallback();
+    public UpdateMatchUICallback m_UpdateMatchUICallback;
+    //游戏匹配倒计时UI
+    public delegate void UpdateMatchTimeUICallback(int time);
+    public UpdateMatchTimeUICallback m_UpdateMatchTimeUICallback;
+    //游戏匹配成功UI
+    public delegate void UpdateMatchSuccessUICallback();
+    public UpdateMatchSuccessUICallback m_UpdateMatchSuccessUICallback;
+    //确认进入匹配UI
+    public delegate void UpdateConfirmMatchUICallback(int campId,int pos);
+    public UpdateConfirmMatchUICallback m_UpdateConfirmMatchUICallback;
+    //进入选择英雄UI
+    public delegate void UpdateMatchHeroRoomUICallback();
+    public UpdateMatchHeroRoomUICallback m_UpdateMatchHeroRoomUICallback;
+    //进入游戏战斗UI
+    public delegate void UpdateEmbattleUICallback();
+    public UpdateEmbattleUICallback m_UpdateEmbattleUICallback;
     //刷新技能图标
     public delegate void UpdateSkillUICallback(List<SkillNode> skillNodeList);
     public UpdateSkillUICallback m_UpdateSkillUICallback = null;

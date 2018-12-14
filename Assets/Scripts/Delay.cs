@@ -13,6 +13,9 @@ public class Delay
     Fix64 m_FixPlanTime = Fix64.Zero;
     //累计时间
     Fix64 m_FixElapseTime = Fix64.Zero;
+    //匹配倒计时
+    public delegate void MatchTimeCallback(int time);
+    MatchTimeCallback m_MatchTimeCallback;
     //英雄复活延时
     public delegate void ResurgenceCallback(PlayerData data);
     //英雄复活延时
@@ -42,6 +45,11 @@ public class Delay
                 GameData.m_GameManager.m_UIManager.m_EnemyResurrectionLabel.text = string.Format("{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
         }
 
+        if (m_MatchTimeCallback != null)
+        {
+            m_MatchTimeCallback((int)m_FixElapseTime);
+        }
+
         if (m_SkillCDUISprite != null)
         {
             m_SkillCDUISprite.fillAmount = 1 - ((float)m_FixElapseTime / (float)m_FixPlanTime);
@@ -60,6 +68,19 @@ public class Delay
 
             m_Enable = false;
         }
+    }
+
+    /// <summary>
+    /// 初始化匹配倒计时
+    /// </summary>
+    /// <param name="time"></param>
+    /// <param name="acb"></param>
+    public void InitMatchTime(Fix64 time, MatchTimeCallback callback)
+    {
+        m_Enable = true;
+        m_FixElapseTime = Fix64.Zero;
+        m_FixPlanTime = time;
+        m_MatchTimeCallback = callback;
     }
 
     /// <summary>
@@ -125,6 +146,7 @@ public class Delay
         m_FixElapseTime = Fix64.Zero;
         m_ResurgenceCallback = null;
         m_ResurgencePlayerData = null;
+        m_MatchTimeCallback = null;
         m_SkillCDUISprite = null;
         m_Enable = false;
     }

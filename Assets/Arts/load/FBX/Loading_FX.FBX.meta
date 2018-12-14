@@ -1,0 +1,163 @@
+fileFormatVersion: 2
+guid: 85e6c62f7cd595245baae147dad59fb9
+timeCreated: 1509087076
+licenseType: Pro
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: Bone001
+    100002: Bone003
+    100004: Bone004
+    100006: Bone007
+    100008: Bone013
+    100010: Bone014
+    100012: Bone015
+    100014: Bone016
+    100016: Bone017
+    100018: Bone020
+    100020: Bone021
+    100022: Bone023
+    100024: Bone024
+    100026: Bone025
+    100028: Bone026
+    100030: Bone027
+    100032: Bone028
+    100034: Bone033
+    100036: Bone034
+    100038: Bone035
+    100040: Bone036
+    100042: Bone038
+    100044: Bone040
+    100046: Bone041
+    100048: Bone042
+    100050: Bone044
+    100052: Bone045
+    100054: Bone046
+    100056: Bone047
+    100058: Bone049
+    100060: Bone050
+    100062: Bone051
+    100064: Bone052
+    100066: FX_body
+    100068: FX_gong
+    100070: FX_Hair
+    100072: FX_pifeng
+    100074: FX_qunbai
+    100076: //RootNode
+    100078: Root
+    400000: Bone001
+    400002: Bone003
+    400004: Bone004
+    400006: Bone007
+    400008: Bone013
+    400010: Bone014
+    400012: Bone015
+    400014: Bone016
+    400016: Bone017
+    400018: Bone020
+    400020: Bone021
+    400022: Bone023
+    400024: Bone024
+    400026: Bone025
+    400028: Bone026
+    400030: Bone027
+    400032: Bone028
+    400034: Bone033
+    400036: Bone034
+    400038: Bone035
+    400040: Bone036
+    400042: Bone038
+    400044: Bone040
+    400046: Bone041
+    400048: Bone042
+    400050: Bone044
+    400052: Bone045
+    400054: Bone046
+    400056: Bone047
+    400058: Bone049
+    400060: Bone050
+    400062: Bone051
+    400064: Bone052
+    400066: FX_body
+    400068: FX_gong
+    400070: FX_Hair
+    400072: FX_pifeng
+    400074: FX_qunbai
+    400076: //RootNode
+    400078: Root
+    4300000: FX_Hair
+    4300002: FX_gong
+    4300004: FX_pifeng
+    4300006: FX_qunbai
+    4300008: FX_body
+    7400000: Loading_FX1
+    9500000: //RootNode
+    13700000: FX_body
+    13700002: FX_gong
+    13700004: FX_Hair
+    13700006: FX_pifeng
+    13700008: FX_qunbai
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

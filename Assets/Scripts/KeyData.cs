@@ -24,3 +24,14 @@ public class KeyData
     //操作参数
     public string m_Parameter;
 }
+
+/// <summary>
+/// 匹配用户数据
+/// </summary>
+public class MatchPlayerData
+{
+    public int m_PlayerId;
+    public string m_PlayerName;
+    public int m_CampId;
+    public int m_Pos;
+}

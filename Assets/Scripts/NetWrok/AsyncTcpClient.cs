@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 
 /// <summary>
-/// 网络连接
+/// Tcp网络连接
 /// </summary>
 public class AsyncTcpClient
 {
@@ -21,8 +21,8 @@ public class AsyncTcpClient
     private IPAddress m_Address;
     //接收消息数据
     private List<CReadPacket> m_ReceivePacketList;
-    //接收数据
-    private byte[] m_ReceiveBuffer;
+    //接收数据长度
+    private int length = 1024;
     #endregion
     //网络数据派发
     public delegate void MessageHandle(CReadPacket msg);
@@ -30,49 +30,68 @@ public class AsyncTcpClient
     public AsyncTcpClient() { }
     public AsyncTcpClient(string ip, int port)
     {
-        m_ReceiveBuffer = new byte[1024];
         m_ReceivePacketList = new List<CReadPacket>();
         m_Address = IPAddress.Parse(ip);
         IPEndPoint point = new IPEndPoint(m_Address, port);
         m_Client = new Socket(m_Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-        m_Client.Bind(point);
-        m_Client.BeginConnect(point, AsyncConnectData, null);
+        m_Client.BeginConnect(point, AsyncConnectData, m_Client);
     }
 
+    /// <summary>
+    /// 开始连接回调
+    /// </summary>
+    /// <param name="result"></param>
     private void AsyncConnectData(IAsyncResult result)
     {
+        if (result.IsCompleted)
+            AsyncBeginReceive();
+    }
+
+    /// <summary>
+    /// 开始监听
+    /// </summary>
+    private void AsyncBeginReceive()
+    {
         if (m_Client.Connected)
-            m_Client.BeginReceive(m_ReceiveBuffer, 0, m_ReceiveBuffer.Length, SocketFlags.None, ReceiveCallback, null);
+        {
+            AsyncSocketState newState = new AsyncSocketState();
+            newState.m_ReceiveBuffer = new byte[length];
+            m_Client.BeginReceive(newState.m_ReceiveBuffer, 0, newState.m_ReceiveBuffer.Length, SocketFlags.None, ReceiveCallback, newState);
+        }
     }
     /// <summary>
-    /// 接收数据的回调函数
+    /// 开始监听回调
     /// </summary>
     /// <param name="result"></param>
     private void ReceiveCallback(IAsyncResult result)
     {
-        if (result.IsCompleted)
+        if (result.IsCompleted && m_Client.Connected)
         {
             try
             {
-                if (m_ReceiveBuffer.Length < 1)
+                AsyncSocketState state = (AsyncSocketState)result.AsyncState;
+                int length = m_Client.EndReceive(result);
+                if (length < 1 || state == null)
                     return;
-                CReadPacket readPacket = new CReadPacket(m_ReceiveBuffer, m_ReceiveBuffer.Length);
+                CReadPacket readPacket = new CReadPacket(state.m_ReceiveBuffer, length);
                 readPacket.ReadData();
-                OnMessage(readPacket);
+                m_ReceivePacketList.Add(readPacket);
+                state.m_ReceiveBuffer = null;
+                state = null;
             }
             catch (Exception ex)
             {
-                throw ex;
+                GameData.m_GameManager.m_LogMessage.text += string.Format("{0},", ex.Message);
             }
             finally
             {
-                m_Client.BeginReceive(m_ReceiveBuffer, 0, m_ReceiveBuffer.Length, SocketFlags.None, ReceiveCallback, null);
+                AsyncBeginReceive();
             }
         }
     }
 
     /// <summary>
-    /// 异步发送数据
+    /// 发送数据
     /// </summary>
     /// <param name="data"></param>
     public void AsyncSendData(CWritePacket data)
@@ -81,22 +100,7 @@ public class AsyncTcpClient
     }
 
     /// <summary>
-    /// Ping包
-    /// </summary>
-    /// <param name="data"></param>
-    public void AsyncSendPing()
-    {
-        IDictionary<string, object> packet = new Dictionary<string, object>();
-        packet.Add("msgid", NetProtocol.PING);
-        CWritePacket writePacket = new CWritePacket(NetProtocol.PING);
-        StringBuilder builder = Jsontext.WriteData(packet);
-        string json_Str = builder.ToString();
-        writePacket.WriteString(json_Str);
-        m_Client.BeginSend(writePacket.GetPacketByte(), 0, writePacket.GetPacketByte().Length, SocketFlags.None, SendCallback, null);
-    }
-
-    /// <summary>
-    /// 发送数据后的回调函数
+    /// 发送数据回调
     /// </summary>
     /// <param name="result"></param>
     private void SendCallback(IAsyncResult result)
@@ -109,7 +113,7 @@ public class AsyncTcpClient
             }
             catch (Exception ex)
             {
-                throw ex;
+                GameData.m_GameManager.m_LogMessage.text += string.Format("{0},", ex.Message);
             }
         }
     }
@@ -126,4 +130,27 @@ public class AsyncTcpClient
         m_ReceivePacketList.Clear();
         m_ReceivePacketList = null;
     }
+
+    /// <summary>
+    /// 每帧处理网络数据
+    /// </summary>
+    public void UpdateNet()
+    {
+        if (m_ReceivePacketList == null)
+            return;
+        while (m_ReceivePacketList.Count > 0)
+        {
+            OnMessage(m_ReceivePacketList[0]);
+            m_ReceivePacketList.RemoveAt(0);
+        }
+    }
+}
+
+/// <summary>
+/// 接收数据类
+/// </summary>
+public class AsyncSocketState
+{
+    //接收数据数组
+    public byte[] m_ReceiveBuffer;
 }

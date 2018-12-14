@@ -27,18 +27,8 @@ public class MoveState : BaseState
         if (m_Parameter == null || !m_Parameter.Contains("#"))
             return;
         float x = float.Parse(m_Parameter.Split('#')[0]);
-        float z = float.Parse(m_Parameter.Split('#')[2]);
+        float z = float.Parse(m_Parameter.Split('#')[1]);
         m_Player.m_Angles = (FixVector3)((new Vector3(x, 0, z).normalized));
-        m_MoveSpeed = (Fix64)m_Player.m_PlayerData.m_HeroAttrNode.movement_speed * GameData.m_FixFrameLen;
-        if (m_Player.m_PlayerData.m_Type == 1)
-        {
-            float posX = float.Parse(m_Parameter.Split('#')[3]);
-            float posY = float.Parse(m_Parameter.Split('#')[4]);
-            float posZ = float.Parse(m_Parameter.Split('#')[5]);
-            Fix64 fixX = (Fix64)posX + m_MoveSpeed * (Fix64)x;
-            Fix64 fixZ = (Fix64)posZ + m_MoveSpeed * (Fix64)z;
-            m_Player.m_Pos = new FixVector3(fixX, (Fix64)4.8F, fixZ);
-        }
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {

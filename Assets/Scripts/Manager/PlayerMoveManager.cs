@@ -30,17 +30,18 @@ public class PlayerMoveManager
         {
             if (GameData.m_CurrentPlayer.m_IsSkill || GameData.m_CurrentPlayer.m_IsAttack || GameData.m_CurrentPlayer.m_IsHit || GameData.m_CurrentPlayer == null || GameData.m_CurrentPlayer.m_PlayerData == null)
                 return;
-            //if (Math.Abs(x) < 0.1 && Math.Abs(y) < 0.1)
-            //    return;
-            //Vector3 pos = new Vector3(x, 0, y);
-            //float angle = Mathf.Acos(Vector3.Dot(pos.normalized, (pos - m_PrePos).normalized)) * Mathf.Rad2Deg;
-            //if ((m_PrePos == Vector3.zero || Mathf.Abs(angle - m_PreAngle) > 0.1f))
-            //{
-            string parameter = string.Format("{0}#{1}#{2}#{3}#{4}#{5}", x, 0, y, GameData.m_CurrentPlayer.m_Pos.x, GameData.m_CurrentPlayer.m_Pos.y, GameData.m_CurrentPlayer.m_Pos.z);
-            GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
-            //m_PrePos = pos;
-            //m_PreAngle = angle;
-            //}
+            if (Math.Abs(x) < 0.1 && Math.Abs(y) < 0.1)
+                return;
+            Vector3 pos = new Vector3(x, 0, y);
+            float angle = Mathf.Acos(Vector3.Dot(pos.normalized, (pos - m_PrePos).normalized)) * Mathf.Rad2Deg;
+            if ((m_PrePos == Vector3.zero || Mathf.Abs(angle - m_PreAngle) > 0.1f))
+            {
+                //string parameter = string.Format("{0}#{1}#{2}#{3}#{4}#{5}", x, 0, y, GameData.m_CurrentPlayer.m_Pos.x, GameData.m_CurrentPlayer.m_Pos.y, GameData.m_CurrentPlayer.m_Pos.z);
+                string parameter = string.Format("{0}#{1}", x,y);
+                GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
+                m_PrePos = pos;
+                m_PreAngle = angle;
+            }
         }
     }
 }

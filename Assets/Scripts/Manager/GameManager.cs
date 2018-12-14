@@ -24,6 +24,8 @@ public class GameManager
     public GridManager m_GridManager;
     //Log输出
     public UILabel m_LogMessage;
+    //匹配延时
+    private Delay m_MatchTimeDelay;
 
     /// <summary>
     /// 初始化TCP网络
@@ -31,7 +33,25 @@ public class GameManager
     public void InitTcpNet()
     {
         m_NetManager = new NetManager();
-        m_NetManager.InitClient();
+        m_NetManager.InitTcpClient();
+        m_OpreationManager = new OpreationManager();
+        m_UIManager = new UIManager();
+        m_DelayManager = new DelayManager();
+        #region 显示层
+        if (GameData.m_IsExecuteViewLogic)
+            m_LogMessage = GameObject.Find("LogMessage").GetComponent<UILabel>();
+        #endregion
+    }
+
+    /// <summary>
+    /// 每帧处理Tcp网络逻辑
+    /// </summary>
+    public void UpdateTcpNet()
+    {
+        if (m_NetManager != null)
+            m_NetManager.UpdateTcpNet();
+        if (GameData.m_GameManager.m_DelayManager != null)
+            GameData.m_GameManager.m_DelayManager.UpdateDelay();
     }
     /// <summary>
     /// 初始化
@@ -39,21 +59,13 @@ public class GameManager
     public void InitGame()
     {
         LoadJsonData();
-        m_NetManager = new NetManager();
-        m_NetManager.InitClient();
+        m_NetManager.InitUdpClient();
         m_PlayerMoveManager = new PlayerMoveManager();
-        m_OpreationManager = new OpreationManager();
         m_BattleLogicManager = new BattleLogicManager();
         m_BulletManager = new BulletManager();
-        m_DelayManager = new DelayManager();
         m_SpawnManager = new SpawnManager();
-        m_UIManager = new UIManager();
         m_GridManager = new GridManager();
         m_GridManager.InitGrid();
-        #region 显示层
-        if (GameData.m_IsExecuteViewLogic)
-            m_LogMessage = GameObject.Find("LogMessage").GetComponent<UILabel>();
-        #endregion
     }
 
     /// <summary>
@@ -65,15 +77,12 @@ public class GameManager
             m_NetManager.UpdateNet();
         if (!GameData.m_IsGame)
             return;
-        GameData.m_ClientGameFrame++;
         if (GameData.m_GameManager.m_PlayerMoveManager != null)
             GameData.m_GameManager.m_PlayerMoveManager.UpdateMove();
         if (GameData.m_GameManager.m_BattleLogicManager != null)
             GameData.m_GameManager.m_BattleLogicManager.UpdateLogic();
         if (GameData.m_GameManager.m_BulletManager != null)
             GameData.m_GameManager.m_BulletManager.UpdateAttack();
-        if (GameData.m_GameManager.m_DelayManager != null)
-            GameData.m_GameManager.m_DelayManager.UpdateDelay();
         if (GameData.m_GameManager.m_SpawnManager != null)
             GameData.m_GameManager.m_SpawnManager.UpdateLogic();
     }
@@ -89,9 +98,12 @@ public class GameManager
             GameData.m_TowerList[i].Destroy();
         GameData.m_PlayerList.Clear();
         GameData.m_TowerList.Clear();
-        m_NetManager.OnDisconnect();
-        m_DelayManager.DestoryDelay();
-        m_BulletManager.DestoryAttack();
+        if (m_NetManager != null)
+            m_NetManager.OnDisconnect();
+        if (m_DelayManager != null)
+            m_DelayManager.DestoryDelay();
+        if (m_BulletManager != null)
+            m_BulletManager.DestoryAttack();
     }
 
     /// <summary>
@@ -115,7 +127,7 @@ public class GameManager
     public void InputReady()
     {
         CWritePacket packet = m_OpreationManager.InputReady();
-        m_NetManager.Send(packet);
+        m_NetManager.SendUdp(packet);
     }
 
     /// <summary>
@@ -136,6 +148,26 @@ public class GameManager
     public void InputLogin(string account)
     {
         CWritePacket packet = m_OpreationManager.InputLogin(account);
+        m_NetManager.Send(packet);
+    }
+
+    /// <summary>
+    /// 参加匹配
+    /// </summary>
+    /// <param name="account"></param>
+    public void InputMatch(int matchType)
+    {
+        CWritePacket packet = m_OpreationManager.InputMatch(matchType);
+        m_NetManager.Send(packet);
+    }
+
+    /// <summary>
+    /// 进入匹配房间
+    /// </summary>
+    /// <param name="account"></param>
+    public void InputJoinMatchRoom()
+    {
+        CWritePacket packet = m_OpreationManager.InputJoinMatchRoom();
         m_NetManager.Send(packet);
     }
     /// <summary>
@@ -170,10 +202,11 @@ public class GameManager
         for (int i = 0; i < data.Length; i++)
         {
             Dictionary<string, object> playerDic = data[i] as Dictionary<string, object>;
-            int roleId = playerDic.TryGetInt("id");
-            string roleName = playerDic.TryGetString("name");
+            int roleId = playerDic.TryGetInt("playerId");
+            string roleName = playerDic.TryGetString("playerName");
             int heroId = int.Parse(playerDic.TryGetString("heroId"));
-            int campId = i % 2 == 0 ? 1 : 2;
+            int campId = int.Parse(playerDic.TryGetString("teamId"));
+            campId = campId == 0 ? 1 : 2;
             PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 1);
             CreatePlayer(charData);
         }
@@ -187,7 +220,7 @@ public class GameManager
             int campId = i % 2 == 0 ? 1 : 2;
             CreateTower(campId, 2);
         }
-        GameData.m_GameManager.m_GridManager.InitTowerGrid();
+        m_GridManager.InitTowerGrid();
     }
 
     public void SyncKey(Dictionary<string, object> data)
@@ -218,14 +251,110 @@ public class GameManager
         //GameData.m_GameFrame += 1;
         //}
     }
-
+    /// <summary>
+    /// 登录游戏
+    /// </summary>
+    /// <param name="data"></param>
     public void LoginGame(Dictionary<string, object> data)
     {
         int result = data.TryGetInt("ret");
         int playerId = data.TryGetInt("playerId");
         GameData.m_CurrentRoleId = playerId;
+        if (result != 0)
+            return;
+        m_UIManager.m_UpdateMatchUICallback();
     }
 
+    /// <summary>
+    /// 匹配游戏
+    /// </summary>
+    /// <param name="data"></param>
+    public void MatchGame(Dictionary<string, object> data)
+    {
+        int result = data.TryGetInt("ret");
+        if (result != 0)
+            return;
+        Delay delay = new Delay();
+        delay.InitMatchTime(Fix64.FromRaw(30000), UpdateMatchTime);
+        m_DelayManager.m_DelayList.Add(delay);
+    }
+
+    /// <summary>
+    /// 匹配游戏成功
+    /// </summary>
+    /// <param name="data"></param>
+    public void MatchGameSuccess(Dictionary<string, object> data)
+    {
+        int result = data.TryGetInt("ret");
+        if (result != 0)
+            return;
+        string matchKey = data.TryGetString("matchKey");
+        GameData.m_CampId = data.TryGetInt("teamId");
+        GameData.m_MatchPos = data.TryGetInt("pos");
+        GameData.m_MatchKey = matchKey;
+        if (data["teamInfo"] == null)
+            return;
+        object[] teamInfoArray = data["teamInfo"] as object[];
+        List<MatchPlayerData> matchPlayerList = new List<MatchPlayerData>();
+        for (int i = 0; i < teamInfoArray.Length; i++)
+        {
+            Dictionary<string, object> keydata = teamInfoArray[i] as Dictionary<string, object>;
+            MatchPlayerData matchPlayer = new MatchPlayerData();
+            matchPlayer.m_CampId = keydata.TryGetInt("teamId");
+            matchPlayer.m_Pos = keydata.TryGetInt("pos");
+            matchPlayerList.Add(matchPlayer);
+        }
+        m_UIManager.m_UpdateMatchSuccessUICallback();
+    }
+
+    /// <summary>
+    /// 确认进入匹配房间
+    /// </summary>
+    /// <param name="data"></param>
+    public void JoinMatchRoom(Dictionary<string, object> data)
+    {
+        int result = data.TryGetInt("ret");
+        if (result != 0)
+            return;
+    }
+
+    /// <summary>
+    /// 点亮匹配头像
+    /// </summary>
+    /// <param name="data"></param>
+    public void JoinMatchRoomInPos(Dictionary<string, object> data)
+    {
+        int campId = data.TryGetInt("teamId");
+        int pos = data.TryGetInt("pos");
+        GameData.m_GameManager.m_UIManager.m_UpdateConfirmMatchUICallback(campId, pos);
+    }
+
+    /// <summary>
+    /// 进入匹配房间
+    /// </summary>
+    /// <param name="data"></param>
+    public void JoinMatchHeroRoom(Dictionary<string, object> data)
+    {
+        int result = data.TryGetInt("ret");
+        if (result != 0)
+            return;
+        string mobaKey = data.TryGetString("mobaKey");
+        string udpIp = data.TryGetString("ip");
+        int udpPort = data.TryGetInt("port");
+        GameData.m_UdpIP = udpIp;
+        GameData.m_UdpPort = udpPort;
+        GameData.m_MobaKey = mobaKey;
+        m_UIManager.m_UpdateMatchHeroRoomUICallback();
+    }
+
+    /// <summary>
+    /// 匹配游戏倒计时
+    /// </summary>
+    /// <param name="time"></param>
+    private void UpdateMatchTime(int time)
+    {
+        m_UIManager.m_UpdateMatchTimeUICallback(time);
+    }
     /// <summary>
     /// 加载游戏数据
     /// </summary>

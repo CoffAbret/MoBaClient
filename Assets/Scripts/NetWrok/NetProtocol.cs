@@ -20,4 +20,18 @@ public class NetProtocol
     public const int LOGIN_REQ = 1001;
     //登录返回
     public const int LOGIN_RET = 1002;
+    //匹配发送
+    public const int MATCH_REQ = 1003;
+    //匹配返回
+    public const int MATCH_RET = 1004;
+    //匹配成功返回
+    public const int MATCH_SUCCESS_RET = 1005;
+    //进入匹配房间
+    public const int MATCH_JOIN_ROOM_REQ = 1006;
+    //进入匹配房间返回
+    public const int MATCH_JOIN_ROOM_RET = 1007;
+    //进入选择英雄界面
+    public const int MATCH_HERO_ROOM_RET = 1008;
+    //点亮匹配头像
+    public const int MATCH_JOIN_ROOM_IN_POSTION = 1009;
 }

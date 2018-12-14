@@ -15,6 +15,14 @@ public class GameData
     public static int m_HeroId = 201991000;
     //当前阵营
     public static int m_CampId;
+    //当前匹配位置
+    public static int m_MatchPos;
+    //当前匹配Key值
+    public static string m_MatchKey;
+    //当前MobaKey值
+    public static string m_MobaKey;
+    //匹配用户列表
+    public static List<MatchPlayerData> m_MatchPlayerDataList;
     //当前显示角色
     public static Player m_CurrentPlayer;
     //每帧时间长度
@@ -46,11 +54,11 @@ public class GameData
     //是否正在查看小地图
     public static bool m_IsDragMinMap;
     //IP
-    public static string m_IP = "192.168.3.55";
+    public static string m_IP = "192.168.3.88";
     //端口
     public static int m_Port = 8889;
     //UDPIP
-    public static string m_UdpIP = "192.168.3.55";
+    public static string m_UdpIP = "192.168.3.88";
     //UDP端口
     public static int m_UdpPort = 8888;
     //普攻按钮点击次数
