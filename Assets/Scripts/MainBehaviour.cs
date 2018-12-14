@@ -196,7 +196,7 @@ public class MainBehaviour : MonoBehaviour
         if (m_Index == 7 && m_Skill4CD.fillAmount > 0)
             return;
         GameData.m_CurrentPlayer.m_IsSkill = true;
-        GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Index.ToString());
+        GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Index.ToString()+"#5#0#5");
     }
 
     /// <summary>

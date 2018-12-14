@@ -30,6 +30,11 @@ public class Delay
     GameObject m_AddHPGo = null;
     //是否开启
     public bool m_Enable;
+    //延迟方法
+    public delegate void DoCallBack();
+    //延迟方法
+    DoCallBack m_DoCallBack = null;
+
     public Delay()
     {
         m_DelayId = Guid.NewGuid().ToString();
@@ -65,6 +70,9 @@ public class Delay
 
             if (m_ResurgenceCallback != null && m_ResurgencePlayerData != null)
                 m_ResurgenceCallback(m_ResurgencePlayerData);
+
+            if (m_DoCallBack != null)
+                m_DoCallBack();
 
             m_Enable = false;
         }
@@ -149,5 +157,23 @@ public class Delay
         m_MatchTimeCallback = null;
         m_SkillCDUISprite = null;
         m_Enable = false;
+    }
+
+    public void DelayDo(Fix64 time, DoCallBack callback)
+    {
+        if (time <= (Fix64)0)
+        {
+            m_Enable = true;
+            m_FixElapseTime = (Fix64)0.02;
+            m_FixPlanTime = (Fix64)0.02;
+            m_DoCallBack = callback;
+        }
+        else
+        {
+            m_Enable = true;
+            m_FixElapseTime = Fix64.Zero;
+            m_FixPlanTime = time;
+            m_DoCallBack = callback;
+        }
     }
 }

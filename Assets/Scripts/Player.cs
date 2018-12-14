@@ -48,6 +48,7 @@ public class Player
     public SkillNode m_SkillNode;
     //销毁延迟时间
     private Fix64 m_DestoryDelayTime = Fix64.FromRaw(1000);
+
     #endregion
     #region 显示层
 
@@ -204,7 +205,8 @@ public class Player
         if (m_State == null)
             return;
         m_State.UpdateLogic();
-        if (m_PlayerData != null && m_HudText != null && m_PlayerData.m_Type == 1)
+
+        if (m_PlayerData != null && m_PlayerData.m_Type == 1)
             GameData.m_GameManager.m_UIManager.m_UpdateAddHpCallback(this);
     }
 
