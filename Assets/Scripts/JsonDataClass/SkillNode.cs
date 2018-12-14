@@ -489,7 +489,7 @@ public class SkillNode : FSDataNodeBase
     {
         if (object_temp == null || object_temp.Length == 0)
         {
-            Debug.LogError("     SkillNode    ");
+           //Debug.LogError("     SkillNode    ");
             return;
         }
         for (int i = 0; i < object_temp.Length; i++)

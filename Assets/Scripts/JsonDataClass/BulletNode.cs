@@ -172,7 +172,7 @@ public class BulletNode : FSDataNodeBase
     {
         if (object_temp == null || object_temp.Length == 0)
         {
-            Debug.LogError("     BulletNode    ");
+            //Debug.LogError("     BulletNode    ");
             return;
         }
         for (int i = 0; i < object_temp.Length; i++)
@@ -185,7 +185,7 @@ public class BulletNode : FSDataNodeBase
     {
         if (object_temp == null || object_temp.Length == 0)
         {
-            Debug.LogError("     BulletNode    ");
+            //Debug.LogError("     BulletNode    ");
             return;
         }
         for (int i = 0; i < object_temp.Length; i++)
@@ -199,7 +199,7 @@ public class BulletNode : FSDataNodeBase
     {
         if (object_temp == null || object_temp.Length == 0)
         {
-            Debug.LogError("     BulletNode    ");
+            //Debug.LogError("     BulletNode    ");
             return;
         }
         for (int i = 0; i < object_temp.Length; i++)

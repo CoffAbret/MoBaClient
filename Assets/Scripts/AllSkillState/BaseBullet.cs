@@ -704,7 +704,7 @@ public class BaseBullet : BaseState
         {
             return;
         }
-        Debug.LogError("创建子子弹");
+        //Debug.LogError("创建子子弹");
         if (m_BulletNode.newbul != null && m_BulletNode.newbul.Count > 0)
         {
             for (int i = 0; i < m_BulletNode.newbul.Count; i++)
@@ -713,7 +713,7 @@ public class BaseBullet : BaseState
                     return;
                 if (i >= m_BulletNode.newbul.Count)
                 {
-                    Debug.LogError("     子弹触发时间点数组长度不对       ");
+                    //Debug.LogError("     子弹触发时间点数组长度不对       ");
                     return;
                 }
                 if (i == 0)
@@ -729,7 +729,7 @@ public class BaseBullet : BaseState
                 Delay delay = new Delay();
                 delay.DelayDo((Fix64)time, () =>
                 {
-                    Debug.LogError("触发轮数：" + m_BulletClass.son_now);
+                    ////Debug.LogError("触发轮数：" + m_BulletClass.son_now);
                     BaseBullet m_SkillState = new BaseBullet();
                     Bullet_ValueClass bullet = m_BulletClass;
                     if (m_BulletNode.newbul.Count > 0 && m_BulletNode.newbul[count_temp] != null)
@@ -738,7 +738,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul");
+                        //Debug.LogError("newbul");
                     }
                     //------------
                     if (m_BulletNode.newbul_target_type[count_temp] != null && m_BulletNode.newbul_target_type[count_temp].Length > 0)
@@ -747,7 +747,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_target_type");
+                        //Debug.LogError("newbul_target_type");
                     }
                     //------------
                     if (m_BulletNode.newbul_target_value.Count > 0 && m_BulletNode.newbul_target_value[count_temp] != null && m_BulletNode.newbul_target_value[count_temp].Length > 0)
@@ -760,7 +760,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_target_value");
+                        //Debug.LogError("newbul_target_value");
                     }
                     //------------
                     if (m_BulletNode.newbul_target_size.Count > 0 && m_BulletNode.newbul_target_size[count_temp] != null && m_BulletNode.newbul_target_size[count_temp].Length > 0)
@@ -769,7 +769,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_target_size");
+                        //Debug.LogError("newbul_target_size");
 
                     }
                     //------------
@@ -779,7 +779,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_firing");
+                        //Debug.LogError("newbul_firing");
                     }
                     //------------
                     if (m_BulletNode.newbul_firing_xyz.Count > 0 && m_BulletNode.newbul_firing_xyz[count_temp] != null)
@@ -788,7 +788,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_firing_xyz");
+                        //Debug.LogError("newbul_firing_xyz");
                     }
                     //------------
                     if (m_BulletNode.newbul_end.Count > 0 && m_BulletNode.newbul_end[count_temp] != null && m_BulletNode.newbul_end[count_temp].Length > 0)
@@ -797,7 +797,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_end");
+                        //Debug.LogError("newbul_end");
                     }
                     //------------
                     if (m_BulletNode.newbul_end_xyz.Count > 0 && m_BulletNode.newbul_end_xyz[count_temp] != null)
@@ -806,7 +806,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_end_xyz");
+                        //Debug.LogError("newbul_end_xyz");
                     }
                     //------------
                     if (m_BulletNode.newbul_angle.Count > 0 && m_BulletNode.newbul_angle[count_temp] != null && m_BulletNode.newbul_angle[count_temp].Length > 0)
@@ -815,7 +815,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_angle");
+                        //Debug.LogError("newbul_angle");
                     }
                     //------------
                     if (m_BulletNode.newbul_origin.Count > 0 && m_BulletNode.newbul_origin[count_temp] != null && m_BulletNode.newbul_origin[count_temp].Length > 0)
@@ -824,7 +824,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_origin");
+                        //Debug.LogError("newbul_origin");
                     }
                     //------------
                     if (m_BulletNode.newbul_target_extra.Count > 0 && m_BulletNode.newbul_target_extra[count_temp] != null && m_BulletNode.newbul_target_extra[count_temp].Length > 0)
@@ -833,7 +833,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_target_extra");
+                        //Debug.LogError("newbul_target_extra");
                     }
                     //------------
                     if (m_BulletNode.newbul_max.Count > 0 && m_BulletNode.newbul_max[count_temp] != null && m_BulletNode.newbul_max[count_temp].Length > 0)
@@ -842,7 +842,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_target_extra");
+                        //Debug.LogError("newbul_target_extra");
                     }
                     //------------
                     if (m_BulletNode.newbul_num_single.Count > 0 && m_BulletNode.newbul_num_single[count_temp] != null && m_BulletNode.newbul_num_single[count_temp].Length > 0)
@@ -855,7 +855,7 @@ public class BaseBullet : BaseState
                     }
                     else
                     {
-                        Debug.LogError("newbul_num_single");
+                        //Debug.LogError("newbul_num_single");
                     }
                     //switch (m_Player.m_SkillNode.skill_usetype)
                     //{
