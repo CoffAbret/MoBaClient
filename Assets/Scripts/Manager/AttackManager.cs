@@ -8,7 +8,7 @@ using UnityEngine;
 public class BulletManager
 {
     //子弹列表
-    public List<PlayerBullet> m_AttackList = new List<PlayerBullet>();
+    public List<BaseBullet> m_AttackList = new List<BaseBullet>();
 
     /// <summary>
     /// 每帧执行逻辑

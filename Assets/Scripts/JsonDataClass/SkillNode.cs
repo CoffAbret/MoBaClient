@@ -54,16 +54,29 @@ public enum SkillCastType
     Boom = 37,
     Around = 38,
 }
-//作用类型 0：自己：1：我方英雄；2：我方小兵；3：敌方英雄；4：敌方小兵；5：敌方防御塔；6：敌方基地；
+//作用类型 1：自己：2：我方小兵；3：敌方小兵4：我方英雄；5：敌方英雄；
 public enum influence_type
 {
-    self = 0,
-    selfHero = 1,
+    self = 1,
     selfMonster = 2,
-    enemyHero = 3,
-    enemyMonster = 4,
-    enemyTower = 5,
-    enemyBase = 6
+    enemyMonster = 3,
+    selfHero = 4,
+    enemyHero = 5,
+}
+
+public enum col_type
+{
+    self = 0,
+    selfMonster = 1,
+    selfHero = 2,
+    enemyMonster = 3,
+    enemyHero = 4,
+    selfTower = 5,
+    enemyTower = 6,
+    neutralMonster = 7,
+    neutralTower = 8,
+    terrain = 9,
+    target = 10,
 }
 //技能作用范围类型 0：无；1：溅射；2：被格挡；3：推进
 public enum rangeType
@@ -105,6 +118,43 @@ public class RangenValue
     public float outerRadius;
     public float innerRadius;
     public float angle;
+}
+
+//动作中朝向
+//"1.释放时朝向不变
+//2.跟随目标方向转动
+//3.可手动调整方向
+//4.等同位移方向
+public enum FaceType
+{
+    None = 0,
+    Hold = 1,
+    FollowTarget = 2,
+    Handle = 3,
+    MoveForward = 4,
+}
+//释放类型
+//"1.方向型
+//2.坐标点型
+//3.直接释放型
+//4.目标型
+public enum SkillUseType
+{
+    None = 0,
+    Direction = 1,
+    Point = 2,
+    Forward = 3,
+    Target = 4,
+}
+//子弹目标类型
+//"0.自身
+//1.当前目标
+//2.范围内目标"
+public enum BulTargetType
+{
+    Self = 0,
+    Target = 1,
+    Range = 2,
 }
 
 public class SkillNode : FSDataNodeBase
@@ -179,10 +229,38 @@ public class SkillNode : FSDataNodeBase
 
 
     public object[] life_drain;//技能吸血参数 [a,b]a:1固定值2百分比b:参数（大于0）
+    //--------------------------------------------------------------------------------------
+    //新加数据
+    public int energyvalue;//施放消耗值
+    public bool can_move;//动作中位移
+    public bool is_turnround;//释放前转向
+    public FaceType face_type;//动作中朝向
+    public string[] effect;//动作特效
+    public int[] effect_position;//特效挂点
+    public List<Vector3> effect_positionxyz = new List<Vector3>();//特效挂点位置偏移
+    public double[] effect_start;//施法特效生成时间
+    public double[] effect_end;//施法特效存在时间
+    public SkillUseType skill_usetype;//释放类型
+    public double[] bullet_time;//子弹触发时间点
+    public int[] bullet_id;//子弹id
+    public int[] bul_target_type;//子弹目标类型
+    public List<int[]> bul_target_value;//子弹目标类型参数
+    public int[] bul_target_size;//子弹目标范围参数
+    public int[] max_bul;//子弹最大数量
+    public List<int[]> bul_num_single;//同目标最小，最大数量
+    public int[] bul_start;//子弹发射源" 1.自身 2.当前目标"
+    public List<Vector3> firing_xyz = new List<Vector3>();//子弹发射挂点偏移
+    public int bul_end;//子弹目标挂点 0:脚底下；1：发射点
+    public List<Vector3> bul_end_xyz = new List<Vector3>();//子弹目标挂点偏移
+    public int[] bul_end_angle;//子弹目标挂点偏移角度
+    public int[] bul_son_max;//子子弹触发最大轮数
+    public int[] combo_time;//普攻连击限制
+    //--------------------------------------------------------------------------------------
+
     public override void ParseJson(object jd)
     {
         Dictionary<string, object> item = (Dictionary<string, object>)jd;
-        skill_id = item.TryGetLong("skill_id");
+        skill_id = item.TryGetLong("skillid");
         name = item.TryGetString("name");
         hero_id = item.TryGetLong("hero_id");
         skill_name = item.TryGetString("skill_name");
@@ -296,10 +374,6 @@ public class SkillNode : FSDataNodeBase
         missable = item.TryGetByte("missable");
         efficiency_time = item.TryGetFloat("efficiency_time");
         effect_time = item.TryGetFloat("effect_time");
-        if (item.ContainsKey("firing"))
-        {
-            isFiringPoint = item.TryGetInt("firing");
-        }
         cooling = item.TryGetFloat("cooling");
         if (item.ContainsKey("base_num1"))
         {
@@ -346,6 +420,86 @@ public class SkillNode : FSDataNodeBase
         if (item.ContainsKey("alerted_position"))
         {
             alerted_position = item.TryGetInt("alerted_position");
+        }
+
+        //--------------------------------------------------------------------------------------
+        //新加数据
+        energyvalue = item.TryGetInt("energy_value");
+        can_move = item.TryGetInt("can_move") == 2;
+        is_turnround = item.TryGetInt("is_turnround") == 1;
+        face_type = (FaceType)item.TryGetInt("face_type");
+        effect = item.TryGetStringIntArr("effect");
+        effect_position = item.TryGetIntArr("effect_position");
+        if (item.ContainsKey("effect_positionxyz") && item["effect_positionxyz"] != null)
+        {
+            object[] effect_positionxyz_temp = item["effect_positionxyz"] as object[];
+            GetVector3List(effect_positionxyz, effect_positionxyz_temp);
+        }
+        effect_start = item.TryGetDoubleArr("effect_start");
+        effect_end = item.TryGetDoubleArr("effect_end");
+        skill_usetype = (SkillUseType)item.TryGetInt("skill_usetype");
+        bullet_time = item.TryGetDoubleArr("bullet_time");
+        bullet_id = item.TryGetIntArr("bullet_id");
+        bul_target_type = item.TryGetIntArr("bul_target_type");
+        if (item.ContainsKey("bul_target_value") && item["bul_target_value"] != null)
+        {
+            bul_target_value = new List<int[]>();
+            object[] bul_target_value_temp = item["bul_target_value"] as object[];
+            for (int i = 0; i < bul_target_value_temp.Length; i++)
+            {
+                int[] objs = bul_target_value_temp[i] as int[];
+                bul_target_value.Add(objs);
+            }
+        }
+        bul_target_size = item.TryGetIntArr("bul_target_size");
+        max_bul = item.TryGetIntArr("max_bul");
+        if (item.ContainsKey("bul_num_single") && item["bul_num_single"] != null)
+        {
+            bul_num_single = new List<int[]>();
+            object[] bul_num_single_temp = item["bul_num_single"] as object[];
+            for (int i = 0; i < bul_num_single_temp.Length; i++)
+            {
+                int[] objs = bul_num_single_temp[i] as int[];
+                bul_num_single.Add(objs);
+            }
+        }
+        bul_start = item.TryGetIntArr("bul_start");
+        isFiringPoint = item.TryGetInt("firing");
+        if (item.ContainsKey("firing_xyz") && item["firing_xyz"] != null)
+        {
+            object[] firing_xyz_temp = item["firing_xyz"] as object[];
+            GetVector3List(firing_xyz, firing_xyz_temp);
+        }
+        bul_end = item.TryGetInt("bul_end");
+        if (item.ContainsKey("bul_end_xyz") && item["bul_end_xyz"] != null)
+        {
+            object[] bul_end_xyz_temp = item["bul_end_xyz"] as object[];
+            GetVector3List(bul_end_xyz, bul_end_xyz_temp);
+        }
+
+        bul_end_angle = item.TryGetIntArr("bul_end_angle");
+        bul_son_max = item.TryGetIntArr("bul_son_max");
+        combo_time = item.TryGetIntArr("combo_time");
+
+        //--------------------------------------------------------------------------------------
+
+    }
+
+    public void GetVector3List(List<Vector3> list_temp, object[] object_temp)
+    {
+        if (object_temp == null || object_temp.Length == 0)
+        {
+            Debug.LogError("     SkillNode    ");
+            return;
+        }
+        for (int i = 0; i < object_temp.Length; i++)
+        {
+            double[] objs = object_temp[i] as double[];
+            if (objs != null && objs.Length == 3)
+            {
+                Vector3 temp = new Vector3(objs[0].ToString().StringToFloat(), objs[1].ToString().StringToFloat(), objs[2].ToString().StringToFloat());
+                list_temp.Add(temp);
+            }
         }
     }
 

@@ -70,7 +70,7 @@ public class AttackState : BaseState
             m_TargetPos = m_Player.m_TargetPlayer.m_Pos;
         }
         m_Player.m_IsAttack = true;
-        if (m_TargetPos != FixVector3.Zero)
+        if (m_Player.m_SkillNode.is_turnround && m_TargetPos != FixVector3.Zero)
         {
             //普通攻击自动改变朝向
             FixVector3 relativePos = m_TargetPos - m_Player.m_Pos;
@@ -87,6 +87,181 @@ public class AttackState : BaseState
         if (GameData.m_IsExecuteViewLogic)
         {
             m_Animator.SetInteger(m_StateParameter, m_Player.m_SkillIndex);
+            #region  加载施法特效
+            if (m_Player.m_SkillNode.effect != null && m_Player.m_SkillNode.effect.Length > 0)
+            {
+                for (int i = 0; i < m_Player.m_SkillNode.effect.Length; i++)//加载施法特效
+                {
+                    if (i >= m_Player.m_SkillNode.effect_start.Length || i >= m_Player.m_SkillNode.effect_end.Length)
+                    {
+                        Debug.LogError("     施法特效开始时间，结束时间数组长度不对       ");
+                        return;
+                    }
+                    int count_temp = 0;
+                    Delay delay = new Delay();
+                    delay.DelayDo((Fix64)m_Player.m_SkillNode.effect_start[i], () =>
+                    {
+                        string eff = m_Player.m_SkillNode.effect[count_temp];
+                        if (m_Player.m_PlayerData.m_Type == 1 && !string.IsNullOrEmpty(eff))
+                        {
+                            GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, eff));
+                            if (effectGo != null)
+                                m_AniEffect = GameObject.Instantiate(effectGo);
+                        }
+                        if (m_Player.m_PlayerData.m_Type == 2 && !string.IsNullOrEmpty(eff))
+                        {
+                            GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Monster", m_Player.m_PlayerData.m_HeroName, eff));
+                            if (effectGo != null)
+                                m_AniEffect = GameObject.Instantiate(effectGo);
+                        }
+                        if (m_AniEffect == null)
+                            return;
+                        if (/*count_temp >= m_Player.m_SkillNode.effect_position.Length ||*/ count_temp >= m_Player.m_SkillNode.effect_positionxyz.Count)
+                        {
+                            Debug.LogError("     施法特效挂点数组,位置偏移数组长度不对       ");
+                            return;
+                        }
+                        #region 后修改为挂点
+                        m_AniEffect.transform.parent = m_Player.m_VGo.transform;
+                        #endregion
+                        m_AniEffect.transform.localPosition = Vector3.zero + m_Player.m_SkillNode.effect_positionxyz[count_temp];
+                        m_AniEffect.transform.localRotation = Quaternion.Euler(Vector3.zero);
+                        m_AniEffect.transform.localScale = Vector3.one;
+                        Delay end_delay = new Delay();
+                        end_delay.InitDestory(m_AniEffect, (Fix64)m_Player.m_SkillNode.effect_end[count_temp]);
+                        GameData.m_GameManager.m_DelayManager.m_DelayList.Add(end_delay);
+                        count_temp++;
+                    });
+                    GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
+                }
+            }
+            #endregion
+        }
+        #endregion
+        //创建子弹
+        #region
+        if (m_Player.m_SkillNode.bullet_id != null && m_Player.m_SkillNode.bullet_id.Length > 0)
+        {
+            for (int i = 0; i < m_Player.m_SkillNode.bullet_id.Length; i++)
+            {
+                if (i >= m_Player.m_SkillNode.bullet_time.Length)
+                {
+                    Debug.LogError("     子弹触发时间点数组长度不对       ");
+                    return;
+                }
+                int count_temp = 0;
+                Delay delay = new Delay();
+                delay.DelayDo((Fix64)m_Player.m_SkillNode.bullet_time[i], () =>
+                {
+                    BaseBullet m_SkillState = new BaseBullet();
+                    Bullet_ValueClass bullet = new Bullet_ValueClass();
+                    if (m_Player.m_SkillNode.bullet_id != null)
+                    {
+                        bullet.m_BulletId = (Fix64)m_Player.m_SkillNode.bullet_id[count_temp];
+                    }
+                    else
+                    {
+                        Debug.LogError("bullet_id");
+                    }
+                    if (m_Player.m_SkillNode.bul_target_type != null)
+                    {
+                        bullet.m_bul_target_type = (Fix64)m_Player.m_SkillNode.bul_target_type[count_temp];
+                    }
+                    else
+                    {
+                        Debug.LogError("bul_target_type");
+                    }
+                    if (m_Player.m_SkillNode.bul_target_value != null)
+                    {
+                        bullet.m_bul_target_value = new Fix64[m_Player.m_SkillNode.bul_target_value[count_temp].Length];
+                        for (int j = 0; j < m_Player.m_SkillNode.bul_target_value[count_temp].Length; j++)
+                        {
+                            bullet.m_bul_target_value[j] = (Fix64)m_Player.m_SkillNode.bul_target_value[count_temp][j];
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("bul_target_value");
+                    }
+                    if (m_Player.m_SkillNode.bul_target_size != null)
+                    {
+                        bullet.m_bul_target_size = (Fix64)m_Player.m_SkillNode.bul_target_size[count_temp];
+                    }
+                    else
+                    {
+                        Debug.LogError("bul_target_size");
+
+                    }
+                    if (m_Player.m_SkillNode.bul_start != null)
+                    {
+                        bullet.m_bul_start = (Fix64)m_Player.m_SkillNode.bul_start[count_temp];
+                    }
+                    else
+                    {
+                        Debug.LogError("bul_start");
+                    }
+                    if (m_Player.m_SkillNode.firing_xyz != null)
+                    {
+                        bullet.m_firing_xyz = (FixVector3)m_Player.m_SkillNode.firing_xyz[count_temp];
+                    }
+                    else
+                    {
+                        Debug.LogError("firing_xyz");
+                    }
+                    bullet.m_bul_end = (Fix64)m_Player.m_SkillNode.bul_end;
+                    if (m_Player.m_SkillNode.bul_end_xyz != null)
+                    {
+                        bullet.m_bul_end_xyz = (FixVector3)m_Player.m_SkillNode.bul_end_xyz[count_temp];
+                    }
+                    else
+                    {
+                        Debug.LogError("bul_end_xyz");
+                    }
+                    if (m_Player.m_SkillNode.bul_end_angle != null)
+                    {
+                        bullet.m_bul_end_angle = (Fix64)m_Player.m_SkillNode.bul_end_angle[count_temp];
+                    }
+                    else
+                    {
+                        Debug.LogError("bul_end_angle");
+                    }
+                    if (m_Player.m_SkillNode.bul_son_max != null)
+                    {
+                        bullet.m_bul_son_max = (Fix64)m_Player.m_SkillNode.bul_son_max[count_temp];
+                    }
+                    else
+                    {
+                        Debug.LogError("bul_son_max");
+                    }
+                    switch (m_Player.m_SkillNode.skill_usetype)
+                    {
+                        case SkillUseType.None:
+                            break;
+                        case SkillUseType.Direction://方向型
+                            bullet.v_pos = m_Player.m_Pos + (FixVector3)(m_Player.m_Angles.ToVector3().normalized * 10);
+
+                            break;
+                        case SkillUseType.Point://坐标点型
+                            bullet.v_pos = (FixVector3)m_Player.m_TargetPlayer.m_Pos;
+
+                            break;
+                        case SkillUseType.Forward://直接释放型
+                            bullet.v_pos = m_Player.m_Pos + (FixVector3)(m_Player.m_Angles.ToVector3().normalized * 10);
+                            break;
+                        case SkillUseType.Target://目标型
+                            bullet.v_taregt.Add(m_Player.m_TargetPlayer);
+                            bullet.m_taregt = m_Player.m_TargetPlayer;
+                            break;
+                        default:
+                            break;
+                    }
+                    m_SkillState.CreateBullet(m_Player, bullet, m_Parameter);
+                    m_SkillState.OnEnter();
+                    GameData.m_GameManager.m_BulletManager.m_AttackList.Add(m_SkillState);
+                    count_temp++;
+                });
+                GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
+            }
         }
         #endregion
     }
@@ -104,38 +279,15 @@ public class AttackState : BaseState
         if (m_Player.m_SkillNode == null)
             return;
         m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-        if (m_Player.m_IntervalTime == (GameData.m_FixFrameLen * (Fix64)5))
-        {
-            #region 显示层
-            if (GameData.m_IsExecuteViewLogic)
-            {
-                if (m_Player.m_PlayerData.m_Type == 1)
-                {
-                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion));
-                    if (effectGo != null)
-                        m_AniEffect = GameObject.Instantiate(effectGo);
-                }
-                if (m_Player.m_PlayerData.m_Type == 2 && !string.IsNullOrEmpty(m_Player.m_SkillNode.spell_motion))
-                {
-                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Monster", m_Player.m_PlayerData.m_HeroName, m_Player.m_SkillNode.spell_motion));
-                    if (effectGo != null)
-                        m_AniEffect = GameObject.Instantiate(effectGo);
-                }
-                if (m_AniEffect == null)
-                    return;
-                m_AniEffect.transform.parent = m_Player.m_VGo.transform;
-                m_AniEffect.transform.localPosition = Vector3.zero;
-                m_AniEffect.transform.localRotation = Quaternion.Euler(Vector3.zero);
-                m_AniEffect.transform.localScale = Vector3.one;
-            }
-            #endregion
-        }
-        if (m_Player.m_IntervalTime == (GameData.m_FixFrameLen * (Fix64)10))
-        {
-            PlayerBullet attack = new PlayerBullet();
-            attack.Create(m_Player, m_Player.m_SkillNode);
-            GameData.m_GameManager.m_BulletManager.m_AttackList.Add(attack);
-        }
+
+        //if (m_Player.m_IntervalTime >= (((Fix64)m_Player.m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsLaunchAttack)
+        //{
+        //    PlayerAttack attack = new PlayerAttack();
+        //    attack.Create(m_Player, m_Player.m_SkillNode);
+        //    GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
+        //    m_Player.m_IsLaunchAttack = true;
+        //}
+
         if (m_Player.m_IntervalTime >= (Fix64)m_Player.m_SkillNode.animatorTime)
             OnExit();
     }
@@ -157,7 +309,6 @@ public class AttackState : BaseState
         }
         #endregion
         m_Player.m_IsAttack = false;
-        m_Player.m_SkillNode = null;
         m_Player.m_IntervalTime = Fix64.Zero;
         m_Player.m_SkillIndex = 0;
     }

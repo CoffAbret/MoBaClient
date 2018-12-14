@@ -206,7 +206,8 @@ public class GameManager
     /// </summary>
     public void LoadJsonData()
     {
-        FSDataNodeTable<SkillNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("skill_hero"));            //技能表
+        FSDataNodeTable<SkillNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("skill"));            //技能表
+        FSDataNodeTable<BulletNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("bullet"));               //子弹表
         FSDataNodeTable<ModelNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("model"));                 //模型表
         FSDataNodeTable<HeroNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("hero"));                   //英雄表
         FSDataNodeTable<HeroSkinNode>.GetSingleton().LoadJson(ResLoad.LoadJsonRes("skin"));               //英雄皮肤表

@@ -171,7 +171,6 @@ public class PlayerBullet
     public void Destory()
     {
         m_AttackPlayer = null;
-        m_SkillNode = null;
         m_WoundPlayerList.Clear();
         m_WoundPlayerList = null;
     }
