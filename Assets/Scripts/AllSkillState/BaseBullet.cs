@@ -7,7 +7,7 @@ public class Bullet_ValueClass
 {
     public Fix64 m_BulletId;//子弹id
     public Fix64 m_bul_target_type;//子弹目标类型
-    public Fix64[] m_bul_target_value;//子弹目标类型参数
+    public Fix64 m_bul_target_value;//子弹目标类型参数
     public Fix64 m_bul_target_size;//子弹目标范围参数
     public Fix64 m_bul_start;//子弹发射源" 1.自身 2.当前目标"
     public FixVector3 m_firing_xyz = FixVector3.Zero;//子弹发射挂点偏移
@@ -15,6 +15,8 @@ public class Bullet_ValueClass
     public FixVector3 m_bul_end_xyz = FixVector3.Zero;//子弹目标挂点偏移
     public Fix64 m_bul_end_angle;//子弹目标挂点偏移角度
     public Fix64 m_bul_son_max;//子子弹触发最大轮数
+    public Fix64 m_max_bul;//子弹最大数量
+
     //虚拟目标 1,2,3 通用
     public FixVector3 v_pos;
     //虚拟目标
@@ -25,7 +27,6 @@ public class Bullet_ValueClass
     //创建子子弹参数
     public Fix64 newbul_origin;//触发子弹发射者
     public Fix64 newbul_target_extra;//目标额外判定
-    public Fix64 newbul_max;//子弹最大数量
     public Fix64[] newbul_num_single;//同目标最小，最大数量
     public Fix64 son_now = Fix64.Zero;//子子弹触发当前轮数
 }
@@ -81,11 +82,8 @@ public class BaseBullet : BaseState
     public Player m_Target;
     //目标玩家list
     public List<Player> m_TargetList = new List<Player>();
-    //子弹发射源
-    public FixVector3 m_bullet_start;
-    //子弹目标挂点
-    public FixVector3 m_bullet_end;
-
+    //命中瞬移
+    private bool Blink = false;
 
     #region 显示层
 #if IS_EXECUTE_VIEWLOGIC
@@ -128,42 +126,58 @@ public class BaseBullet : BaseState
         }
         else if (m_BulletClass.m_bul_target_type == (Fix64)2)//范围内目标
         {
-            if (m_BulletClass.v_taregt.Count > 0)
-            {
-                m_Target = m_BulletClass.v_taregt[0];
-            }
+            m_Target = CheckBulTargetValue();
+            //if (m_BulletClass.v_taregt.Count > 0)
+            //{
+            //    m_Target = m_BulletClass.v_taregt[0];
+            //}
         }
         #endregion
-        //if (m_SkillNode.interval_time.Length > 0)
-        //    m_Isinterval = true;
-        //else
-        //    m_Isinterval = false;
+
         m_IsActive = true;
-        m_Pos = player.m_Pos;
-        //m_WoundPlayerList = new List<Player>();
-        //m_WoundTowerList = new List<Tower>();
+
+        #region 技能判断子弹发射者
+        if (m_BulletClass.m_bul_start == (Fix64)1)//自身
+        {
+            m_Pos = player.m_Pos;
+        }
+        else if (m_BulletClass.m_bul_start == (Fix64)2)//当前目标
+        {
+            if (m_Target == null)
+                return;
+            m_Pos = m_Target.m_Pos;
+        }
+        #endregion
+
+        #region 子子弹判断子弹发射者
+        if (m_BulletClass.newbul_origin == (Fix64)0)//无
+        {
+        }
+        else if (m_BulletClass.newbul_origin == (Fix64)1)//当前子弹碰撞目标
+        {
+            m_Pos = m_BulletClass.m_taregt.m_Pos;
+        }
+        else if (m_BulletClass.newbul_origin == (Fix64)2)//技能释放者
+        {
+            m_Pos = player.m_Pos;
+        }
+        #endregion
+
         m_BuHurtList = new List<BeHurtTarget>();
         if (Math.Abs(m_SkillNode.max_fly) > 0 && Math.Abs(m_SkillNode.flight_speed) > 0)
             m_destoryTime = (Fix64)(m_SkillNode.max_fly / m_SkillNode.flight_speed);
 
-        //子弹发射位置
-        m_bullet_start = (FixVector3)m_Player.m_Pos + bullet.m_firing_xyz;
         //子弹结束位置
         if (m_Target != null)
         {
-            m_bullet_end = (FixVector3)m_Target.m_Pos + bullet.m_bul_end_xyz;
+            m_BulletClass.v_pos = (FixVector3)m_Target.m_Pos + bullet.m_bul_end_xyz;
         }
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
-            //obj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            //obj.transform.localScale = new Vector3(m_SkillNode.aoe_long, 0f, m_SkillNode.aoe_long);
             #region  加载子弹特效
             if (!string.IsNullOrEmpty(m_BulletNode.effect))
             {
-                //Delay delay = new Delay();
-                //delay.DelayDo((Fix64)m_Player.m_SkillNode.effect_start[i], () =>
-                //{
                 string eff = m_BulletNode.effect;
                 if (m_Player.m_PlayerData.m_Type == 1 && !string.IsNullOrEmpty(eff))
                 {
@@ -179,7 +193,7 @@ public class BaseBullet : BaseState
                 }
                 if (m_AniEffect == null)
                     return;
-
+                //技能判断子弹发射者
                 if (m_BulletClass.m_bul_start == (Fix64)1)//自身
                 {
                     #region 后修改为挂点
@@ -196,6 +210,26 @@ public class BaseBullet : BaseState
                     m_AniEffect.transform.position = m_Target.m_Pos.ToVector3();
                     #endregion
                 }
+                //子子弹判断子弹发射者
+                if (m_BulletClass.newbul_origin == (Fix64)0)//无
+                {
+
+                }
+                else if (m_BulletClass.newbul_origin == (Fix64)1)//当前子弹碰撞目标
+                {
+                    #region 后修改为挂点
+                    //m_AniEffect.transform.parent = m_Player.m_VGo.transform;
+                    m_AniEffect.transform.position = m_BulletClass.m_taregt.m_Pos.ToVector3();
+                    #endregion
+                }
+                else if (m_BulletClass.newbul_origin == (Fix64)2)//技能释放者
+                {
+                    #region 后修改为挂点
+                    //m_AniEffect.transform.parent = m_Player.m_VGo.transform;
+                    m_AniEffect.transform.position = m_Player.m_Pos.ToVector3();
+                    #endregion
+                }
+
                 m_AniEffect.transform.localPosition = Vector3.zero + m_BulletNode.effect_xyz;
                 m_AniEffect.transform.localRotation = Quaternion.Euler(m_Player.m_Rotation.ToVector3());
                 //m_AniEffect.transform.localScale = Vector3.one;
@@ -211,8 +245,6 @@ public class BaseBullet : BaseState
                     end_delay.InitDestory(m_AniEffect, (Fix64)m_BulletNode.time_max);
                     GameData.m_GameManager.m_DelayManager.m_DelayList.Add(end_delay);
                 }
-                //});
-                //GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
             }
             #endregion
         }
@@ -329,7 +361,7 @@ public class BaseBullet : BaseState
             }
             else if (m_BulletNode.follow_type == 2)//子弹命中时子弹发射者瞬移到命中坐标
             {
-
+                Blink = true;
             }
             else if (m_BulletNode.follow_type == 3)//子弹命中时技能使用者瞬移到命中坐标
             {
@@ -503,6 +535,7 @@ public class BaseBullet : BaseState
             #region 检测物理碰撞最大次数
             if (m_BulletNode.col_times_single == -1)
             {
+                m_BulletClass.m_taregt = playerTargetList[i];
                 playerTargetList[i].FallDamage(damage);
                 CreateSonBullet(2);
             }
@@ -520,6 +553,7 @@ public class BaseBullet : BaseState
                         }
                         else
                         {
+                            m_BulletClass.m_taregt = playerTargetList[i];
                             playerTargetList[i].FallDamage(damage);
                             m_BuHurtList[j].CollisionCount = m_BuHurtList[j].CollisionCount + (Fix64)1;
                             CreateSonBullet(2);
@@ -528,6 +562,7 @@ public class BaseBullet : BaseState
                 }
                 if (!haveTarget)
                 {
+                    m_BulletClass.m_taregt = playerTargetList[i];
                     playerTargetList[i].FallDamage(damage);
                     BeHurtTarget target = new BeHurtTarget();
                     target.PlayerTarget = playerTargetList[i];
@@ -537,6 +572,27 @@ public class BaseBullet : BaseState
             }
             #endregion
 
+            if (Blink)
+            {
+                m_Player.m_Pos = playerTargetList[i].m_Pos;
+                #region 显示层
+                if (GameData.m_IsExecuteViewLogic)
+                {
+                    m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
+                }
+                #endregion
+            }
+
+            #region 检测物理穿透最大次数
+            //if (m_BulletNode.pen_times_max == (Fix64)(-1))
+            //{
+
+            //}
+            //else if (true)
+            //{
+
+            //}
+            #endregion
             CreateHitEff(damage);
         }
     }
@@ -582,50 +638,120 @@ public class BaseBullet : BaseState
     public bool CheckHitCondition(BulletNode bulletNode, Player attack, Player target)
     {
         bool result = false;
-        if (bulletNode != null)
+        if (bulletNode == null)
         {
-            if (bulletNode.col_type != null)
+            return false;
+        }
+        if (bulletNode.col_type == null)
+        {
+            return false;
+        }
+        for (int i = 0; i < bulletNode.col_type.Length; i++)
+        {
+            switch ((col_type)bulletNode.col_type[i])
             {
-                for (int i = 0; i < bulletNode.col_type.Length; i++)
-                {
-                    switch ((col_type)bulletNode.col_type[i])
-                    {
-                        case col_type.self:
-                            result |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target == attack;
-                            break;
-                        case col_type.selfMonster:
-                            result |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type != 1;
-                            break;
-                        case col_type.selfHero:
-                            result |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type == 1;
-                            break;
-                        case col_type.enemyMonster:
-                            result |= target.m_PlayerData.m_CampId != attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type != 1;
-                            break;
-                        case col_type.enemyHero:
-                            result |= target.m_PlayerData.m_CampId != attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type == 1;
-                            break;
-                        case col_type.selfTower:
-                            break;
-                        case col_type.enemyTower:
-                            break;
-                        case col_type.neutralMonster:
-                            break;
-                        case col_type.neutralTower:
-                            break;
-                        case col_type.terrain:
-                            break;
-                        case col_type.target:
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                case col_type.self:
+                    result |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target == attack;
+                    break;
+                case col_type.selfMonster:
+                    result |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type != 1;
+                    break;
+                case col_type.selfHero:
+                    result |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type == 1;
+                    break;
+                case col_type.enemyMonster:
+                    result |= target.m_PlayerData.m_CampId != attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type != 1;
+                    break;
+                case col_type.enemyHero:
+                    result |= target.m_PlayerData.m_CampId != attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type == 1;
+                    break;
+                case col_type.selfTower:
+                    break;
+                case col_type.enemyTower:
+                    break;
+                case col_type.neutralMonster:
+                    break;
+                case col_type.neutralTower:
+                    break;
+                case col_type.terrain:
+                    break;
+                case col_type.target:
+                    break;
+                default:
+                    break;
             }
+
         }
         return result;
     }
 
+    //检测子弹目标类型
+    public Player CheckBulTargetValue()
+    {
+        if (m_BulletClass == null)
+        {
+            return null;
+        }
+        if (m_BulletClass.m_bul_target_value == (Fix64)1)
+        {
+            return null;
+        }
+        if (m_BulletClass.m_bul_target_value == (Fix64)1)
+        {
+            return m_Player;
+        }
+        for (int i = 0; i < GameData.m_PlayerList.Count; i++)
+        {
+            if (GameData.m_PlayerList[i] == null || GameData.m_PlayerList[i].m_PlayerData == null)
+                continue;
+            if (m_BulletClass.m_bul_target_value == (Fix64)2)
+            {
+                if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_Player.m_PlayerData.m_CampId && GameData.m_PlayerList[i] != m_Player && GameData.m_PlayerList[i].m_PlayerData.m_Type != 1 && checkIsInBulTargetSize(GameData.m_PlayerList[i]))
+                {
+                    return GameData.m_PlayerList[i];
+                }
+            }
+            else if (m_BulletClass.m_bul_target_value == (Fix64)3)
+            {
+                if (GameData.m_PlayerList[i].m_PlayerData.m_CampId != m_Player.m_PlayerData.m_CampId && GameData.m_PlayerList[i] != m_Player && GameData.m_PlayerList[i].m_PlayerData.m_Type != 1 && checkIsInBulTargetSize(GameData.m_PlayerList[i]))
+                {
+                    return GameData.m_PlayerList[i];
+                }
+            }
+            else if (m_BulletClass.m_bul_target_value == (Fix64)4)
+            {
+                if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_Player.m_PlayerData.m_CampId && GameData.m_PlayerList[i] != m_Player && GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 && checkIsInBulTargetSize(GameData.m_PlayerList[i]))
+                {
+                    return GameData.m_PlayerList[i];
+                }
+            }
+            else if (m_BulletClass.m_bul_target_value == (Fix64)5)
+            {
+                if (GameData.m_PlayerList[i].m_PlayerData.m_CampId != m_Player.m_PlayerData.m_CampId && GameData.m_PlayerList[i] != m_Player && GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 && checkIsInBulTargetSize(GameData.m_PlayerList[i]))
+                {
+                    return GameData.m_PlayerList[i];
+                }
+            }
+            else if (m_BulletClass.m_bul_target_value == (Fix64)6)
+            {
+                if (GameData.m_PlayerList[i] == m_Player)
+                {
+                    return GameData.m_PlayerList[i];
+                }
+            }
+        }
+        return null;
+    }
+    //检测子弹目标范围参数
+    public bool checkIsInBulTargetSize(Player Target)
+    {
+        Fix64 distance = FixVector3.Distance(Target.m_Pos, m_Pos);
+        if (distance <= m_BulletClass.m_bul_target_size)
+        {
+            return true;
+        }
+        return false;
+    }
 
     ////检测玩家
     public void GetPlayerRangeList(FixVector3 m_Pos)
@@ -752,11 +878,13 @@ public class BaseBullet : BaseState
                     //------------
                     if (m_BulletNode.newbul_target_value.Count > 0 && m_BulletNode.newbul_target_value[count_temp] != null && m_BulletNode.newbul_target_value[count_temp].Length > 0)
                     {
-                        bullet.m_bul_target_value = new Fix64[m_BulletNode.newbul_target_value[count_temp].Length];
-                        for (int j = 0; j < m_BulletNode.newbul_target_value[count_temp].Length; j++)
-                        {
-                            bullet.m_bul_target_value[j] = (Fix64)m_BulletNode.newbul_target_value[count_temp][j];
-                        }
+                        //bullet.m_bul_target_value = new Fix64[m_BulletNode.newbul_target_value[count_temp].Length];
+                        //for (int j = 0; j < m_BulletNode.newbul_target_value[count_temp].Length; j++)
+                        //{
+                        //    bullet.m_bul_target_value[j] = (Fix64)m_BulletNode.newbul_target_value[count_temp][j];
+                        //}
+                        bullet.m_bul_target_value = (Fix64)m_BulletNode.newbul_target_value[count_temp][0];
+
                     }
                     else
                     {
@@ -838,7 +966,7 @@ public class BaseBullet : BaseState
                     //------------
                     if (m_BulletNode.newbul_max.Count > 0 && m_BulletNode.newbul_max[count_temp] != null && m_BulletNode.newbul_max[count_temp].Length > 0)
                     {
-                        bullet.newbul_max = (Fix64)m_BulletNode.newbul_max[count_temp][0];
+                        bullet.m_max_bul = (Fix64)m_BulletNode.newbul_max[count_temp][0];
                     }
                     else
                     {
@@ -879,9 +1007,12 @@ public class BaseBullet : BaseState
                     //    default:
                     //        break;
                     //}
-                    m_SkillState.CreateBullet(m_Player, bullet, m_Parameter);
-                    m_SkillState.OnEnter();
-                    GameData.m_GameManager.m_BulletManager.m_AttackList.Add(m_SkillState);
+                    for (int j = 0; j < (int)bullet.m_max_bul; j++)
+                    {
+                        m_SkillState.CreateBullet(m_Player, bullet, m_Parameter);
+                        m_SkillState.OnEnter();
+                        GameData.m_GameManager.m_BulletManager.m_AttackList.Add(m_SkillState);
+                    }
                     count_temp++;
                 });
                 GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);

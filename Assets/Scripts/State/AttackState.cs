@@ -173,11 +173,12 @@ public class AttackState : BaseState
                     }
                     if (m_Player.m_SkillNode.bul_target_value != null)
                     {
-                        bullet.m_bul_target_value = new Fix64[m_Player.m_SkillNode.bul_target_value[count_temp].Length];
-                        for (int j = 0; j < m_Player.m_SkillNode.bul_target_value[count_temp].Length; j++)
-                        {
-                            bullet.m_bul_target_value[j] = (Fix64)m_Player.m_SkillNode.bul_target_value[count_temp][j];
-                        }
+                        //bullet.m_bul_target_value = new Fix64[m_Player.m_SkillNode.bul_target_value[count_temp].Length];
+                        //for (int j = 0; j < m_Player.m_SkillNode.bul_target_value[count_temp].Length; j++)
+                        //{
+                        //    bullet.m_bul_target_value[j] = (Fix64)m_Player.m_SkillNode.bul_target_value[count_temp][j];
+                        //}
+                        bullet.m_bul_target_value = (Fix64)m_Player.m_SkillNode.bul_target_value[count_temp][0];
                     }
                     else
                     {
@@ -233,6 +234,14 @@ public class AttackState : BaseState
                     {
                         Debug.LogError("bul_son_max");
                     }
+                    if (m_Player.m_SkillNode.max_bul != null)
+                    {
+                        bullet.m_max_bul = (Fix64)m_Player.m_SkillNode.max_bul[count_temp];
+                    }
+                    else
+                    {
+                        Debug.LogError("max_bul");
+                    }
                     switch (m_Player.m_SkillNode.skill_usetype)
                     {
                         case SkillUseType.None:
@@ -255,9 +264,12 @@ public class AttackState : BaseState
                         default:
                             break;
                     }
-                    m_SkillState.CreateBullet(m_Player, bullet, m_Parameter);
-                    m_SkillState.OnEnter();
-                    GameData.m_GameManager.m_BulletManager.m_AttackList.Add(m_SkillState);
+                    for (int j = 0; j < (int)bullet.m_max_bul; j++)
+                    {
+                        m_SkillState.CreateBullet(m_Player, bullet, m_Parameter);
+                        m_SkillState.OnEnter();
+                        GameData.m_GameManager.m_BulletManager.m_AttackList.Add(m_SkillState);
+                    }
                     count_temp++;
                 });
                 GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
