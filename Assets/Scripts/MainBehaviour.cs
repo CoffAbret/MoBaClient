@@ -39,6 +39,7 @@ public class MainBehaviour : MonoBehaviour
     public GameObject m_LoginUIGo;
     public GameObject m_LoginLabel;
     public GameObject m_LoginButton;
+    public GameObject m_LoginConnectButton;
     public GameObject m_LoginExitButton;
     //匹配UI
     public GameObject m_MatchUIGo;
@@ -99,6 +100,7 @@ public class MainBehaviour : MonoBehaviour
     private void Start()
     {
         UIEventListener.Get(m_LoginButton).onClick = OnLoginClick;
+        UIEventListener.Get(m_LoginConnectButton).onClick = OnLoginConnectClick;
         UIEventListener.Get(m_1V1Button).onClick = On1v1Click;
         UIEventListener.Get(m_JoinMatchRoomButton).onClick = OnJoinMatchRoomClick;
         UIEventListener.Get(m_AttackGo).onClick = OnAttackClick;
@@ -196,7 +198,7 @@ public class MainBehaviour : MonoBehaviour
         if (m_Index == 7 && m_Skill4CD.fillAmount > 0)
             return;
         GameData.m_CurrentPlayer.m_IsSkill = true;
-        GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Index.ToString()+"#5#0#5");
+        GameData.m_GameManager.InputCmd(Cmd.UseSkill, m_Index.ToString() + "#5#0#5");
     }
 
     /// <summary>
@@ -245,6 +247,16 @@ public class MainBehaviour : MonoBehaviour
     /// <param name="go"></param>
     private void OnLoginClick(GameObject go)
     {
+        string account = m_LoginLabel.GetComponent<UILabel>().text;
+        GameData.m_GameManager.InputLogin(account);
+    }
+
+    /// <summary>
+    /// 连接网络
+    /// </summary>
+    /// <param name="go"></param>
+    private void OnLoginConnectClick(GameObject go)
+    {
         int port;
         GameData.m_IP = m_IPTxt.text.Trim();
         int.TryParse(m_PortTxt.text.Trim(), out port);
@@ -255,8 +267,6 @@ public class MainBehaviour : MonoBehaviour
         GameData.m_GameManager.m_UIManager.m_UpdateMatchSuccessUICallback = OnUpdateMatchSuccessUI;
         GameData.m_GameManager.m_UIManager.m_UpdateMatchHeroRoomUICallback = OnUpdateMatchHeroRoomUI;
         GameData.m_GameManager.m_UIManager.m_UpdateConfirmMatchUICallback = OnUpdateConfirmMatchUI;
-        string account = m_LoginLabel.GetComponent<UILabel>().text;
-        GameData.m_GameManager.InputLogin(account);
     }
     /// <summary>
     /// 1v1匹配

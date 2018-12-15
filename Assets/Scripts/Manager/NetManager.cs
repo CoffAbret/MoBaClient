@@ -10,9 +10,9 @@ using UnityEngine;
 public class NetManager
 {
     //Tcp网络连接
-    private AsyncTcpClient m_TcpClient;
+    public AsyncTcpClient m_TcpClient;
     //Udp网络连接
-    private AsyncUdpClient m_UdpClient;
+    public AsyncUdpClient m_UdpClient;
 
     /// <summary>
     /// 初始化Tcp网络连接
