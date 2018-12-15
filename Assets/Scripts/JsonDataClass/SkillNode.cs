@@ -238,7 +238,7 @@ public class SkillNode : FSDataNodeBase
     public string[] effect;//动作特效
     public int[] effect_position;//特效挂点
     public List<Vector3> effect_positionxyz = new List<Vector3>();//特效挂点位置偏移
-    public double[] effect_start;//施法特效生成时间
+    public int[] effect_start;//施法特效生成时间
     public double[] effect_end;//施法特效存在时间
     public SkillUseType skill_usetype;//释放类型
     public double[] bullet_time;//子弹触发时间点
@@ -435,7 +435,7 @@ public class SkillNode : FSDataNodeBase
             object[] effect_positionxyz_temp = item["effect_positionxyz"] as object[];
             GetVector3List(effect_positionxyz, effect_positionxyz_temp);
         }
-        effect_start = item.TryGetDoubleArr("effect_start");
+        effect_start = item.TryGetIntArr("effect_start");
         effect_end = item.TryGetDoubleArr("effect_end");
         skill_usetype = (SkillUseType)item.TryGetInt("skill_usetype");
         bullet_time = item.TryGetDoubleArr("bullet_time");
@@ -489,7 +489,7 @@ public class SkillNode : FSDataNodeBase
     {
         if (object_temp == null || object_temp.Length == 0)
         {
-           //Debug.LogError("     SkillNode    ");
+            //Debug.LogError("     SkillNode    ");
             return;
         }
         for (int i = 0; i < object_temp.Length; i++)
