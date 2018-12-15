@@ -269,7 +269,7 @@ public class SocketClient
     /// </summary>
     public void SendConnect()
     {
-        ConnectServer("192.168.3.42", 8889);
+        ConnectServer("192.168.3.251", 8889);
     }
 
     /// <summary>

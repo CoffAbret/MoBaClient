@@ -21,7 +21,6 @@ public class AsyncUdpClient
     private IPAddress address;
     //网络地址
     private IPEndPoint point;
-
     //接收消息数据
     private List<CReadPacket> m_ReceivePacketList;
     #endregion
@@ -48,11 +47,13 @@ public class AsyncUdpClient
     {
         try
         {
+            if (m_Client == null)
+                return;
             m_Client.BeginReceive(ReceiveCallback, m_Client);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            GameData.m_GameManager.m_LogMessage.text += string.Format("{0},", ex.Message);
+
         }
     }
 
@@ -62,25 +63,24 @@ public class AsyncUdpClient
     /// <param name="result"></param>
     private void ReceiveCallback(IAsyncResult result)
     {
-        if (result.IsCompleted)
+        if (m_Client == null || !result.IsCompleted)
+            return;
+        try
         {
-            try
-            {
-                byte[] data = m_Client.EndReceive(result, ref m_RemoteEP);
-                if (data == null || data.Length < 1)
-                    return;
-                CReadPacket readPacket = new CReadPacket(data, data.Length);
-                readPacket.ReadData();
-                m_ReceivePacketList.Add(readPacket);
-            }
-            catch (Exception ex)
-            {
-                GameData.m_GameManager.m_LogMessage.text += string.Format("{0},", ex.Message);
-            }
-            finally
-            {
-                m_Client.BeginReceive(ReceiveCallback, null);
-            }
+            byte[] data = m_Client.EndReceive(result, ref m_RemoteEP);
+            if (data == null || data.Length < 1)
+                return;
+            CReadPacket readPacket = new CReadPacket(data, data.Length);
+            readPacket.ReadData();
+            m_ReceivePacketList.Add(readPacket);
+        }
+        catch (Exception)
+        {
+
+        }
+        finally
+        {
+            m_Client.BeginReceive(ReceiveCallback, null);
         }
     }
 
@@ -90,6 +90,8 @@ public class AsyncUdpClient
     /// <param name="data"></param>
     public void AsyncSendData(CWritePacket data)
     {
+        if (m_Client == null)
+            return;
         m_Client.BeginSend(data.GetPacketByte(), data.GetPacketByte().Length, new AsyncCallback(SendCallback), null);
     }
 
@@ -114,16 +116,15 @@ public class AsyncUdpClient
     /// <param name="result"></param>
     private void SendCallback(IAsyncResult result)
     {
-        if (result.IsCompleted)
+        if (m_Client == null || !result.IsCompleted)
+            return;
+        try
         {
-            try
-            {
-                m_Client.EndSend(result);
-            }
-            catch (Exception ex)
-            {
-                GameData.m_GameManager.m_LogMessage.text += string.Format("{0},", ex.Message);
-            }
+            m_Client.EndSend(result);
+        }
+        catch (Exception)
+        {
+
         }
     }
 
