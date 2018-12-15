@@ -15,12 +15,6 @@ public class SkillState : BaseState
     private GameObject m_AniEffect;
     //状态机参数名
     private string m_StateParameter = "State";
-    //计算伤害时间
-    private Fix64 m_CalcDamageTime = Fix64.FromRaw(600);
-    //播放特效时间
-    private Fix64 m_PlayEffectTime = Fix64.FromRaw(60);
-    //计算目标位置与当前位置的间隔距离
-    FixVector3 FramePos;
 #endif
     #endregion
     //普攻段数
@@ -42,11 +36,6 @@ public class SkillState : BaseState
         if (m_Parameter != null && m_Parameter.Contains("#"))
         {
             m_Player.m_SkillIndex = int.Parse(parameter.Split('#')[0]);
-            float x = float.Parse(parameter.Split('#')[1]);
-            float y = float.Parse(parameter.Split('#')[2]);
-            float z = float.Parse(parameter.Split('#')[3]);
-            FixVector3 pos = new FixVector3((Fix64)x, (Fix64)y, (Fix64)z);
-            FramePos = new FixVector3(pos.GetNormalized().x, (Fix64)y, pos.GetNormalized().z);
         }
         else
         {
@@ -100,10 +89,10 @@ public class SkillState : BaseState
             relativePos = new FixVector3(relativePos.x, Fix64.Zero, relativePos.z);
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
+            m_Player.m_Angles = relativePos.GetNormalized();
             #region 显示层
             if (GameData.m_IsExecuteViewLogic)
                 m_Player.m_VGo.transform.rotation = rotation;
-            m_Player.m_Angles = (FixVector3)(new Vector3(m_Player.m_VGo.transform.forward.normalized.x, 0, m_Player.m_VGo.transform.forward.normalized.z));
             #endregion
         }
         m_Player.m_IsSkill = true;

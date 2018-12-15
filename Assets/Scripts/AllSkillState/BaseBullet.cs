@@ -225,9 +225,6 @@ public class BaseBullet : BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-
-
-
     }
 
     /// <summary>

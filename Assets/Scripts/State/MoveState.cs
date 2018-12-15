@@ -71,17 +71,17 @@ public class MoveState : BaseState
         if (!m_Player.m_IsMove)
             return;
         FixVector3 fixPos = m_Player.m_Pos + ((Fix64)m_Player.m_PlayerData.m_HeroAttrNode.movement_speed * m_Player.m_Angles * GameData.m_FixFrameLen);
-        Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(fixPos.ToVector3());
-        bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
-        if (isWalk)
-        {
-            m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-            m_Player.m_Pos = fixPos;
-            #region 显示层
-            if (GameData.m_IsExecuteViewLogic)
-                m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
-            #endregion
-        }
+        //Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(fixPos.ToVector3());
+        //bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
+        //if (isWalk)
+        //{
+        m_Player.m_IntervalTime += GameData.m_FixFrameLen;
+        m_Player.m_Pos = fixPos;
+        #region 显示层
+        if (GameData.m_IsExecuteViewLogic)
+            m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
+        #endregion
+        //}
     }
 
     /// <summary>

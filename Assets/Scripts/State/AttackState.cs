@@ -77,10 +77,10 @@ public class AttackState : BaseState
             relativePos = new FixVector3(relativePos.x, Fix64.Zero, relativePos.z);
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
             m_Player.m_Rotation = new FixVector3((Fix64)rotation.eulerAngles.x, (Fix64)rotation.eulerAngles.y, (Fix64)rotation.eulerAngles.z);
+            m_Player.m_Angles = relativePos.GetNormalized();
             #region 显示层
             if (GameData.m_IsExecuteViewLogic)
                 m_Player.m_VGo.transform.rotation = rotation;
-            m_Player.m_Angles = (FixVector3)(new Vector3(m_Player.m_VGo.transform.forward.normalized.x, 0, m_Player.m_VGo.transform.forward.normalized.z));
             #endregion
         }
         #region 显示层
@@ -94,7 +94,6 @@ public class AttackState : BaseState
                 {
                     if (i >= m_Player.m_SkillNode.effect_start.Length || i >= m_Player.m_SkillNode.effect_end.Length)
                     {
-                        Debug.LogError("     施法特效开始时间，结束时间数组长度不对       ");
                         return;
                     }
                     int count_temp = 0;

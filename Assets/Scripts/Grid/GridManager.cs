@@ -193,8 +193,8 @@ public class GridManager
         //和周围的网格进行碰撞计算
         //得到实际的位置
         //1:位置得到Circle
-        //2: 第一遍碰撞 修正位置
-        //3：迭代第二次碰撞 修正位置 迭代多次
+        //2:第一遍碰撞 修正位置
+        //3:迭代第二次碰撞 修正位置 迭代多次
         var gPos = MapPosToGridFloat(pos);
         var allGrids = BroadColGrids(gPos);
 
@@ -207,12 +207,10 @@ public class GridManager
             if (col)
             {
                 var newGPos = FixPos(gPos, firstGrid);
-                //return gridToMapPosFloat(newGPos);
                 gPos = newGPos;
             }
             else
             {
-                //TODO:可能需要插值
                 break;
             }
         }
@@ -234,9 +232,9 @@ public class GridManager
     public void SetWalkable(Tower tower)
     {
         Vector2 v2 = MapPosToGrid(tower.m_Pos.ToVector3());
-        int distince = 8;
+        int distince = 6;
         if (tower.m_Type == 1)
-            distince = 5;
+            distince = 3;
         int xMin = (int)v2.x - distince;
         int xMax = (int)v2.x + distince;
         int yMin = (int)v2.y - distince;
@@ -255,9 +253,9 @@ public class GridManager
         for (int i = 0; i < GameData.m_TowerList.Count; i++)
         {
             Vector2 v2 = MapPosToGrid(GameData.m_TowerList[i].m_Pos.ToVector3());
-            int distince = 8;
+            int distince = 6;
             if (GameData.m_TowerList[i].m_Type == 1)
-                distince = 5;
+                distince = 3;
             int xMin = (int)v2.x - distince;
             int xMax = (int)v2.x + distince;
             int yMin = (int)v2.y - distince;
