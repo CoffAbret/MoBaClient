@@ -21,6 +21,8 @@ public class Bullet_ValueClass
     public FixVector3 v_pos;
     //虚拟目标
     public List<Player> v_taregt = new List<Player>();
+    //记录上次伤害的地址
+    public FixVector3 old_pos;
     //虚拟目标
     public Player m_taregt;
 
@@ -155,7 +157,14 @@ public class BaseBullet : BaseState
         }
         else if (m_BulletClass.newbul_origin == (Fix64)1)//当前子弹碰撞目标
         {
-            m_Pos = m_BulletClass.m_taregt.m_Pos;
+            if (m_BulletClass.m_taregt != null)
+            {
+                m_Pos = m_BulletClass.m_taregt.m_Pos;
+            }
+            if (m_BulletClass.old_pos != FixVector3.Zero)
+            {
+                m_Pos = m_BulletClass.old_pos;
+            }
         }
         else if (m_BulletClass.newbul_origin == (Fix64)2)//技能释放者
         {
@@ -192,6 +201,11 @@ public class BaseBullet : BaseState
                         m_AniEffect = GameObject.Instantiate(effectGo);
                 }
                 if (m_AniEffect == null)
+                {
+                    m_AniEffect = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    m_AniEffect.transform.localScale = new Vector3((float)bullet.m_bul_target_value, (float)bullet.m_bul_target_value, (float)bullet.m_bul_target_value);
+                }
+                if (m_AniEffect == null)
                     return;
                 //技能判断子弹发射者
                 if (m_BulletClass.m_bul_start == (Fix64)1)//自身
@@ -218,8 +232,11 @@ public class BaseBullet : BaseState
                 else if (m_BulletClass.newbul_origin == (Fix64)1)//当前子弹碰撞目标
                 {
                     #region 后修改为挂点
-                    //m_AniEffect.transform.parent = m_Player.m_VGo.transform;
-                    m_AniEffect.transform.position = m_BulletClass.m_taregt.m_Pos.ToVector3();
+                    if (m_BulletClass.m_taregt != null)
+                    {
+                        //m_AniEffect.transform.parent = m_Player.m_VGo.transform;
+                        m_AniEffect.transform.position = m_BulletClass.m_taregt.m_Pos.ToVector3();
+                    }
                     #endregion
                 }
                 else if (m_BulletClass.newbul_origin == (Fix64)2)//技能释放者
@@ -830,7 +847,6 @@ public class BaseBullet : BaseState
         {
             return;
         }
-        //Debug.LogError("创建子子弹");
         if (m_BulletNode.newbul != null && m_BulletNode.newbul.Count > 0)
         {
             for (int i = 0; i < m_BulletNode.newbul.Count; i++)
@@ -842,6 +858,7 @@ public class BaseBullet : BaseState
                     //Debug.LogError("     子弹触发时间点数组长度不对       ");
                     return;
                 }
+                Debug.LogError("创建子子弹" + m_AttackTime);
                 if (i == 0)
                 {
                     m_BulletClass.son_now = m_BulletClass.son_now + (Fix64)1;
@@ -985,6 +1002,7 @@ public class BaseBullet : BaseState
                     {
                         //Debug.LogError("newbul_num_single");
                     }
+                    bullet.old_pos = m_Pos;
                     //switch (m_Player.m_SkillNode.skill_usetype)
                     //{
                     //    case SkillUseType.None:

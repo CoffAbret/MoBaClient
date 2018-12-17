@@ -120,7 +120,7 @@ public class SkillState : BaseState
                 {
                     if (i >= m_Player.m_SkillNode.effect_start.Length || i >= m_Player.m_SkillNode.effect_end.Length)
                     {
-                        Debug.LogError("     施法特效开始时间，结束时间数组长度不对       ");
+                        //Debug.LogError("     施法特效开始时间，结束时间数组长度不对       ");
                         return;
                     }
                     int count_temp = 0;
@@ -144,7 +144,7 @@ public class SkillState : BaseState
                             return;
                         if (/*count_temp >= m_Player.m_SkillNode.effect_position.Length ||*/ count_temp >= m_Player.m_SkillNode.effect_positionxyz.Count)
                         {
-                            Debug.LogError("     施法特效挂点数组,位置偏移数组长度不对       ");
+                            //Debug.LogError("     施法特效挂点数组,位置偏移数组长度不对       ");
                             return;
                         }
                         #region 后修改为挂点
@@ -172,7 +172,7 @@ public class SkillState : BaseState
             {
                 if (i >= m_Player.m_SkillNode.bullet_time.Length)
                 {
-                    Debug.LogError("     子弹触发时间点数组长度不对       ");
+                    //Debug.LogError("     子弹触发时间点数组长度不对       ");
                     return;
                 }
                 count_temp = 0;
@@ -187,7 +187,7 @@ public class SkillState : BaseState
                     }
                     else
                     {
-                        Debug.LogError("bullet_id");
+                        //Debug.LogError("bullet_id");
                     }
                     if (m_Player.m_SkillNode.bul_target_type != null)
                     {
@@ -195,7 +195,7 @@ public class SkillState : BaseState
                     }
                     else
                     {
-                        Debug.LogError("bul_target_type");
+                        //Debug.LogError("bul_target_type");
                     }
                     if (m_Player.m_SkillNode.bul_target_value != null)
                     {
@@ -209,7 +209,7 @@ public class SkillState : BaseState
                     }
                     else
                     {
-                        Debug.LogError("bul_target_value");
+                        //Debug.LogError("bul_target_value");
                     }
                     if (m_Player.m_SkillNode.bul_target_size != null)
                     {
@@ -217,7 +217,7 @@ public class SkillState : BaseState
                     }
                     else
                     {
-                        Debug.LogError("bul_target_size");
+                        //Debug.LogError("bul_target_size");
 
                     }
                     if (m_Player.m_SkillNode.bul_start != null)
@@ -226,7 +226,7 @@ public class SkillState : BaseState
                     }
                     else
                     {
-                        Debug.LogError("bul_start");
+                        //Debug.LogError("bul_start");
                     }
                     if (m_Player.m_SkillNode.firing_xyz != null)
                     {
@@ -234,7 +234,7 @@ public class SkillState : BaseState
                     }
                     else
                     {
-                        Debug.LogError("firing_xyz");
+                        //Debug.LogError("firing_xyz");
                     }
                     bullet.m_bul_end = (Fix64)m_Player.m_SkillNode.bul_end;
                     if (m_Player.m_SkillNode.bul_end_xyz != null)
@@ -243,7 +243,7 @@ public class SkillState : BaseState
                     }
                     else
                     {
-                        Debug.LogError("bul_end_xyz");
+                        //Debug.LogError("bul_end_xyz");
                     }
                     if (m_Player.m_SkillNode.bul_end_angle != null)
                     {
@@ -251,7 +251,7 @@ public class SkillState : BaseState
                     }
                     else
                     {
-                        Debug.LogError("bul_end_angle");
+                        //Debug.LogError("bul_end_angle");
                     }
                     if (m_Player.m_SkillNode.bul_son_max != null)
                     {
@@ -259,7 +259,15 @@ public class SkillState : BaseState
                     }
                     else
                     {
-                        Debug.LogError("bul_son_max");
+                        //Debug.LogError("bul_son_max");
+                    }
+                    if (m_Player.m_SkillNode.max_bul != null)
+                    {
+                        bullet.m_max_bul = (Fix64)m_Player.m_SkillNode.max_bul[count_temp];
+                    }
+                    else
+                    {
+                        //Debug.LogError("m_max_bul");
                     }
                     switch (m_Player.m_SkillNode.skill_usetype)
                     {
