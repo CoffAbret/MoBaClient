@@ -26,19 +26,13 @@ public class MoveState : BaseState
             return;
         if (m_Parameter == null || !m_Parameter.Contains("#"))
             return;
-        float x = float.Parse(m_Parameter.Split('#')[0]);
-        float z = float.Parse(m_Parameter.Split('#')[2]);
-        m_Player.m_Angles = (FixVector3)((new Vector3(x, 0, z).normalized));
-        m_MoveSpeed = (Fix64)m_Player.m_PlayerData.m_HeroAttrNode.movement_speed * GameData.m_FixFrameLen;
-        if (m_Player.m_PlayerData.m_Type == 1)
-        {
-            float posX = float.Parse(m_Parameter.Split('#')[3]);
-            float posY = float.Parse(m_Parameter.Split('#')[4]);
-            float posZ = float.Parse(m_Parameter.Split('#')[5]);
-            Fix64 fixX = (Fix64)posX + m_MoveSpeed * (Fix64)x;
-            Fix64 fixZ = (Fix64)posZ + m_MoveSpeed * (Fix64)z;
-            m_Player.m_Pos = new FixVector3(fixX, (Fix64)4.8F, fixZ);
-        }
+        Fix64 fixX = (Fix64)(m_Parameter.Split('#')[0]);
+        Fix64 fixZ = (Fix64)(m_Parameter.Split('#')[1]);
+        m_Player.m_Angles = new FixVector3(fixX, Fix64.Zero, fixZ);
+        if (viewPlayer.m_PlayerData.m_Type == 1)
+            GameData.m_GameManager.LogMsg(string.Format("收到移动朝向：{0}", m_Player.m_Angles));
+        else
+            GameData.m_GameManager.LogMsg(string.Format("小兵收到移动朝向：{0}", m_Player.m_Angles));
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -62,8 +56,6 @@ public class MoveState : BaseState
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
-            //插值旋转可以优化旋转抖动，不流畅等问题
-            //m_Player.m_VGo.transform.rotation = Quaternion.Slerp(m_Player.m_VGo.transform.rotation, targetRotation, (float)(GameData.m_FixFrameLen * (Fix64)10));
             m_Player.m_VGo.transform.rotation = targetRotation;
             m_Animator.SetInteger(m_StateParameter, 11);
         }
@@ -87,6 +79,10 @@ public class MoveState : BaseState
         {
             m_Player.m_IntervalTime += GameData.m_FixFrameLen;
             m_Player.m_Pos = fixPos;
+            if (m_Player.m_PlayerData.m_Type == 1)
+                GameData.m_GameManager.LogMsg(string.Format("移动后坐标：{0}", m_Player.m_Pos));
+            else
+                GameData.m_GameManager.LogMsg(string.Format("小兵移动后坐标：{0}", m_Player.m_Pos));
             #region 显示层
             if (GameData.m_IsExecuteViewLogic)
                 m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();

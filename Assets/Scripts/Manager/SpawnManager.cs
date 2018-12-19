@@ -8,7 +8,7 @@ using UnityEngine;
 public class SpawnManager
 {
     private Fix64 m_IntervalTime = Fix64.Zero;
-    private Fix64 m_SpawnTime = Fix64.FromRaw(20000);
+    private Fix64 m_SpawnTime = Fix64.FromRaw(2000);
 
     /// <summary>
     /// 每帧执行逻辑

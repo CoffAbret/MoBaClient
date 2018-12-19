@@ -189,7 +189,7 @@ public class Player
         m_PlayerData.m_HP += addHp;
         m_Health.m_Health += addHp;
         if (m_PlayerData.m_Id == GameData.m_CurrentRoleId)
-            m_HudText.PlayerHUDText.AddLocalized(string.Format("+{0}", hp), new Color(0.09F, 0.9F, 0.09F, 1), 1);
+            m_HudText.PlayerHUDText.AddLocalized(string.Format("+{0}", hp), new Color(0.09F, 0.9F, 0.09F, 1), 0);
     }
 
 
@@ -224,7 +224,7 @@ public class Player
             if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_PlayerData.m_CampId)
                 continue;
             Fix64 distance = GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 ? (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(200)) : (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(100));
-            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.aoe_long)
+            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.dist)
             {
                 prePlayer = GameData.m_PlayerList[i];
                 preDistance = distance;
@@ -249,7 +249,7 @@ public class Player
             if (GameData.m_TowerList[i].m_CampId == m_PlayerData.m_CampId)
                 continue;
             Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.aoe_long)
+            if ((preDistance == Fix64.Zero || preDistance > distance) && (float)distance <= skillNode.dist)
             {
                 preTower = GameData.m_TowerList[i];
                 preDistance = distance;

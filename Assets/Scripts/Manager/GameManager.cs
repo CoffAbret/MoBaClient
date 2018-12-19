@@ -52,8 +52,6 @@ public class GameManager
     /// </summary>
     public void UpdateGame()
     {
-        if (m_NetManager != null)
-            m_NetManager.UpdateNet();
         if (!GameData.m_IsGame)
             return;
         GameData.m_ClientGameFrame++;
@@ -118,6 +116,7 @@ public class GameManager
     {
         CWritePacket packet = m_OpreationManager.InputCmd(cmd, parameter);
         m_NetManager.Send(packet);
+        //LogMsg(string.Format("发送操作:{0}，参数：{1},帧数{2}", cmd.ToString(), parameter, GameData.m_GameFrame));
     }
 
     /// <summary>
@@ -169,14 +168,15 @@ public class GameManager
             int campId = i % 2 == 0 ? 1 : 2;
             CreateTower(campId, 2);
         }
-        GameData.m_GameManager.m_GridManager.InitTowerGrid();
+        m_GridManager.InitTowerGrid();
+        InitLog();
     }
 
     public void SyncKey(Dictionary<string, object> data)
     {
         int serverFrameCount = 0;
-        //serverFrameCount = data.TryGetInt("framecount");
-        GameData.m_GameFrame = data.TryGetInt("framecount");
+        serverFrameCount = data.TryGetInt("framecount");
+        GameData.m_GameFrame = serverFrameCount;
         //补帧逻辑，后续添加
         //if (serverFrameCount >= GameData.m_GameFrame)
         //{
@@ -196,9 +196,32 @@ public class GameManager
             m_KeyData.m_Parameter = keydata.TryGetString("m_Parameter");
             frameKeyData.m_KeyDataList.Add(m_KeyData);
             m_BattleLogicManager.OnOperation(m_KeyData);
+            LogMsg(string.Format("收到操作:{0}，参数：{1},帧数：{2}", m_KeyData.m_Cmd.ToString(), m_KeyData.m_Parameter, GameData.m_GameFrame));
         }
         //GameData.m_GameFrame += 1;
         //}
+    }
+
+    public void InitLog()
+    {
+        //        GameData.m_logFilePath = string.Format("{0}/{1}_Log.txt", Application.dataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
+        //#if UNITY_IOS || UNITY_ANDROID
+        //        GameData.m_logFilePath = string.Format("{0}/{1}_Log.txt", Application.persistentDataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
+        //#endif
+        //        System.IO.FileStream fs = new System.IO.FileStream(GameData.m_logFilePath, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+        //        fs.Dispose();
+        //        fs.Close();
+    }
+
+    public void LogMsg(string log)
+    {
+        //System.IO.FileStream fs = new System.IO.FileStream(GameData.m_logFilePath, System.IO.FileMode.Append, System.IO.FileAccess.Write);
+        //System.IO.StreamWriter sw = new System.IO.StreamWriter(fs);
+        //sw.WriteLine(log);
+        //sw.Dispose();
+        //sw.Close();
+        //fs.Dispose();
+        //fs.Close();
     }
 
     /// <summary>

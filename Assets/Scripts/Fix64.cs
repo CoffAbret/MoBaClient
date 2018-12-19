@@ -18,12 +18,17 @@ public struct Fix64 : System.IEquatable<Fix64>
 
     public static explicit operator float(Fix64 value)
     {
-        return value.m_rawValue * PrecisionFactor;
+        return float.Parse(Math.Round(value.m_rawValue * PrecisionFactor, 3).ToString());
     }
 
     public static explicit operator Fix64(float value)
     {
         return new Fix64((long)(Math.Round(value, 3) * FloatPrecision));
+    }
+
+    public static explicit operator Fix64(string value)
+    {
+        return new Fix64(long.Parse(value));
     }
 
     public static Fix64 operator +(Fix64 x, Fix64 y)
@@ -105,7 +110,7 @@ public struct Fix64 : System.IEquatable<Fix64>
 
     public override string ToString()
     {
-        return (m_rawValue * PrecisionFactor).ToString();
+        return m_rawValue.ToString();
     }
 }
 
@@ -240,8 +245,8 @@ public struct FixVector3
     {
         Vector3 v3 = new Vector3((float)x, (float)y, (float)z);
         x = (Fix64)v3.normalized.x;
-        y = (Fix64)v3.normalized.x;
-        z = (Fix64)v3.normalized.x;
+        y = (Fix64)v3.normalized.y;
+        z = (Fix64)v3.normalized.z;
     }
 
     public FixVector3 GetNormalized()
@@ -253,7 +258,7 @@ public struct FixVector3
 
     public override string ToString()
     {
-        return string.Format("x:{0} y:{1} z:{2}", (float)x, (float)y, (float)z);
+        return string.Format("x:{0} y:{1} z:{2}", x, y, z);
     }
 
     public override bool Equals(object obj)

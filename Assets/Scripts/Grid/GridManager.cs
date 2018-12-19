@@ -83,9 +83,9 @@ public class GridManager
     public void SetWalkable(Tower tower)
     {
         Vector2 v2 = MapPosToGrid(tower.m_Pos.ToVector3());
-        int distince = 8;
+        int distince = 6;
         if (tower.m_Type == 1)
-            distince = 5;
+            distince = 3;
         int xMin = (int)v2.x - distince;
         int xMax = (int)v2.x + distince;
         int yMin = (int)v2.y - distince;
@@ -104,9 +104,9 @@ public class GridManager
         for (int i = 0; i < GameData.m_TowerList.Count; i++)
         {
             Vector2 v2 = MapPosToGrid(GameData.m_TowerList[i].m_Pos.ToVector3());
-            int distince = 8;
+            int distince = 6;
             if (GameData.m_TowerList[i].m_Type == 1)
-                distince = 5;
+                distince = 3;
             int xMin = (int)v2.x - distince;
             int xMax = (int)v2.x + distince;
             int yMin = (int)v2.y - distince;
