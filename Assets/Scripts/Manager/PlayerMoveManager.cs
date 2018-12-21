@@ -15,8 +15,8 @@ public class PlayerMoveManager
         if (GameData.m_CurrentPlayer == null)
             return;
         Vector3 newEulerAngles = Vector3.zero;
-        float x = ETCInput.GetAxis("Horizontal");
-        float y = ETCInput.GetAxis("Vertical");
+        float x = (float)(Fix64)ETCInput.GetAxis("Horizontal");
+        float y = (float)(Fix64)ETCInput.GetAxis("Vertical");
         if (x == 0 && y == 0)
         {
             if (GameData.m_CurrentPlayer.m_IsMove)
@@ -37,7 +37,7 @@ public class PlayerMoveManager
             if ((m_PrePos == Vector3.zero || Mathf.Abs(angle - m_PreAngle) > 0.1f))
             {
                 //string parameter = string.Format("{0}#{1}#{2}#{3}#{4}#{5}", x, 0, y, GameData.m_CurrentPlayer.m_Pos.x, GameData.m_CurrentPlayer.m_Pos.y, GameData.m_CurrentPlayer.m_Pos.z);
-                string parameter = string.Format("{0}#{1}", x,y);
+                string parameter = string.Format("{0}#{1}", x, y);
                 GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
                 m_PrePos = pos;
                 m_PreAngle = angle;
