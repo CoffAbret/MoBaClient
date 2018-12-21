@@ -168,6 +168,7 @@ public class SkillState : BaseState
         #region
         if (m_Player.m_SkillNode.bullet_id != null && m_Player.m_SkillNode.bullet_id.Length > 0)
         {
+            count_temp = 0;
             for (int i = 0; i < m_Player.m_SkillNode.bullet_id.Length; i++)
             {
                 if (i >= m_Player.m_SkillNode.bullet_time.Length)
@@ -175,12 +176,12 @@ public class SkillState : BaseState
                     //Debug.LogError("     子弹触发时间点数组长度不对       ");
                     return;
                 }
-                count_temp = 0;
                 Delay delay = new Delay();
                 delay.DelayDo((Fix64)m_Player.m_SkillNode.bullet_time[i], () =>
                 {
                     BaseBullet m_SkillState = new BaseBullet();
                     Bullet_ValueClass bullet = new Bullet_ValueClass();
+                    bullet.m_BulletIndex = (Fix64)count_temp;
                     if (m_Player.m_SkillNode.bullet_id != null)
                     {
                         bullet.m_BulletId = (Fix64)m_Player.m_SkillNode.bullet_id[count_temp];
