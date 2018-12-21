@@ -38,7 +38,7 @@ public class PlayerBullet
         m_AttackPlayer = player;
         m_SkillNode = node;
         m_Pos = player.m_Pos;
-        m_Angles = player.m_Angles;
+        m_Angles = (FixVector3)(player.m_VGo.transform.rotation * Vector3.forward);
         m_WoundPlayerList = new List<Player>();
         m_WoundTowerList = new List<Tower>();
     }
@@ -70,21 +70,35 @@ public class PlayerBullet
             bool IsFallDamage = false;
             if (m_SkillNode.aoe_wide <= 0)
             {
-                float angle = Mathf.Acos(Vector3.Dot(m_Angles.ToVector3().normalized, targetFixVec.ToVector3().normalized)) * Mathf.Rad2Deg;
+                Fix64 angle = (Fix64)(Mathf.Acos((float)FixVector3.Dot(m_Angles.GetNormalized(), targetFixVec.GetNormalized()))) * (Fix64)Mathf.Rad2Deg;
+                Fix64 compareAngle = (Fix64)m_SkillNode.angle;
+                compareAngle = compareAngle / Fix64.FromRaw(2000);
+                Fix64 compareDistance = (Fix64)m_SkillNode.aoe_long;
+                GameData.m_GameManager.LogMsg(string.Format("角度:{0}", angle));
+                GameData.m_GameManager.LogMsg(string.Format("配置表角度:{0}", compareAngle));
                 Fix64 distance = GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 ? (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(200)) : (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(100));
-                if ((angle <= m_SkillNode.angle * 0.5F || m_SkillNode.angle <= 0) && ((float)distance <= m_SkillNode.aoe_long))
+                GameData.m_GameManager.LogMsg(string.Format("距离:{0}", distance));
+                GameData.m_GameManager.LogMsg(string.Format("配置表距离:{0}", compareDistance));
+                if ((angle <= compareAngle || compareAngle <= Fix64.Zero) && (distance <= compareDistance))
                 {
                     IsFallDamage = true;
                 }
             }
             else
             {
-                float forwardDistance = Vector3.Dot(targetFixVec.ToVector3().normalized, m_Angles.ToVector3().normalized);
+                Fix64 forwardDistance = FixVector3.Dot(targetFixVec.GetNormalized(), m_Angles);
+                Fix64 compareDistance = (Fix64)m_SkillNode.aoe_long;
                 Fix64 distance = GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 ? (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(200)) : (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(100));
-                if (forwardDistance > 0 && forwardDistance <= m_SkillNode.aoe_long && (float)distance < m_SkillNode.aoe_long)
+                GameData.m_GameManager.LogMsg(string.Format("往前距离:{0}", forwardDistance));
+                GameData.m_GameManager.LogMsg(string.Format("配置表往前距离:{0}", compareDistance));
+                if (forwardDistance > Fix64.Zero && forwardDistance <= compareDistance && distance < compareDistance)
                 {
-                    float rightDistance = Vector3.Dot(targetFixVec.ToVector3().normalized, m_AttackPlayer.m_VGo.transform.right.normalized);
-                    if (Math.Abs(rightDistance) <= m_SkillNode.aoe_wide)
+                    Fix64 rightDistance = FixVector3.Dot(targetFixVec, (FixVector3)m_AttackPlayer.m_VGo.transform.right.normalized);
+                    rightDistance = rightDistance < Fix64.Zero ? -rightDistance : rightDistance;
+                    Fix64 compareWide = (Fix64)m_SkillNode.aoe_wide;
+                    GameData.m_GameManager.LogMsg(string.Format("往右距离:{0}", rightDistance));
+                    GameData.m_GameManager.LogMsg(string.Format("配置表往右距离:{0}", compareWide));
+                    if (rightDistance <= compareWide)
                     {
                         IsFallDamage = true;
                     }
@@ -123,21 +137,35 @@ public class PlayerBullet
             bool IsFallDamage = false;
             if (m_SkillNode.aoe_wide <= 0)
             {
-                float angle = Mathf.Acos(Vector3.Dot(m_Angles.ToVector3().normalized, targetFixVec.ToVector3().normalized)) * Mathf.Rad2Deg;
+                Fix64 angle = (Fix64)(Mathf.Acos((float)FixVector3.Dot(m_Angles.GetNormalized(), targetFixVec.GetNormalized()))) * (Fix64)Mathf.Rad2Deg;
+                Fix64 compareAngle = (Fix64)m_SkillNode.angle;
+                compareAngle = compareAngle / Fix64.FromRaw(2000);
+                Fix64 compareDistance = (Fix64)m_SkillNode.aoe_long;
+                GameData.m_GameManager.LogMsg(string.Format("角度:{0}", angle));
+                GameData.m_GameManager.LogMsg(string.Format("配置表角度:{0}", compareAngle));
                 Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-                if ((angle <= m_SkillNode.angle * 0.5F || m_SkillNode.angle <= 0) && ((float)distance <= m_SkillNode.aoe_long))
+                GameData.m_GameManager.LogMsg(string.Format("距离:{0}", distance));
+                GameData.m_GameManager.LogMsg(string.Format("配置表距离:{0}", compareDistance));
+                if ((angle <= compareAngle || compareAngle <= Fix64.Zero) && (distance <= compareDistance))
                 {
                     IsFallDamage = true;
                 }
             }
             else
             {
-                float forwardDistance = Vector3.Dot(targetFixVec.ToVector3(), m_Angles.ToVector3().normalized);
-                Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-                if (forwardDistance > 0 && forwardDistance <= m_SkillNode.aoe_long && (float)distance <= m_SkillNode.aoe_long)
+                Fix64 forwardDistance = FixVector3.Dot(targetFixVec.GetNormalized(), m_Angles);
+                Fix64 compareDistance = (Fix64)m_SkillNode.aoe_long;
+                Fix64 distance = GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 ? (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos) - Fix64.One);
+                GameData.m_GameManager.LogMsg(string.Format("往前距离:{0}", forwardDistance));
+                GameData.m_GameManager.LogMsg(string.Format("配置表往前距离:{0}", compareDistance));
+                if (forwardDistance > Fix64.Zero && forwardDistance <= compareDistance && distance < compareDistance)
                 {
-                    float rightDistance = Vector3.Dot(targetFixVec.ToVector3(), m_AttackPlayer.m_VGo.transform.right.normalized);
-                    if (Math.Abs(rightDistance) <= m_SkillNode.aoe_wide)
+                    Fix64 rightDistance = FixVector3.Dot(targetFixVec, (FixVector3)m_AttackPlayer.m_VGo.transform.right.normalized);
+                    rightDistance = rightDistance < Fix64.Zero ? -rightDistance : rightDistance;
+                    Fix64 compareWide = (Fix64)m_SkillNode.aoe_wide;
+                    GameData.m_GameManager.LogMsg(string.Format("往右距离:{0}", rightDistance));
+                    GameData.m_GameManager.LogMsg(string.Format("配置表往右距离:{0}", compareWide));
+                    if (rightDistance <= compareWide)
                     {
                         IsFallDamage = true;
                     }
@@ -171,6 +199,7 @@ public class PlayerBullet
     public void Destory()
     {
         m_AttackPlayer = null;
+        m_SkillNode = null;
         m_WoundPlayerList.Clear();
         m_WoundPlayerList = null;
     }

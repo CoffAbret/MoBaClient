@@ -8,40 +8,48 @@ using UnityEngine;
 /// </summary>
 public class PlayerMoveManager
 {
-    private Vector3 m_PrePos = Vector3.zero;
-    private float m_PreAngle = 0f;
+    private Fix64 m_PreAngle = Fix64.Zero;
+    private Vector3 preV3;
     public void UpdateMove()
     {
         if (GameData.m_CurrentPlayer == null)
             return;
-        Vector3 newEulerAngles = Vector3.zero;
-        float x = (float)(Fix64)ETCInput.GetAxis("Horizontal");
-        float y = (float)(Fix64)ETCInput.GetAxis("Vertical");
-        if (x == 0 && y == 0)
+        Fix64 fixX = (Fix64)ETCInput.GetAxis("Horizontal");
+        Fix64 fixY = (Fix64)ETCInput.GetAxis("Vertical");
+        if (fixX == Fix64.Zero && fixY == Fix64.Zero)
         {
             if (GameData.m_CurrentPlayer.m_IsMove)
             {
                 GameData.m_GameManager.InputCmd(Cmd.MoveEnd);
-                m_PrePos = Vector3.zero;
-                m_PreAngle = 0f;
+                m_PreAngle = Fix64.Zero;
             }
         }
         else
         {
             if (GameData.m_CurrentPlayer.m_IsSkill || GameData.m_CurrentPlayer.m_IsAttack || GameData.m_CurrentPlayer.m_IsHit || GameData.m_CurrentPlayer == null || GameData.m_CurrentPlayer.m_PlayerData == null)
-                return;
-            if (Math.Abs(x) < 0.1 && Math.Abs(y) < 0.1)
-                return;
-            Vector3 pos = new Vector3(x, 0, y);
-            float angle = Mathf.Acos(Vector3.Dot(pos.normalized, (pos - m_PrePos).normalized)) * Mathf.Rad2Deg;
-            if ((m_PrePos == Vector3.zero || Mathf.Abs(angle - m_PreAngle) > 0.1f))
             {
-                //string parameter = string.Format("{0}#{1}#{2}#{3}#{4}#{5}", x, 0, y, GameData.m_CurrentPlayer.m_Pos.x, GameData.m_CurrentPlayer.m_Pos.y, GameData.m_CurrentPlayer.m_Pos.z);
-                string parameter = string.Format("{0}#{1}", x, y);
-                GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
-                m_PrePos = pos;
-                m_PreAngle = angle;
+                m_PreAngle = Fix64.Zero;
+                return;
             }
+            Fix64 angle = CalcAngle(fixX, fixY);
+            if (angle < Fix64.One)
+                return;
+            Fix64 subAngle = angle - m_PreAngle;
+            subAngle = subAngle < Fix64.Zero ? -subAngle : subAngle;
+            if (subAngle < Fix64.One)
+                return;
+            string parameter = string.Format("{0}#{1}", fixX, fixY);
+            GameData.m_GameManager.InputCmd(Cmd.Move, parameter);
+            m_PreAngle = angle;
         }
+    }
+
+    private Fix64 CalcAngle(Fix64 x, Fix64 y)
+    {
+        x = x < Fix64.Zero ? -x : x;
+        y = y < Fix64.Zero ? -y : y;
+        Fix64 angleX = x * Fix64.FromRaw(180000);
+        Fix64 angleY = y * Fix64.FromRaw(180000);
+        return angleX + angleY;
     }
 }

@@ -123,8 +123,9 @@ public class MainBehaviour : MonoBehaviour
     {
         if (GameData.m_GameManager == null)
             return;
-        GameData.m_GameManager.UpdateTcpNet();
-        GameData.m_GameManager.UpdateGame();
+        if (GameData.m_GameManager.m_NetManager == null)
+            return;
+        GameData.m_GameManager.m_NetManager.UpdateNet();
     }
 
     /// <summary>

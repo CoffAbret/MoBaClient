@@ -123,6 +123,7 @@ public class NetManager
         {
             case NetProtocol.SYNC_KEY:
                 GameData.m_GameManager.SyncKey(data);
+                GameData.m_GameManager.UpdateGame();
                 break;
             case NetProtocol.START:
                 GameData.m_IsGame = true;

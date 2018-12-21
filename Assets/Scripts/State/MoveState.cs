@@ -26,9 +26,13 @@ public class MoveState : BaseState
             return;
         if (m_Parameter == null || !m_Parameter.Contains("#"))
             return;
-        float x = float.Parse(m_Parameter.Split('#')[0]);
-        float z = float.Parse(m_Parameter.Split('#')[1]);
-        m_Player.m_Angles = (FixVector3)((new Vector3(x, 0, z).normalized));
+        Fix64 fixX = (Fix64)(m_Parameter.Split('#')[0]);
+        Fix64 fixZ = (Fix64)(m_Parameter.Split('#')[1]);
+        m_Player.m_Angles = new FixVector3(fixX, Fix64.Zero, fixZ);
+        if (viewPlayer.m_PlayerData.m_Type == 1)
+            GameData.m_GameManager.LogMsg(string.Format("收到移动朝向：{0}", m_Player.m_Angles));
+        else
+            GameData.m_GameManager.LogMsg(string.Format("小兵收到移动朝向：{0}", m_Player.m_Angles));
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
@@ -71,17 +75,21 @@ public class MoveState : BaseState
         if (!m_Player.m_IsMove)
             return;
         FixVector3 fixPos = m_Player.m_Pos + ((Fix64)m_Player.m_PlayerData.m_HeroAttrNode.movement_speed * m_Player.m_Angles * GameData.m_FixFrameLen);
-        //Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(fixPos.ToVector3());
-        //bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
-        //if (isWalk)
-        //{
-        m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-        m_Player.m_Pos = fixPos;
-        #region 显示层
-        if (GameData.m_IsExecuteViewLogic)
-            m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
-        #endregion
-        //}
+        Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(fixPos.ToVector3());
+        bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
+        if (isWalk)
+        {
+            m_Player.m_IntervalTime += GameData.m_FixFrameLen;
+            m_Player.m_Pos = fixPos;
+            if (m_Player.m_PlayerData.m_Type == 1)
+                GameData.m_GameManager.LogMsg(string.Format("移动后坐标：{0}", m_Player.m_Pos));
+            else
+                GameData.m_GameManager.LogMsg(string.Format("小兵移动后坐标：{0}", m_Player.m_Pos));
+            #region 显示层
+            if (GameData.m_IsExecuteViewLogic)
+                m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
+            #endregion
+        }
     }
 
     /// <summary>

@@ -26,7 +26,7 @@ public class GameData
     //当前显示角色
     public static Player m_CurrentPlayer;
     //每帧时间长度
-    public static Fix64 m_FixFrameLen = Fix64.FromRaw(20);
+    public static Fix64 m_FixFrameLen = Fix64.FromRaw(33);
     //随机数
     public static SRandom m_Srandom = new SRandom(1000);
     //游戏逻辑帧数
@@ -63,4 +63,6 @@ public class GameData
     public static int m_UdpPort = 8888;
     //普攻按钮点击次数
     public static int m_AttackClickIndex = 0;
+    //日志写入路径
+    public static string m_logFilePath = string.Empty;
 }

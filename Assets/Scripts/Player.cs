@@ -190,7 +190,7 @@ public class Player
         m_PlayerData.m_HP += addHp;
         m_Health.m_Health += addHp;
         if (m_PlayerData.m_Id == GameData.m_CurrentRoleId)
-            m_HudText.PlayerHUDText.AddLocalized(string.Format("+{0}", hp), new Color(0.09F, 0.9F, 0.09F, 1), 1);
+            m_HudText.PlayerHUDText.AddLocalized(string.Format("+{0}", hp), new Color(0.09F, 0.9F, 0.09F, 1), 0);
     }
 
 
@@ -276,7 +276,7 @@ public class Player
             if (m_Health != null)
                 m_Health.m_Health -= damage;
             if (m_HudText != null && m_PlayerData != null && GameData.m_CurrentPlayer != null && GameData.m_CurrentPlayer.m_PlayerData != null && m_PlayerData.m_Id == GameData.m_CurrentPlayer.m_PlayerData.m_Id)
-                m_HudText.PlayerHUDText.AddLocalized(string.Format("-{0}", damage), Color.red, 0f);
+                m_HudText.PlayerHUDText.AddLocalized(string.Format("-{0}", damage), Color.red, 0);
         }
         #endregion
         if (m_PlayerData.m_HP <= 0)
