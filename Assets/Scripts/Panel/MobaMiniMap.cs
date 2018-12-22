@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 public class MobaMiniMap : MonoBehaviour
 {
-    public static List<Player> mapElements = new List<Player>();
-    public static List<Tower> mapTowerElements = new List<Tower>();
+    public static List<BaseObject> mapElements = new List<BaseObject>();
     public static MobaMiniMap instance;
 
     public UISprite heroHead;
@@ -40,17 +39,7 @@ public class MobaMiniMap : MonoBehaviour
         mapDragBox.gameObject.SetActive(false);
         baseDepth = map1v1.depth + 1;
     }
-    void RefreshIcon(Player element)
-    {
-        if (element != null && element.m_MapIcon != null)
-        {
-            element.m_MapIcon.transform.localPosition = GetMapPos(element.m_VGo.transform.position);
-            if (!element.m_MapIcon.gameObject.activeSelf)
-                element.m_MapIcon.gameObject.SetActive(true);
-        }
-    }
-
-    void RefreshTowerIcon(Tower element)
+    void RefreshIcon(BaseObject element)
     {
         if (element != null && element.m_MapIcon != null)
         {
@@ -114,32 +103,24 @@ public class MobaMiniMap : MonoBehaviour
         {
             RefreshIcon(mapElements[i]);
         }
-
-        for (int i = 0; i < mapTowerElements.Count; i++)
-        {
-            RefreshTowerIcon(mapTowerElements[i]);
-        }
     }
 
-    string GetMapIconNameByState(Player cs)
+    string GetMapIconNameByState(BaseObject cs)
     {
-        switch (cs.m_PlayerData.m_Type)
+        switch (cs.m_Data.m_Type)
         {
-            case 1:
-                return cs.m_PlayerData.m_HeroAttrNode.icon_name;
-            case 2:
-            case 3:
-                return cs.m_PlayerData.m_CampId == 1 ? "moba_lvbingbing" : "moba_hongbing";
+            case ObjectType.PLAYER:
+                return (cs as Player).m_PlayerData.m_HeroAttrNode.icon_name;
+            case ObjectType.MONSTER:
+                return (cs as Monster).m_MonsterData.m_CampId == CampType.BLUE ? "moba_lvbingbing" : "moba_hongbing";
+            case ObjectType.ARROW_TOWER:
+            case ObjectType.CRYSTAL_TOWER:
+                return (cs as Tower).m_TowerData.m_CampId == CampType.BLUE ? "moba_lanta" : "moba_hongjia";
         }
         return string.Empty;
     }
 
-    string GetMapIconNameByTowerState(Tower cs)
-    {
-        return cs.m_CampId == 1 ? "moba_lanta" : "moba_hongjia";
-    }
-
-    public UISprite AddMapIconByType(Player cs)
+    public UISprite AddMapIconByType(BaseObject cs)
     {
         map1v1.gameObject.SetActive(true);
         mapScale = 300;
@@ -149,60 +130,37 @@ public class MobaMiniMap : MonoBehaviour
         mPosRatio = 0.6f;
         cameraPlayerOffset = new Vector3(-2f, 0, -2f);
 
-        UISprite icon = NGUITools.AddSprite(gameObject, cs.m_PlayerData.m_Type == 1 ? map1v1Hero.atlas : map1v1.atlas, GetMapIconNameByState(cs));
+        UISprite icon = NGUITools.AddSprite(gameObject, cs.m_Data.m_Type == ObjectType.PLAYER ? map1v1Hero.atlas : map1v1.atlas, GetMapIconNameByState(cs));
         icon.transform.localEulerAngles = new Vector3(0, 0, -35);
         icon.gameObject.SetActive(false);
         icon.depth = map1v1.depth + 1;
-        if (cs.m_PlayerData.m_Type == 1)
+        if (cs.m_Data.m_Type == ObjectType.PLAYER)
         {
             icon.depth = baseDepth + 1;
-            string borderName = cs.m_PlayerData.m_CampId == 2 ? "hongdiankuang" : "landiankuang";
+            string borderName = cs.m_Data.m_CampId == CampType.RED ? "hongdiankuang" : "landiankuang";
             UISprite iconGroupBorder = NGUITools.AddSprite(icon.gameObject, map1v1Hero.atlas, borderName);
             iconGroupBorder.width = iconGroupBorder.height = 41;
             iconGroupBorder.depth = icon.depth + 1;
             baseDepth += 2;
             icon.width = icon.height = 36;
         }
-        else
+        else if (cs.m_Data.m_Type == ObjectType.MONSTER)
             icon.width = icon.height = 6;
+        else
+        {
+            icon.width = 14;
+            icon.height = 20;
+        }
         cs.m_MapIcon = icon;
         cs.m_DestoryMinMapCallback = RemoveMapIcon;
         if (!mapElements.Contains(cs)) mapElements.Add(cs);
         return icon;
     }
 
-    public UISprite AddMapIconByTower(Tower cs)
-    {
-        map1v1.gameObject.SetActive(true);
-        mapScale = 300;
-        mapRotZ = 0;
-        mapDragConstrain = new Vector2(320, 80);
-        mapDragCenter = new Vector2(0, 0);
-        mPosRatio = 0.6f;
-        cameraPlayerOffset = new Vector3(-2f, 0, -2f);
-
-        UISprite icon = NGUITools.AddSprite(gameObject, map1v1.atlas, GetMapIconNameByTowerState(cs));
-        icon.transform.localEulerAngles = new Vector3(0, 0, -35);
-        icon.gameObject.SetActive(false);
-        icon.depth = map1v1.depth + 1;
-        icon.width = 14;
-        icon.height = 20;
-        cs.m_MapIcon = icon;
-        cs.m_DestoryMinMapCallback = RemoveTowerMapIcon;
-        if (!mapTowerElements.Contains(cs)) mapTowerElements.Add(cs);
-        return icon;
-    }
-
-    public void RemoveMapIcon(Player player)
+    public void RemoveMapIcon(BaseObject player)
     {
         if (mapElements.Contains(player)) mapElements.Remove(player);
         if (player.m_MapIcon != null) GameObject.DestroyImmediate(player.m_MapIcon.gameObject);
-    }
-
-    public void RemoveTowerMapIcon(Tower tower)
-    {
-        if (mapTowerElements.Contains(tower)) mapTowerElements.Remove(tower);
-        if (tower.m_MapIcon != null) GameObject.DestroyImmediate(tower.m_MapIcon.gameObject);
     }
 
     private void OnDestroy()
@@ -212,11 +170,5 @@ public class MobaMiniMap : MonoBehaviour
             RemoveMapIcon(mapElements[i]);
         }
         mapElements.Clear();
-
-        for (int i = 0; i < mapTowerElements.Count; i++)
-        {
-            RemoveTowerMapIcon(mapTowerElements[i]);
-        }
-        mapTowerElements.Clear();
     }
 }

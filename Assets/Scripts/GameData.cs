@@ -14,7 +14,7 @@ public class GameData
     //当前选择英雄id
     public static int m_HeroId = 201991000;
     //当前阵营
-    public static int m_CampId;
+    public static CampType m_CampId;
     //当前匹配位置
     public static int m_MatchPos;
     //当前匹配Key值
@@ -33,10 +33,8 @@ public class GameData
     public static int m_GameFrame;
     //Ping累计时长
     public static Fix64 m_PingTime = Fix64.Zero;
-    //所有显示角色列表
-    public static List<Player> m_PlayerList = new List<Player>();
-    //所有显示箭塔列表
-    public static List<Tower> m_TowerList = new List<Tower>();
+    //所有游戏物体列表(角色、小兵、箭塔、水晶)
+    public static List<BaseObject> m_ObjectList = new List<BaseObject>();
     //所有操作事件的列表
     public static List<FrameKeyData> m_OperationEventList = new List<FrameKeyData>();
     //技能特效路径

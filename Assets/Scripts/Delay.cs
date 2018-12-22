@@ -44,10 +44,10 @@ public class Delay
         m_FixElapseTime = m_FixElapseTime + GameData.m_FixFrameLen;
         if (m_ResurgencePlayerData != null)
         {
-            if (m_ResurgencePlayerData.m_Id == GameData.m_CurrentRoleId)
-                GameData.m_GameManager.m_UIManager.m_ResurrectionLabel.text = string.Format("{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
+            if (m_ResurgencePlayerData.m_RoleId == GameData.m_CurrentRoleId)
+                GameData.m_GameManager.m_UIManager.m_ResurrectionCountdown.text = string.Format("{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
             else
-                GameData.m_GameManager.m_UIManager.m_EnemyResurrectionLabel.text = string.Format("{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
+                GameData.m_GameManager.m_UIManager.m_EmenyResurrectionCountdown.text = string.Format("{0}", (int)(m_FixPlanTime - m_FixElapseTime) + 1);
         }
 
         if (m_MatchTimeCallback != null)

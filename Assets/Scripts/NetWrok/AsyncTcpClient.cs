@@ -126,9 +126,9 @@ public class AsyncTcpClient
                 m_Client.GetStream().BeginRead(m_Buffer, 0, m_MaxLength, new AsyncCallback(OnRead), null);
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            throw ex;
         }
     }
 
@@ -145,6 +145,21 @@ public class AsyncTcpClient
     }
 
     /// <summary>
+    /// 发送ping包
+    /// </summary>
+    /// <param name="data"></param>
+    public void AsyncSendPing()
+    {
+        IDictionary<string, object> packet = new Dictionary<string, object>();
+        packet.Add("msgid", NetProtocol.PING);
+        CWritePacket writePacket = new CWritePacket(NetProtocol.PING);
+        StringBuilder builder = Jsontext.WriteData(packet);
+        string json_Str = builder.ToString();
+        writePacket.WriteString(json_Str);
+        m_Client.GetStream().BeginWrite(writePacket.GetPacketByte(), 0, writePacket.GetPacketByte().Length, new AsyncCallback(OnWrite), null);
+    }
+
+    /// <summary>
     /// 发送数据回调
     /// </summary>
     /// <param name="result"></param>
@@ -156,9 +171,9 @@ public class AsyncTcpClient
         {
             m_Client.GetStream().EndWrite(result);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            throw ex;
         }
     }
 

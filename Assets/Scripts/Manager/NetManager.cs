@@ -43,7 +43,7 @@ public class NetManager
     /// <summary>
     /// 每帧处理Udp网络数据
     /// </summary>
-    public void UpdateNet()
+    public void UpdateUdpNet()
     {
         if (m_UdpClient == null)
             return;
@@ -123,11 +123,11 @@ public class NetManager
         {
             case NetProtocol.SYNC_KEY:
                 GameData.m_GameManager.SyncKey(data);
-                GameData.m_GameManager.UpdateGame();
+                GameData.m_GameManager.UpdateUdpGame();
                 break;
             case NetProtocol.START:
                 GameData.m_IsGame = true;
-                GameData.m_GameManager.m_UIManager.m_UpdateEmbattleUICallback();
+                GameData.m_GameManager.m_UIManager.m_UpdateBattleUICallback();
                 object[] playerObj = data["info"] as object[];
                 GameData.m_GameManager.CreateAllPlayer(playerObj);
                 break;

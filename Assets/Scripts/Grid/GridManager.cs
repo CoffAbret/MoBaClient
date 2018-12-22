@@ -84,7 +84,7 @@ public class GridManager
     {
         Vector2 v2 = MapPosToGrid(tower.m_Pos.ToVector3());
         int distince = 6;
-        if (tower.m_Type == 1)
+        if (tower.m_TowerData.m_Type == ObjectType.ARROW_TOWER)
             distince = 3;
         int xMin = (int)v2.x - distince;
         int xMax = (int)v2.x + distince;
@@ -101,11 +101,13 @@ public class GridManager
 
     public void InitTowerGrid()
     {
-        for (int i = 0; i < GameData.m_TowerList.Count; i++)
+        for (int i = 0; i < GameData.m_ObjectList.Count; i++)
         {
-            Vector2 v2 = MapPosToGrid(GameData.m_TowerList[i].m_Pos.ToVector3());
+            if (GameData.m_ObjectList[i].m_Data.m_Type == ObjectType.PLAYER || GameData.m_ObjectList[i].m_Data.m_Type == ObjectType.MONSTER)
+                continue;
+            Vector2 v2 = MapPosToGrid(GameData.m_ObjectList[i].m_Pos.ToVector3());
             int distince = 6;
-            if (GameData.m_TowerList[i].m_Type == 1)
+            if (GameData.m_ObjectList[i].m_Data.m_Type == ObjectType.ARROW_TOWER)
                 distince = 3;
             int xMin = (int)v2.x - distince;
             int xMax = (int)v2.x + distince;

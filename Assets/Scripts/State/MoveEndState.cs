@@ -20,16 +20,16 @@ public class MoveEndState : BaseState
     /// </summary>
     /// <param name="viewPlayer"></param>
     /// <param name="parameter"></param>
-    public override void OnInit(Player player, string parameter = null)
+    public override void OnInit(BaseObject baseObject, string parameter = null)
     {
-        base.OnInit(player, parameter);
+        base.OnInit(baseObject, parameter);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
-            if (m_Player == null || m_Player.m_VGo == null)
+            if (m_BaseObject == null || m_BaseObject.m_VGo == null)
                 return;
             if (m_Animator == null)
-                m_Animator = m_Player.m_VGo.GetComponent<Animator>();
+                m_Animator = m_BaseObject.m_VGo.GetComponent<Animator>();
         }
         #endregion
     }
@@ -40,8 +40,8 @@ public class MoveEndState : BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        m_Player.m_IsMove = false;
-        m_Player.m_IntervalTime = Fix64.Zero;
+        m_BaseObject.m_IsMove = false;
+        m_IntervalTime = Fix64.Zero;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
             if (m_Animator != null)

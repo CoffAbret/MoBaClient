@@ -5,65 +5,43 @@ using UnityEngine;
 /// <summary>
 /// 角色数据类
 /// </summary>
-public class PlayerData
+public class PlayerData : BaseData
 {
-    //对象唯一ID
-    public int m_Id;
-    //对象名称
-    public string m_Name;
-    //当前英雄ID
+    //角色ID
+    public int m_RoleId;
+    //角色名称
+    public string m_RoleName;
+    //角色英雄ID
     public int m_HeroId;
-    //所属阵营
-    public int m_CampId;
-    //当前血量
-    public int m_HP;
-    //当前对象模型路径
-    public string m_ModelPath;
-    //角色类型(1 角色 2 小兵)
-    public int m_Type;
-    //索引
-    public int m_Index;
-    //寻路点
-    public FixVector3 m_NaviPos = FixVector3.Zero;
-    //当前英雄基础属性
+    //角色英雄资源名称
+    public string m_HeroResourceName;
+    //角色英雄模型路径
+    public string m_HeroModelPath;
+    //角色英雄基础属性
     public CharacterAttrNode m_HeroAttrNode;
-    //当前英雄技能
+    //角色英雄技能
     public List<SkillNode> m_SkillList;
-    public string m_HeroName;
     public PlayerData() { }
-    public PlayerData(int id, int heroId, string name, int campId, int type)
+    public PlayerData(int id, int heroId, string name, CampType campId, ObjectType type)
     {
-        m_Id = id;
+        m_RoleId = id;
         m_HeroId = heroId;
-        m_Name = name;
+        m_RoleName = name;
         m_CampId = campId;
         m_Type = type;
         m_SkillList = new List<SkillNode>();
         //获取英雄品质为1的基础属性
-        if (type == 1)
-            m_HeroAttrNode = FSDataNodeTable<HeroAttrNode>.GetSingleton().FindDataByType(heroId + 1);
-        //获取小兵基础属性
-        else
-        {
-            m_HeroAttrNode = FSDataNodeTable<MonsterAttrNode>.GetSingleton().FindDataByType(heroId);
-            Moba3v3NaviNode naviNode = FSDataNodeTable<Moba3v3NaviNode>.GetSingleton().FindDataByType(type - 1);
-            m_NaviPos = campId == 1 ? new FixVector3((Fix64)naviNode.naviPoint2.x, (Fix64)naviNode.naviPoint2.y, (Fix64)naviNode.naviPoint2.z) : new FixVector3((Fix64)naviNode.naviPoint1.x, (Fix64)naviNode.naviPoint1.y, (Fix64)naviNode.naviPoint1.z);
-
-        }
+        m_HeroAttrNode = FSDataNodeTable<HeroAttrNode>.GetSingleton().FindDataByType(heroId + 1);
         if (m_HeroAttrNode == null)
             return;
         for (int i = 0; i < m_HeroAttrNode.skill_id.Length; i++)
         {
-            SkillNode skillNode = null;
-            if (type == 1)
-                skillNode = FSDataNodeTable<SkillNode>.GetSingleton().FindDataByType(m_HeroAttrNode.skill_id[i]);
-            else
-                skillNode = FSDataNodeTable<MonsterSkillNode>.GetSingleton().FindDataByType(m_HeroAttrNode.skill_id[i]);
+            SkillNode skillNode = FSDataNodeTable<SkillNode>.GetSingleton().FindDataByType(m_HeroAttrNode.skill_id[i]);
             m_SkillList.Add(skillNode);
         }
-        m_HP = m_HeroAttrNode.hp;
-        m_ModelPath = m_HeroAttrNode.modelNode.respath;
-        m_HeroName = m_ModelPath.Split('/')[3];
+        m_HP = m_MaxHP = m_HeroAttrNode.hp;
+        m_HeroModelPath = m_HeroAttrNode.modelNode.respath;
+        m_HeroResourceName = m_HeroModelPath.Split('/')[3];
     }
 
     /// <summary>

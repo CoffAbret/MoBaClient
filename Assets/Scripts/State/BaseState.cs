@@ -8,18 +8,19 @@ using UnityEngine;
 public class BaseState
 {
     //游戏对象
-    protected Player m_Player;
+    protected BaseObject m_BaseObject;
     //参数
     protected string m_Parameter;
-
+    //累计时间
+    protected Fix64 m_IntervalTime = Fix64.Zero;
     /// <summary>
     /// 初始化状态数据
     /// </summary>
     /// <param name="player">游戏对象</param>
     /// <param name="parameter">参数</param>
-    public virtual void OnInit(Player player, string parameter = null)
+    public virtual void OnInit(BaseObject baseObject, string parameter = null)
     {
-        m_Player = player;
+        m_BaseObject = baseObject;
         m_Parameter = parameter;
     }
 

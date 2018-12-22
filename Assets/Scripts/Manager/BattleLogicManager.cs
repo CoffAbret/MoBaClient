@@ -46,17 +46,11 @@ public class BattleLogicManager
     /// </summary>
     public void UpdateLogic()
     {
-        for (int i = 0; i < GameData.m_PlayerList.Count; i++)
+        for (int i = 0; i < GameData.m_ObjectList.Count; i++)
         {
-            if (GameData.m_PlayerList[i] == null || GameData.m_PlayerList[i].m_PlayerData == null)
+            if (GameData.m_ObjectList[i] == null || GameData.m_ObjectList[i].m_Data == null)
                 continue;
-            GameData.m_PlayerList[i].UpdateLogic();
-        }
-        for (int i = 0; i < GameData.m_TowerList.Count; i++)
-        {
-            if (GameData.m_TowerList[i] == null)
-                continue;
-            GameData.m_TowerList[i].UpdateLogic();
+            GameData.m_ObjectList[i].UpdateLogic();
         }
     }
 
@@ -68,11 +62,14 @@ public class BattleLogicManager
     public Player GetOperationPlayer(int roleId)
     {
 
-        for (int i = 0; i < GameData.m_PlayerList.Count; i++)
+        for (int i = 0; i < GameData.m_ObjectList.Count; i++)
         {
-            if (GameData.m_PlayerList[i].m_PlayerData.m_Id == roleId)
+            if (!(GameData.m_ObjectList[i] is Player))
+                continue;
+            Player player = GameData.m_ObjectList[i] as Player;
+            if (player.m_PlayerData.m_RoleId == roleId)
             {
-                return GameData.m_PlayerList[i];
+                return player;
             }
         }
         return null;

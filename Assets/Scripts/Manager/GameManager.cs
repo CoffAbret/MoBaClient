@@ -32,6 +32,23 @@ public class GameManager
     {
         m_NetManager = new NetManager();
         m_NetManager.InitTcpClient();
+    }
+
+    /// <summary>
+    /// 初始化UDP网络
+    /// </summary>
+    public void InitUdpNet()
+    {
+        if (m_NetManager == null)
+            return;
+        m_NetManager.InitUdpClient();
+    }
+
+    /// <summary>
+    /// 初始化使用Tcp网络的游戏数据
+    /// </summary>
+    public void InitTcpGame()
+    {
         m_OpreationManager = new OpreationManager();
         m_UIManager = new UIManager();
         m_DelayManager = new DelayManager();
@@ -42,22 +59,11 @@ public class GameManager
     }
 
     /// <summary>
-    /// 每帧处理Tcp网络逻辑
+    /// 初始化使用Udp网络的游戏数据
     /// </summary>
-    public void UpdateTcpNet()
-    {
-        if (m_NetManager != null)
-            m_NetManager.UpdateTcpNet();
-        if (GameData.m_GameManager.m_DelayManager != null)
-            GameData.m_GameManager.m_DelayManager.UpdateDelay();
-    }
-    /// <summary>
-    /// 初始化
-    /// </summary>
-    public void InitGame()
+    public void InitUdpGame()
     {
         LoadJsonData();
-        m_NetManager.InitUdpClient();
         m_PlayerMoveManager = new PlayerMoveManager();
         m_BattleLogicManager = new BattleLogicManager();
         m_BulletManager = new BulletManager();
@@ -67,9 +73,36 @@ public class GameManager
     }
 
     /// <summary>
-    /// 每帧处理游戏逻辑
+    /// 每帧处理Tcp网络逻辑
     /// </summary>
-    public void UpdateGame()
+    public void UpdateTcpNet()
+    {
+        if (m_NetManager != null)
+            m_NetManager.UpdateTcpNet();
+    }
+
+    /// <summary>
+    /// 每帧处理Udp网络逻辑
+    /// </summary>
+    public void UpdateUdpNet()
+    {
+        if (m_NetManager != null)
+            m_NetManager.UpdateUdpNet();
+    }
+
+    /// <summary>
+    /// 每帧处理使用Tcp网络的游戏逻辑
+    /// </summary>
+    public void UpdateTcpGame()
+    {
+        if (GameData.m_GameManager.m_DelayManager != null)
+            GameData.m_GameManager.m_DelayManager.UpdateDelay();
+    }
+
+    /// <summary>
+    /// 每帧处理使用UDP网络的游戏逻辑
+    /// </summary>
+    public void UpdateUdpGame()
     {
         if (!GameData.m_IsGame)
             return;
@@ -83,17 +116,15 @@ public class GameManager
             GameData.m_GameManager.m_SpawnManager.UpdateLogic();
     }
 
+
     /// <summary>
     /// 销毁游戏数据
     /// </summary>
     public void DestoryGame()
     {
-        for (int i = 0; i < GameData.m_PlayerList.Count; i++)
-            GameData.m_PlayerList[i].Destroy();
-        for (int i = 0; i < GameData.m_TowerList.Count; i++)
-            GameData.m_TowerList[i].Destroy();
-        GameData.m_PlayerList.Clear();
-        GameData.m_TowerList.Clear();
+        for (int i = 0; i < GameData.m_ObjectList.Count; i++)
+            GameData.m_ObjectList[i].Destroy();
+        GameData.m_ObjectList.Clear();
         if (m_NetManager != null)
             m_NetManager.OnDisconnect();
         if (m_DelayManager != null)
@@ -106,14 +137,14 @@ public class GameManager
     /// 游戏结束
     /// </summary>
     /// <param name="campId">失败阵营</param>
-    public void GameOver(int campId)
+    public void GameOver(CampType campId)
     {
         GameData.m_IsGame = false;
         GameData.m_GameResult = GameData.m_CampId == campId ? false : true;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
-            GameData.m_GameManager.m_UIManager.m_GameOverUICallback();
+            GameData.m_GameManager.m_UIManager.m_SettlementUICallback(GameData.m_GameResult);
         }
         #endregion
     }
@@ -175,19 +206,20 @@ public class GameManager
     {
         Player plyerObj = new Player();
         plyerObj.Create(playerData);
-        GameData.m_PlayerList.Add(plyerObj);
+        GameData.m_ObjectList.Add(plyerObj);
     }
 
     /// <summary>
     /// 创建箭塔
     /// </summary>
     /// <param name="charData"></param>
-    public void CreateTower(int campId, int type)
+    public void CreateTower(CampType campId, ObjectType type)
     {
         Tower towerObj = new Tower();
-        int hp = type == 2 ? 20000 : 10000;
-        towerObj.Create(campId, hp, type);
-        GameData.m_TowerList.Add(towerObj);
+        int hp = type == ObjectType.CRYSTAL_TOWER ? 20000 : 10000;
+        TowerData data = new TowerData(campId, type, hp);
+        towerObj.Create(data);
+        GameData.m_ObjectList.Add(towerObj);
     }
 
     /// <summary>
@@ -204,18 +236,18 @@ public class GameManager
             int heroId = int.Parse(playerDic.TryGetString("heroId"));
             int campId = int.Parse(playerDic.TryGetString("teamId"));
             campId = campId == 0 ? 1 : 2;
-            PlayerData charData = new PlayerData(roleId, heroId, roleName, campId, 1);
+            PlayerData charData = new PlayerData(roleId, heroId, roleName, (CampType)campId, ObjectType.PLAYER);
             CreatePlayer(charData);
         }
         for (int i = 0; i < 2; i++)
         {
             int campId = i % 2 == 0 ? 1 : 2;
-            CreateTower(campId, 1);
+            CreateTower((CampType)campId, ObjectType.ARROW_TOWER);
         }
         for (int i = 0; i < 2; i++)
         {
             int campId = i % 2 == 0 ? 1 : 2;
-            CreateTower(campId, 2);
+            CreateTower((CampType)campId, ObjectType.CRYSTAL_TOWER);
         }
         m_GridManager.InitTowerGrid();
         InitLog();
@@ -288,7 +320,7 @@ public class GameManager
         if (result != 0)
             return;
         string matchKey = data.TryGetString("matchKey");
-        GameData.m_CampId = data.TryGetInt("teamId");
+        GameData.m_CampId = (CampType)data.TryGetInt("teamId");
         GameData.m_MatchPos = data.TryGetInt("pos");
         GameData.m_MatchKey = matchKey;
         if (data["teamInfo"] == null)
@@ -325,7 +357,7 @@ public class GameManager
     {
         int campId = data.TryGetInt("teamId");
         int pos = data.TryGetInt("pos");
-        GameData.m_GameManager.m_UIManager.m_UpdateConfirmMatchUICallback(campId, pos);
+        GameData.m_GameManager.m_UIManager.m_UpdateSelectHeroConfirmMatchUI(campId, pos);
     }
 
     /// <summary>
@@ -343,7 +375,7 @@ public class GameManager
         GameData.m_UdpIP = udpIp;
         GameData.m_UdpPort = udpPort;
         GameData.m_MobaKey = mobaKey;
-        m_UIManager.m_UpdateMatchHeroRoomUICallback();
+        m_UIManager.m_UpdateSelectHeroUI();
     }
 
     /// <summary>
@@ -352,7 +384,7 @@ public class GameManager
     /// <param name="time"></param>
     private void UpdateMatchTime(int time)
     {
-        m_UIManager.m_UpdateMatchTimeUICallback(time);
+        m_UIManager.m_UpdateMatchCountdownUICallback(time);
     }
 
     public void InitLog()

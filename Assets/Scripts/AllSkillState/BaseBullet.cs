@@ -21,11 +21,11 @@ public class Bullet_ValueClass
     //虚拟目标 1,2,3 通用
     public FixVector3 v_pos;
     //虚拟目标
-    public List<Player> v_taregt = new List<Player>();
+    public List<BaseObject> v_taregt = new List<BaseObject>();
     //记录上次伤害的地址
     public FixVector3 old_pos;
     //虚拟目标
-    public Player m_taregt;
+    public BaseObject m_taregt;
 
     //创建子子弹参数
     public Fix64 newbul_origin;//触发子弹发射者
@@ -38,7 +38,7 @@ public class Bullet_ValueClass
 public class BeHurtTarget
 {
     public Fix64 id = Fix64.Zero;//id
-    public Player PlayerTarget;//玩家目标
+    public BaseObject PlayerTarget;//玩家目标
     public Tower TowerTarget;//塔目标
     public Fix64 ThroughCount = Fix64.Zero;//穿透次数
     public Fix64 CollisionCount = Fix64.Zero;//碰撞次数
@@ -60,9 +60,7 @@ public class BaseBullet : BaseState
     //技能是否有效
     public bool m_IsActive = false;
     //受伤角色列表
-    public List<Player> m_WoundPlayerList;
-    //受伤箭塔列表
-    public List<Tower> m_WoundTowerList;
+    public List<BaseObject> m_WoundPlayerList;
     //受伤目标列表
     public List<BeHurtTarget> m_BuHurtList;
     //碰撞总次数
@@ -82,9 +80,9 @@ public class BaseBullet : BaseState
     //计算目标位置与当前位置的间隔距离
     public FixVector3 m_FramePos;
     //检测前目标
-    public Player m_Target;
+    public BaseObject m_Target;
     //目标玩家list
-    public List<Player> m_TargetList = new List<Player>();
+    public List<BaseObject> m_TargetList = new List<BaseObject>();
     //命中瞬移
     private bool Blink = false;
 
@@ -104,13 +102,13 @@ public class BaseBullet : BaseState
     /// </summary>
     /// <param name="viewPlayer"></param>
     /// <param name="parameter"></param>
-    public void CreateBullet(Player player, Bullet_ValueClass bullet, string parameter = null)
+    public void CreateBullet(BaseObject player, SkillNode skillNode, Bullet_ValueClass bullet, string parameter = null)
     {
         if (player == null || bullet == null)
             return;
-        m_Player = player;
+        m_BaseObject = player;
         m_Parameter = parameter;
-        m_SkillNode = player.m_SkillNode;
+        m_SkillNode = skillNode;
         m_BulletClass = bullet;
         m_BulletNode = FSDataNodeTable<BulletNode>.GetSingleton().FindDataByType((long)bullet.m_BulletId);
         if (m_BulletNode == null)
@@ -121,7 +119,7 @@ public class BaseBullet : BaseState
         #region 子弹目标类型
         if (m_BulletClass.m_bul_target_type == (Fix64)0)//自身
         {
-            m_Target = m_Player;
+            m_Target = m_BaseObject;
         }
         else if (m_BulletClass.m_bul_target_type == (Fix64)1)//当前目标
         {
@@ -194,15 +192,15 @@ public class BaseBullet : BaseState
             if (!string.IsNullOrEmpty(m_BulletNode.effect))
             {
                 string eff = m_BulletNode.effect;
-                if (m_Player.m_PlayerData.m_Type == 1 && !string.IsNullOrEmpty(eff))
+                if (m_BaseObject.m_Data.m_Type == ObjectType.PLAYER && !string.IsNullOrEmpty(eff))
                 {
-                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, eff));
+                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", (m_BaseObject as Player).m_PlayerData.m_HeroResourceName, eff));
                     if (effectGo != null)
                         m_AniEffect = GameObject.Instantiate(effectGo);
                 }
-                if (m_Player.m_PlayerData.m_Type == 2 && !string.IsNullOrEmpty(eff))
+                if (m_BaseObject.m_Data.m_Type == ObjectType.MONSTER && !string.IsNullOrEmpty(eff))
                 {
-                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Monster", m_Player.m_PlayerData.m_HeroName, eff));
+                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Monster", (m_BaseObject as Monster).m_MonsterData.m_MonsterResourceName, eff));
                     if (effectGo != null)
                         m_AniEffect = GameObject.Instantiate(effectGo);
                 }
@@ -218,7 +216,7 @@ public class BaseBullet : BaseState
                 {
                     #region 后修改为挂点
                     //m_AniEffect.transform.parent = m_Player.m_VGo.transform;
-                    m_AniEffect.transform.position = m_Player.m_Pos.ToVector3();
+                    m_AniEffect.transform.position = m_BaseObject.m_Pos.ToVector3();
                     #endregion
                 }
                 else if (m_BulletClass.m_bul_start == (Fix64)2)//当前目标
@@ -248,7 +246,7 @@ public class BaseBullet : BaseState
                 {
                     #region 后修改为挂点
                     //m_AniEffect.transform.parent = m_Player.m_VGo.transform;
-                    m_AniEffect.transform.position = m_Player.m_Pos.ToVector3();
+                    m_AniEffect.transform.position = m_BaseObject.m_Pos.ToVector3();
                     #endregion
                 }
                 else if (m_BulletClass.newbul_origin == (Fix64)3)//当前子弹
@@ -267,7 +265,7 @@ public class BaseBullet : BaseState
                 }
 
                 //m_AniEffect.transform.localPosition = Vector3.zero + m_BulletNode.effect_xyz;
-                m_AniEffect.transform.localRotation = Quaternion.Euler(m_Player.m_Rotation.ToVector3());
+                m_AniEffect.transform.localRotation = Quaternion.Euler(m_BaseObject.m_Rotation.ToVector3());
                 //m_AniEffect.transform.localScale = Vector3.one;
                 if (m_BulletNode.effect_timeend != 0)//自然销毁特效
                 {
@@ -301,7 +299,7 @@ public class BaseBullet : BaseState
     public override void UpdateLogic()
     {
         base.UpdateLogic();
-        if (m_Player == null)
+        if (m_BaseObject == null)
             return;
         if (m_BulletNode == null)
             return;
@@ -393,12 +391,12 @@ public class BaseBullet : BaseState
             }
             else if (m_BulletNode.follow_type == 1)//子弹发射者跟随该子弹
             {
-                m_Player.m_Pos = m_Pos;
+                m_BaseObject.m_Pos = m_Pos;
                 //m_Player.m_Angles = m_Angles;
                 #region 显示层
                 if (GameData.m_IsExecuteViewLogic)
                 {
-                    m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
+                    m_BaseObject.m_VGo.transform.position = m_BaseObject.m_Pos.ToVector3();
                     //m_Player.m_VGo.transform.rotation = Quaternion.Euler(m_Player.m_Angles.ToVector3());
                 }
                 #endregion
@@ -467,55 +465,31 @@ public class BaseBullet : BaseState
     public override void OnExit()
     {
         base.OnExit();
-        if (m_Player == null)
+        if (m_BaseObject == null)
             return;
-        CreateSonBullet(1);
+        CreateSonBullet(1, m_SkillNode);
         m_BuHurtList.Clear();
-        //m_BuHurtList = null;
-        //m_WoundPlayerList.Clear();
-        //m_WoundPlayerList = null;
-        //m_WoundTowerList.Clear();
-        //m_WoundTowerList = null;
     }
 
-    public List<Player> GetRangeTarget(FixVector3 m_Pos)
+    public List<BaseObject> GetRangeTarget(FixVector3 m_Pos)
     {
-        List<Player> player = new List<Player>();
-        for (int i = 0; i < GameData.m_PlayerList.Count; i++)
+        List<BaseObject> objectList = new List<BaseObject>();
+        for (int i = 0; i < GameData.m_ObjectList.Count; i++)
         {
-            if (GameData.m_PlayerList[i] == null || GameData.m_PlayerList[i].m_PlayerData == null)
+            if (GameData.m_ObjectList[i] == null || GameData.m_ObjectList[i].m_Data == null)
                 continue;
             if (m_BulletNode.col_type != null && m_BulletNode.col_type.Length > 0)
             {
-                if (CheckHitCondition(m_BulletNode, m_Player, GameData.m_PlayerList[i]) && IsInRange(m_BulletNode, m_Player, GameData.m_PlayerList[i]))
+                if (CheckHitCondition(m_BulletNode, m_BaseObject, GameData.m_ObjectList[i]) && IsInRange(m_BulletNode, m_BaseObject, GameData.m_ObjectList[i]))
                 {
-                    player.Add(GameData.m_PlayerList[i]);
+                    objectList.Add(GameData.m_ObjectList[i]);
                 }
             }
         }
-        //for (int i = 0; i < GameData.m_TowerList.Count; i++)
-        //{
-        //    if (GameData.m_TowerList[i] == null || GameData.m_TowerList[i].m_VGo == null)
-        //        continue;
-        //    if (GameData.m_TowerList[i].m_CampId == m_Player.m_PlayerData.m_CampId)
-        //        continue;
-        //    if (m_BulletClass.m_bul_target_type != (Fix64)2 && m_BulletClass.m_bul_target_value.Length > 0)
-        //    {
-        //        //子弹与敌人的方向向量
-        //        FixVector3 targetV3 = GameData.m_TowerList[i].m_Pos - m_Pos;
-        //        //求玩家正前方、玩家与敌人方向两个向量的夹角
-        //        Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
-        //        Fix64 distance = FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos);
-        //        if (((float)angle <= m_SkillNode.angle / 2 || m_SkillNode.angle <= 0) && (Fix64)distance <= m_BulletClass.m_bul_target_size && !m_WoundTowerList.Contains(GameData.m_PlayerList[i]))
-        //        {
-        //            player.Add(m_Target);
-        //        }
-        //    }
-        //}
-        return player;
+        return objectList;
     }
 
-    public bool IsInRange(BulletNode m_BulletNode, Player attack, Player Target)
+    public bool IsInRange(BulletNode m_BulletNode, BaseObject attack, BaseObject Target)
     {
         if (m_BulletNode.col_size_value == null)
             return false;
@@ -526,8 +500,8 @@ public class BaseBullet : BaseState
             case 1://扇形/环形
                 if (m_BulletNode.col_size_value != null && m_BulletNode.col_size_value.Length == 4)
                 {
-                    angle = Mathf.Acos(Vector3.Dot(m_Player.m_Angles.ToVector3().normalized, (Target.m_Pos - attack.m_Pos).ToVector3().normalized)) * Mathf.Rad2Deg;
-                    distance = Target.m_PlayerData.m_Type == 1 ? (FixVector3.Distance(Target.m_Pos, m_Pos) - Fix64.FromRaw(200)) : (FixVector3.Distance(Target.m_Pos, m_Pos) - Fix64.FromRaw(100));
+                    angle = Mathf.Acos(Vector3.Dot(m_BaseObject.m_Angles.ToVector3().normalized, (Target.m_Pos - attack.m_Pos).ToVector3().normalized)) * Mathf.Rad2Deg;
+                    distance = Target.m_Data.m_Type == ObjectType.PLAYER ? (FixVector3.Distance(Target.m_Pos, m_Pos) - Fix64.FromRaw(200)) : (FixVector3.Distance(Target.m_Pos, m_Pos) - Fix64.FromRaw(100));
                     if ((angle <= m_BulletNode.col_size_value[0] || m_BulletNode.col_size_value[0] <= 0) && ((float)distance <= m_BulletNode.col_size_value[1]) && ((float)distance >= m_BulletNode.col_size_value[2]))
                     {
                         return true;
@@ -556,7 +530,7 @@ public class BaseBullet : BaseState
         return (p2.x - p1.x) * (p.z - p1.z) - (p.x - p1.x) * (p2.z - p1.z);
     }
     //伤害计算
-    public void HitDamage(List<Player> playerTargetList)
+    public void HitDamage(List<BaseObject> playerTargetList)
     {
         for (int i = 0; i < playerTargetList.Count; i++)
         {
@@ -567,11 +541,40 @@ public class BaseBullet : BaseState
             float growth_ratio = m_SkillNode.growth_ratio1[0];
             float skill_ratio = m_SkillNode.stats[0];
             int stats = m_SkillNode.stats[0];
-            float attack = m_Player.m_PlayerData.m_HeroAttrNode.attack;
-            float armor = playerTargetList[i].m_PlayerData.m_HeroAttrNode.armor;
-            float attack_hurt = m_Player.m_PlayerData.m_HeroAttrNode.attack_hurt;
-            float hurt_addition = m_Player.m_PlayerData.m_HeroAttrNode.hurt_addition;
-            float hurt_remission = playerTargetList[i].m_PlayerData.m_HeroAttrNode.hurt_remission;
+            float attack = 0;
+            float armor = 0;
+            float attack_hurt = 0;
+            float hurt_addition = 0;
+            float hurt_remission = 0;
+            if (m_BaseObject is Player)
+            {
+                Player player = m_BaseObject as Player;
+                attack = player.m_PlayerData.m_HeroAttrNode.attack;
+                attack_hurt = player.m_PlayerData.m_HeroAttrNode.attack_hurt;
+                hurt_addition = player.m_PlayerData.m_HeroAttrNode.hurt_addition;
+            }
+
+            if (m_BaseObject is Monster)
+            {
+                Monster monster = m_BaseObject as Monster;
+                attack = monster.m_MonsterData.m_MonsterAttrNode.attack;
+                attack_hurt = monster.m_MonsterData.m_MonsterAttrNode.attack_hurt;
+                hurt_addition = monster.m_MonsterData.m_MonsterAttrNode.hurt_addition;
+            }
+
+            if (playerTargetList[i] is Player)
+            {
+                Player player = m_BaseObject as Player;
+                armor = player.m_PlayerData.m_HeroAttrNode.armor;
+                hurt_remission = player.m_PlayerData.m_HeroAttrNode.hurt_remission;
+            }
+
+            if (playerTargetList[i] is Monster)
+            {
+                Monster monster = m_BaseObject as Monster;
+                armor = monster.m_MonsterData.m_MonsterAttrNode.armor;
+                hurt_remission = monster.m_MonsterData.m_MonsterAttrNode.hurt_remission;
+            }
             //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
             int damage = ((int)(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission) * (double)m_BulletNode.damage));//伤害
             damage = Mathf.Abs(damage);
@@ -580,7 +583,7 @@ public class BaseBullet : BaseState
             {
                 m_BulletClass.m_taregt = playerTargetList[i];
                 playerTargetList[i].FallDamage(damage);
-                CreateSonBullet(2, playerTargetList[i].m_Pos.ToVector3());
+                CreateSonBullet(2, m_SkillNode, playerTargetList[i].m_Pos.ToVector3());
             }
             else
             {
@@ -599,7 +602,7 @@ public class BaseBullet : BaseState
                             m_BulletClass.m_taregt = playerTargetList[i];
                             playerTargetList[i].FallDamage(damage);
                             m_BuHurtList[j].CollisionCount = m_BuHurtList[j].CollisionCount + (Fix64)1;
-                            CreateSonBullet(2, playerTargetList[i].m_Pos.ToVector3());
+                            CreateSonBullet(2, m_SkillNode, playerTargetList[i].m_Pos.ToVector3());
                             m_BuHurtList[j].SameTargetHurtCount = m_BuHurtList[j].SameTargetHurtCount + (Fix64)1;
                         }
                     }
@@ -611,24 +614,24 @@ public class BaseBullet : BaseState
                     BeHurtTarget target = new BeHurtTarget();
                     target.PlayerTarget = playerTargetList[i];
                     m_BuHurtList.Add(target);
-                    CreateSonBullet(2, playerTargetList[i].m_Pos.ToVector3());
+                    CreateSonBullet(2, m_SkillNode, playerTargetList[i].m_Pos.ToVector3());
                 }
             }
             #endregion
 
             if (Blink)
             {
-                m_Player.m_Pos = playerTargetList[i].m_Pos;
+                m_BaseObject.m_Pos = playerTargetList[i].m_Pos;
                 #region 显示层
                 if (GameData.m_IsExecuteViewLogic)
                 {
-                    m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
+                    m_BaseObject.m_VGo.transform.position = m_BaseObject.m_Pos.ToVector3();
                 }
                 #endregion
             }
 
             #region 穿透总次数限制
-            int pen_time = ReturnPen_times_max(m_Player, playerTargetList[i]);
+            int pen_time = ReturnPen_times_max(m_BaseObject, playerTargetList[i]);
             if (pen_time != -10)
             {
                 if (pen_time == -1)
@@ -689,7 +692,7 @@ public class BaseBullet : BaseState
     }
 
     //根据目标类型返回穿透总次数限制
-    public int ReturnPen_times_max(Player attack, Player target)
+    public int ReturnPen_times_max(BaseObject attack, BaseObject target)
     {
         int type = 0;
         if (m_BulletNode == null || m_BulletNode.col_type == null || m_BulletNode.pen_times_max == null)
@@ -702,19 +705,19 @@ public class BaseBullet : BaseState
             switch ((col_type)m_BulletNode.col_type[i])
             {
                 case col_type.self:
-                    isthis |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target == attack;
+                    isthis |= target.m_Data.m_CampId == attack.m_Data.m_CampId && target == attack;
                     break;
                 case col_type.selfMonster:
-                    isthis |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type != 1;
+                    isthis |= target.m_Data.m_CampId == attack.m_Data.m_CampId && target != attack && target.m_Data.m_Type != ObjectType.PLAYER;
                     break;
                 case col_type.selfHero:
-                    isthis |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type == 1;
+                    isthis |= target.m_Data.m_CampId == attack.m_Data.m_CampId && target != attack && target.m_Data.m_Type == ObjectType.PLAYER;
                     break;
                 case col_type.enemyMonster:
-                    isthis |= target.m_PlayerData.m_CampId != attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type != 1;
+                    isthis |= target.m_Data.m_CampId != attack.m_Data.m_CampId && target != attack && target.m_Data.m_Type != ObjectType.PLAYER;
                     break;
                 case col_type.enemyHero:
-                    isthis |= target.m_PlayerData.m_CampId != attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type == 1;
+                    isthis |= target.m_Data.m_CampId != attack.m_Data.m_CampId && target != attack && target.m_Data.m_Type == ObjectType.PLAYER;
                     break;
                 case col_type.selfTower:
                     break;
@@ -751,15 +754,15 @@ public class BaseBullet : BaseState
             if (!string.IsNullOrEmpty(m_BulletNode.effect_hit) && damage > 0)
             {
                 string eff = m_BulletNode.effect_hit;
-                if (m_Player.m_PlayerData.m_Type == 1 && !string.IsNullOrEmpty(eff))
+                if (m_BaseObject.m_Data.m_Type == ObjectType.PLAYER && !string.IsNullOrEmpty(eff))
                 {
-                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, eff));
+                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", (m_BaseObject as Player).m_PlayerData.m_HeroResourceName, eff));
                     if (effectGo != null)
                         m_AniHitEffect = GameObject.Instantiate(effectGo);
                 }
-                if (m_Player.m_PlayerData.m_Type == 2 && !string.IsNullOrEmpty(eff))
+                if (m_BaseObject.m_Data.m_Type == ObjectType.MONSTER && !string.IsNullOrEmpty(eff))
                 {
-                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Monster", m_Player.m_PlayerData.m_HeroName, eff));
+                    GameObject effectGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Monster", (m_BaseObject as Monster).m_MonsterData.m_MonsterResourceName, eff));
                     if (effectGo != null)
                         m_AniHitEffect = GameObject.Instantiate(effectGo);
                 }
@@ -767,7 +770,7 @@ public class BaseBullet : BaseState
                     return;
 
                 #region 后修改为挂点
-                m_AniHitEffect.transform.parent = m_Player.m_VGo.transform;
+                m_AniHitEffect.transform.parent = m_BaseObject.m_VGo.transform;
                 #endregion
                 m_AniHitEffect.transform.localPosition = Vector3.zero + m_BulletNode.effect_hit_positionxyz;
                 m_AniHitEffect.transform.localRotation = Quaternion.Euler(Vector3.zero);
@@ -780,7 +783,7 @@ public class BaseBullet : BaseState
     }
 
     //检测敌人类型
-    public bool CheckHitCondition(BulletNode bulletNode, Player attack, Player target)
+    public bool CheckHitCondition(BulletNode bulletNode, BaseObject attack, BaseObject target)
     {
         bool result = false;
         if (bulletNode == null)
@@ -796,19 +799,19 @@ public class BaseBullet : BaseState
             switch ((col_type)bulletNode.col_type[i])
             {
                 case col_type.self:
-                    result |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target == attack;
+                    result |= target.m_Data.m_CampId == attack.m_Data.m_CampId && target == attack;
                     break;
                 case col_type.selfMonster:
-                    result |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type != 1;
+                    result |= target.m_Data.m_CampId == attack.m_Data.m_CampId && target != attack && target.m_Data.m_Type != ObjectType.PLAYER;
                     break;
                 case col_type.selfHero:
-                    result |= target.m_PlayerData.m_CampId == attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type == 1;
+                    result |= target.m_Data.m_CampId == attack.m_Data.m_CampId && target != attack && target.m_Data.m_Type != ObjectType.PLAYER;
                     break;
                 case col_type.enemyMonster:
-                    result |= target.m_PlayerData.m_CampId != attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type != 1;
+                    result |= target.m_Data.m_CampId != attack.m_Data.m_CampId && target != attack && target.m_Data.m_Type != ObjectType.PLAYER;
                     break;
                 case col_type.enemyHero:
-                    result |= target.m_PlayerData.m_CampId != attack.m_PlayerData.m_CampId && target != attack && target.m_PlayerData.m_Type == 1;
+                    result |= target.m_Data.m_CampId != attack.m_Data.m_CampId && target != attack && target.m_Data.m_Type != ObjectType.PLAYER;
                     break;
                 case col_type.selfTower:
                     break;
@@ -830,7 +833,7 @@ public class BaseBullet : BaseState
     }
 
     //检测子弹目标类型
-    public Player CheckBulTargetValue()
+    public BaseObject CheckBulTargetValue()
     {
         if (m_BulletClass == null)
         {
@@ -842,52 +845,52 @@ public class BaseBullet : BaseState
         }
         if (m_BulletClass.m_bul_target_value == (Fix64)1)
         {
-            return m_Player;
+            return m_BaseObject;
         }
-        for (int i = 0; i < GameData.m_PlayerList.Count; i++)
+        for (int i = 0; i < GameData.m_ObjectList.Count; i++)
         {
-            if (GameData.m_PlayerList[i] == null || GameData.m_PlayerList[i].m_PlayerData == null)
+            if (GameData.m_ObjectList[i] == null || GameData.m_ObjectList[i].m_Data == null)
                 continue;
             if (m_BulletClass.m_bul_target_value == (Fix64)2)
             {
-                if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_Player.m_PlayerData.m_CampId && GameData.m_PlayerList[i] != m_Player && GameData.m_PlayerList[i].m_PlayerData.m_Type != 1 && checkIsInBulTargetSize(GameData.m_PlayerList[i]))
+                if (GameData.m_ObjectList[i].m_Data.m_CampId == m_BaseObject.m_Data.m_CampId && GameData.m_ObjectList[i] != m_BaseObject && GameData.m_ObjectList[i].m_Data.m_Type != ObjectType.PLAYER && checkIsInBulTargetSize(GameData.m_ObjectList[i]))
                 {
-                    return GameData.m_PlayerList[i];
+                    return GameData.m_ObjectList[i];
                 }
             }
             else if (m_BulletClass.m_bul_target_value == (Fix64)3)
             {
-                if (GameData.m_PlayerList[i].m_PlayerData.m_CampId != m_Player.m_PlayerData.m_CampId && GameData.m_PlayerList[i] != m_Player && GameData.m_PlayerList[i].m_PlayerData.m_Type != 1 && checkIsInBulTargetSize(GameData.m_PlayerList[i]))
+                if (GameData.m_ObjectList[i].m_Data.m_CampId != m_BaseObject.m_Data.m_CampId && GameData.m_ObjectList[i] != m_BaseObject && GameData.m_ObjectList[i].m_Data.m_Type != ObjectType.PLAYER && checkIsInBulTargetSize(GameData.m_ObjectList[i]))
                 {
-                    return GameData.m_PlayerList[i];
+                    return GameData.m_ObjectList[i];
                 }
             }
             else if (m_BulletClass.m_bul_target_value == (Fix64)4)
             {
-                if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_Player.m_PlayerData.m_CampId && GameData.m_PlayerList[i] != m_Player && GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 && checkIsInBulTargetSize(GameData.m_PlayerList[i]))
+                if (GameData.m_ObjectList[i].m_Data.m_CampId == m_BaseObject.m_Data.m_CampId && GameData.m_ObjectList[i] != m_BaseObject && GameData.m_ObjectList[i].m_Data.m_Type == ObjectType.PLAYER && checkIsInBulTargetSize(GameData.m_ObjectList[i]))
                 {
-                    return GameData.m_PlayerList[i];
+                    return GameData.m_ObjectList[i];
                 }
             }
             else if (m_BulletClass.m_bul_target_value == (Fix64)5)
             {
-                if (GameData.m_PlayerList[i].m_PlayerData.m_CampId != m_Player.m_PlayerData.m_CampId && GameData.m_PlayerList[i] != m_Player && GameData.m_PlayerList[i].m_PlayerData.m_Type == 1 && checkIsInBulTargetSize(GameData.m_PlayerList[i]))
+                if (GameData.m_ObjectList[i].m_Data.m_CampId != m_BaseObject.m_Data.m_CampId && GameData.m_ObjectList[i] != m_BaseObject && GameData.m_ObjectList[i].m_Data.m_Type == ObjectType.PLAYER && checkIsInBulTargetSize(GameData.m_ObjectList[i]))
                 {
-                    return GameData.m_PlayerList[i];
+                    return GameData.m_ObjectList[i];
                 }
             }
             else if (m_BulletClass.m_bul_target_value == (Fix64)6)
             {
-                if (GameData.m_PlayerList[i] == m_Player)
+                if (GameData.m_ObjectList[i] == m_BaseObject)
                 {
-                    return GameData.m_PlayerList[i];
+                    return GameData.m_ObjectList[i];
                 }
             }
         }
         return null;
     }
     //检测子弹目标范围参数
-    public bool checkIsInBulTargetSize(Player Target)
+    public bool checkIsInBulTargetSize(BaseObject Target)
     {
         Fix64 distance = FixVector3.Distance(Target.m_Pos, m_Pos);
         if (distance <= m_BulletClass.m_bul_target_size)
@@ -897,78 +900,12 @@ public class BaseBullet : BaseState
         return false;
     }
 
-    ////检测玩家
-    public void GetPlayerRangeList(FixVector3 m_Pos)
-    {
-        for (int i = 0; i < GameData.m_PlayerList.Count; i++)
-        {
-            if (GameData.m_PlayerList[i] == null || GameData.m_PlayerList[i].m_PlayerData == null)
-                continue;
-            if (GameData.m_PlayerList[i].m_PlayerData.m_CampId == m_Player.m_PlayerData.m_CampId)
-                continue;
-            //子弹与敌人的方向向量
-            FixVector3 targetV3 = GameData.m_PlayerList[i].m_Pos - m_Pos;
-            //求玩家正前方、玩家与敌人方向两个向量的夹角
-            Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
-            Fix64 distance = FixVector3.Distance(GameData.m_PlayerList[i].m_Pos, m_Pos);
-            if (((float)angle <= m_SkillNode.angle / 2 || m_SkillNode.angle <= 0) && (float)distance <= m_SkillNode.aoe_long && !m_WoundPlayerList.Contains(GameData.m_PlayerList[i]))
-            {
-                float base_num1 = m_SkillNode.base_num1[0];
-                float growth_ratio = m_SkillNode.growth_ratio1[0];
-                float skill_ratio = m_SkillNode.stats[0];
-                int stats = m_SkillNode.stats[0];
-                float attack = m_Player.m_PlayerData.m_HeroAttrNode.attack;
-                float armor = GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.armor;
-                float attack_hurt = m_Player.m_PlayerData.m_HeroAttrNode.attack_hurt;
-                float hurt_addition = m_Player.m_PlayerData.m_HeroAttrNode.hurt_addition;
-                float hurt_remission = GameData.m_PlayerList[i].m_PlayerData.m_HeroAttrNode.hurt_remission;
-                //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
-                int damage = (int)(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
-                damage = Mathf.Abs(damage);
-                GameData.m_PlayerList[i].FallDamage(damage);
-                m_WoundPlayerList.Add(GameData.m_PlayerList[i]);
-            }
-        }
-    }
-    //检测塔
-    public void GetTowerRangeList(FixVector3 m_Pos)
-    {
-        for (int i = 0; i < GameData.m_TowerList.Count; i++)
-        {
-            if (GameData.m_TowerList[i] == null || GameData.m_TowerList[i].m_VGo == null)
-                continue;
-            if (GameData.m_TowerList[i].m_CampId == m_Player.m_PlayerData.m_CampId)
-                continue;
-            //玩家与敌人的方向向量
-            FixVector3 targetV3 = GameData.m_TowerList[i].m_Pos - m_Pos;
-            //求玩家正前方、玩家与敌人方向两个向量的夹角
-            //这地方求夹角将来要使用定点数或者其他方法换掉，暂时使用Vector3类型
-            Fix64 angle = FixVector3.Angle(m_Angles, targetV3);
-            Fix64 distance = GameData.m_TowerList[i].m_Type == 1 ? (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.FromRaw(500)) : (FixVector3.Distance(GameData.m_TowerList[i].m_Pos, m_Pos) - Fix64.One);
-            if (((float)angle <= m_SkillNode.angle / 2 || m_SkillNode.angle <= 0) && (float)distance <= m_SkillNode.aoe_long && !m_WoundTowerList.Contains(GameData.m_TowerList[i]))
-            {
-                float base_num1 = m_SkillNode.base_num1[0];
-                float growth_ratio = m_SkillNode.growth_ratio1[0];
-                float skill_ratio = m_SkillNode.stats[0];
-                int stats = m_SkillNode.stats[0];
-                float attack = m_Player.m_PlayerData.m_HeroAttrNode.attack;
-                float armor = 0;
-                float attack_hurt = m_Player.m_PlayerData.m_HeroAttrNode.attack_hurt;
-                float hurt_addition = m_Player.m_PlayerData.m_HeroAttrNode.hurt_addition;
-                float hurt_remission = 0;
-                //物理伤害 =（攻方base_num1 + 攻方growth_ratio1 * 1 + 攻方skill_ratio * [if 攻方stats=3 攻方attack else 0] ) * (1 - 守方armor / ( 守方armor * 0.5 + 125)) * 攻方暴击 * 守方闪避 * ( 1 + 攻方attack_hurt） * （1 + 攻方hurt_addition - 守方hurt_remission）
-                int damage = (int)(base_num1 + growth_ratio * 1 + skill_ratio * (stats == 3 ? attack : 0) * (1 - armor / (armor * 0.5 + 125)) * 1 * 1 * (1 + attack_hurt) * (1 + hurt_addition - hurt_remission));
-                GameData.m_TowerList[i].FallDamage(damage);
-                m_WoundTowerList.Add(GameData.m_TowerList[i]);
-            }
-        }
-    }
     /// <summary>
     /// 创建子子弹
     /// </summary>
     /// <param name="createType"></param>
     /// 1,销毁触发，碰撞触发
-    public void CreateSonBullet(int createType, Vector3 targetpos = new Vector3())
+    public void CreateSonBullet(int createType, SkillNode skillNode, Vector3 targetpos = new Vector3())
     {
         if (m_BulletClass.son_now > m_BulletClass.m_bul_son_max - (Fix64)1)//最大轮数限制
         {
@@ -1162,7 +1099,7 @@ public class BaseBullet : BaseState
                     //}
                     for (int j = 0; j < (int)bullet.m_max_bul; j++)
                     {
-                        m_SkillState.CreateBullet(m_Player, bullet, m_Parameter);
+                        m_SkillState.CreateBullet(m_BaseObject, skillNode, bullet, m_Parameter);
                         m_SkillState.OnEnter();
                         GameData.m_GameManager.m_BulletManager.m_AttackList.Add(m_SkillState);
                     }

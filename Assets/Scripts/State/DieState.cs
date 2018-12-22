@@ -21,16 +21,16 @@ public class DieState : BaseState
     /// </summary>
     /// <param name="viewPlayer"></param>
     /// <param name="parameter"></param>
-    public override void OnInit(Player viewPlayer, string parameter = null)
+    public override void OnInit(BaseObject baseObject, string parameter = null)
     {
-        base.OnInit(viewPlayer, parameter);
-        if (m_Player == null)
+        base.OnInit(baseObject, parameter);
+        if (baseObject == null)
             return;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
             if (m_Animator == null)
-                m_Animator = viewPlayer.m_VGo.GetComponent<Animator>();
+                m_Animator = baseObject.m_VGo.GetComponent<Animator>();
         }
         #endregion
     }
@@ -41,9 +41,9 @@ public class DieState : BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        if (m_Player == null)
+        if (m_BaseObject == null)
             return;
-        m_Player.m_IsDie = true;
+        m_BaseObject.m_IsDie = true;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
             m_Animator.SetInteger(m_StateParameter, 12);
@@ -56,12 +56,12 @@ public class DieState : BaseState
     public override void UpdateLogic()
     {
         base.UpdateLogic();
-        if (m_Player == null)
+        if (m_BaseObject == null)
             return;
-        if (!m_Player.m_IsDie)
+        if (!m_BaseObject.m_IsDie)
             return;
-        m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-        if (m_Player.m_IntervalTime >= m_AniTime)
+        m_IntervalTime += GameData.m_FixFrameLen;
+        if (m_IntervalTime >= m_AniTime)
             OnExit();
     }
 
@@ -71,17 +71,42 @@ public class DieState : BaseState
     public override void OnExit()
     {
         base.OnExit();
-        if (m_Player == null)
+        if (m_BaseObject == null)
             return;
-        if (m_Player.m_PlayerData.m_Type == 1)
+        if (m_BaseObject.m_Data.m_Type == ObjectType.PLAYER)
         {
             GameData.m_DieCount++;
             Fix64 resurgenceTime = Fix64.FromRaw(20000) * (Fix64)GameData.m_DieCount;
             Delay delay = new Delay();
-            delay.InitResurgence(m_Player.m_PlayerData, resurgenceTime, GameData.m_GameManager.CreatePlayer);
+            delay.InitResurgence((m_BaseObject as Player).m_PlayerData, resurgenceTime, GameData.m_GameManager.CreatePlayer);
             GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
         }
-        m_Player.m_IntervalTime = Fix64.Zero;
-        m_Player.Destroy();
+        m_IntervalTime = Fix64.Zero;
+        m_BaseObject.Destroy();
+    }
+
+    /// <summary>
+    /// 取得数据存放目录
+    /// </summary>
+    public static string DataPath(string game)
+    {
+        if (Application.isMobilePlatform)
+        {
+            return Application.persistentDataPath + "/" + game + "/";
+        }
+        if (Application.platform == RuntimePlatform.WindowsPlayer)
+        {
+            return Application.streamingAssetsPath + "/";
+        }
+        if (Application.isEditor)
+        {
+            return Application.streamingAssetsPath + "/";
+        }
+        if (Application.platform == RuntimePlatform.OSXEditor)
+        {
+            int i = Application.dataPath.LastIndexOf('/');
+            return Application.dataPath.Substring(0, i + 1) + game + "/";
+        }
+        return "c:/" + game + "/";
     }
 }

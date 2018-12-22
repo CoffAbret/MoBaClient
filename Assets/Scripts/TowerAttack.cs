@@ -10,8 +10,10 @@ public class TowerAttack
 {
     //位置
     public FixVector3 m_Pos = FixVector3.Zero;
+    //朝向
+    public FixVector3 m_Angle = FixVector3.Zero;
     //攻击目标
-    public Player m_TargetPlayer;
+    public BaseObject m_TargetObject;
     //攻击距离
     public Fix64 m_AttackDistince = Fix64.FromRaw(200);
     //攻击间隔
@@ -22,12 +24,17 @@ public class TowerAttack
     /// 创建对象
     /// </summary>
     /// <param name="charData">对象数据</param>
-    public void Create(GameObject towerGo, Player targetPlayer)
+    public void Create(Tower tower, BaseObject targetObject)
     {
-        m_TargetPlayer = targetPlayer;
-        m_Attack = towerGo.transform.Find("attack0").gameObject;
-        m_Attack.SetActive(true);
-        m_Pos = new FixVector3((Fix64)towerGo.transform.position.x, (Fix64)towerGo.transform.position.y, (Fix64)towerGo.transform.position.z);
+        m_TargetObject = targetObject;
+        m_Pos = tower.m_Pos;
+        #region 显示层
+        if (GameData.m_IsExecuteViewLogic)
+        {
+            m_Attack = tower.m_VGo.transform.Find("attack0").gameObject;
+            m_Attack.SetActive(true);
+        }
+        #endregion
     }
 
     /// <summary>
@@ -35,22 +42,29 @@ public class TowerAttack
     /// </summary>
     public void UpdateLogic()
     {
-        if (m_Attack == null || !m_Attack.activeSelf)
-            return;
-        FixVector3 fixAttackPos = (FixVector3)(m_Attack.transform.position);
-        Fix64 distince = FixVector3.Distance(m_TargetPlayer.m_Pos, fixAttackPos);
+        Fix64 distince = FixVector3.Distance(m_TargetObject.m_Pos, m_Pos);
         if (distince < m_AttackDistince)
         {
-            m_TargetPlayer.FallDamage(50);
+            m_TargetObject.FallDamage(50);
             Destroy();
         }
         else
         {
             //普通攻击子弹自动改变朝向
-            FixVector3 relativePos = m_TargetPlayer.m_Pos - (FixVector3)(m_Attack.transform.position);
+            FixVector3 relativePos = m_TargetObject.m_Pos - m_Pos;
             Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
-            m_Attack.transform.rotation = rotation;
-            m_Attack.transform.position += ((FixVector3)m_Attack.transform.forward * m_AttackSpeed).ToVector3();
+            m_Angle = relativePos.GetNormalized();
+            m_Pos += m_Angle * m_AttackSpeed;
+            #region 显示层
+            if (GameData.m_IsExecuteViewLogic)
+            {
+                if (m_Attack != null)
+                {
+                    m_Attack.transform.rotation = rotation;
+                    m_Attack.transform.position += m_Pos.ToVector3();
+                }
+            }
+            #endregion
         }
     }
 
@@ -60,12 +74,17 @@ public class TowerAttack
     public void Destroy()
     {
         m_Pos = FixVector3.Zero;
-        m_TargetPlayer = null;
-        if (m_Attack != null)
+        m_TargetObject = null;
+        #region 显示层
+        if (GameData.m_IsExecuteViewLogic)
         {
-            m_Attack.SetActive(false);
-            m_Attack.transform.localPosition = new Vector3(0, 1, 0);
-            m_Attack.transform.rotation = Quaternion.Euler(Vector3.zero);
+            if (m_Attack != null)
+            {
+                m_Attack.SetActive(false);
+                m_Attack.transform.localPosition = new Vector3(0, 1, 0);
+                m_Attack.transform.rotation = Quaternion.Euler(Vector3.zero);
+            }
         }
+        #endregion
     }
 }

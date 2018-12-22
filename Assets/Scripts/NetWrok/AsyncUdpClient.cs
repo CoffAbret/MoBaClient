@@ -51,9 +51,9 @@ public class AsyncUdpClient
                 return;
             m_Client.BeginReceive(ReceiveCallback, m_Client);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            throw ex;
         }
     }
 
@@ -74,9 +74,9 @@ public class AsyncUdpClient
             readPacket.ReadData();
             m_ReceivePacketList.Add(readPacket);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            throw ex;
         }
         finally
         {
@@ -122,9 +122,9 @@ public class AsyncUdpClient
         {
             m_Client.EndSend(result);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            throw ex;
         }
     }
 

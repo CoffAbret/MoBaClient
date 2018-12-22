@@ -21,16 +21,16 @@ public class HitState : BaseState
     /// </summary>
     /// <param name="viewPlayer"></param>
     /// <param name="parameter"></param>
-    public override void OnInit(Player viewPlayer, string parameter = null)
+    public override void OnInit(BaseObject baseObject, string parameter = null)
     {
-        base.OnInit(viewPlayer, parameter);
-        if (m_Player == null)
+        base.OnInit(baseObject, parameter);
+        if (baseObject == null)
             return;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
         {
             if (m_Animator == null)
-                m_Animator = viewPlayer.m_VGo.GetComponent<Animator>();
+                m_Animator = baseObject.m_VGo.GetComponent<Animator>();
         }
         #endregion
     }
@@ -41,9 +41,9 @@ public class HitState : BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        if (m_Player == null)
+        if (m_BaseObject == null)
             return;
-        m_Player.m_IsHit = true;
+        m_BaseObject.m_IsHit = true;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
             m_Animator.SetInteger(m_StateParameter, 13);
@@ -56,12 +56,12 @@ public class HitState : BaseState
     public override void UpdateLogic()
     {
         base.UpdateLogic();
-        if (m_Player == null)
+        if (m_BaseObject == null)
             return;
-        if (!m_Player.m_IsHit)
+        if (!m_BaseObject.m_IsHit)
             return;
-        m_Player.m_IntervalTime += GameData.m_FixFrameLen;
-        if (m_Player.m_IntervalTime >= m_AniTime)
+        m_IntervalTime += GameData.m_FixFrameLen;
+        if (m_IntervalTime >= m_AniTime)
             OnExit();
     }
 
@@ -71,13 +71,13 @@ public class HitState : BaseState
     public override void OnExit()
     {
         base.OnExit();
-        if (m_Player == null)
+        if (m_BaseObject == null)
             return;
-        m_Player.m_IsHit = false;
-        m_Player.m_IsSkill = false;
-        m_Player.m_IsAttack = false;
-        m_Player.m_IsMove = false;
-        m_Player.m_IntervalTime = Fix64.Zero;
+        m_BaseObject.m_IsHit = false;
+        m_BaseObject.m_IsSkill = false;
+        m_BaseObject.m_IsAttack = false;
+        m_BaseObject.m_IsMove = false;
+        m_IntervalTime = Fix64.Zero;
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
             m_Animator.SetInteger(m_StateParameter, 0);

@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 角色AI
+/// 小兵AI
 /// </summary>
-public class PlayerAI
+public class MonsterAI
 {
-    private Player m_Player;
+    private Monster m_Monster;
     //寻路参数
     private string m_Parameter;
     //寻路坐标
@@ -19,10 +19,10 @@ public class PlayerAI
     /// 初始化AI数据
     /// </summary>
     /// <param name="player"></param>
-    public void OnInit(Player player)
+    public void OnInit(Monster monster)
     {
-        m_Player = player;
-        Path p = ABPath.Construct(m_Player.m_Pos.ToVector3(), m_Player.m_PlayerData.m_NaviPos.ToVector3(), OnPathComplete);
+        m_Monster = monster;
+        Path p = ABPath.Construct(m_Monster.m_Pos.ToVector3(), m_Monster.m_MonsterData.m_NaviPos.ToVector3(), OnPathComplete);
         AstarPath.StartPath(p);
     }
 
@@ -41,21 +41,21 @@ public class PlayerAI
     /// </summary>
     public void OnEnter()
     {
-        if (m_Player == null || m_Player.m_PlayerData == null || m_Player.m_PlayerData.m_Type == 1 || m_Player.m_PlayerData.m_NaviPos == null)
+        if (m_Monster == null || m_Monster.m_MonsterData == null || m_Monster.m_MonsterData.m_NaviPos == null)
             return;
-        FixVector3 relativePos = m_Player.m_PlayerData.m_CampId == 1 ? (m_Player.m_PlayerData.m_NaviPos - m_Player.m_Pos) : (m_Player.m_Pos - m_Player.m_PlayerData.m_NaviPos);
+        FixVector3 relativePos = m_Monster.m_MonsterData.m_CampId == CampType.BLUE ? (m_Monster.m_MonsterData.m_NaviPos - m_Monster.m_Pos) : (m_Monster.m_Pos - m_Monster.m_MonsterData.m_NaviPos);
         Quaternion rotation = Quaternion.LookRotation(relativePos.ToVector3(), Vector3.up);
-        m_Player.m_Rotation = (FixVector3)(rotation.eulerAngles);
+        m_Monster.m_Angles = relativePos.GetNormalized();
+        m_Monster.m_Rotation = (FixVector3)(rotation.eulerAngles);
         #region 显示层
         if (GameData.m_IsExecuteViewLogic)
-            m_Player.m_VGo.transform.rotation = rotation;
-        m_Player.m_Angles = (FixVector3)(new Vector3(m_Player.m_VGo.transform.forward.normalized.x, 0, m_Player.m_VGo.transform.forward.normalized.z));
+            m_Monster.m_VGo.transform.rotation = rotation;
         #endregion
 
-        if (m_Player.m_PlayerData.m_CampId == 1)
-            m_Parameter = string.Format("{0}#{1}#{2}", m_Player.m_Angles.x, m_Player.m_Angles.y, m_Player.m_Angles.z);
-        if (m_Player.m_PlayerData.m_CampId == 2)
-            m_Parameter = string.Format("{0}#{1}#{2}", -m_Player.m_Angles.x, -m_Player.m_Angles.y, -m_Player.m_Angles.z);
+        if (m_Monster.m_MonsterData.m_CampId == CampType.BLUE)
+            m_Parameter = string.Format("{0}#{1}#{2}", m_Monster.m_Angles.x, m_Monster.m_Angles.y, m_Monster.m_Angles.z);
+        if (m_Monster.m_MonsterData.m_CampId == CampType.RED)
+            m_Parameter = string.Format("{0}#{1}#{2}", -m_Monster.m_Angles.x, -m_Monster.m_Angles.y, -m_Monster.m_Angles.z);
     }
 
     /// <summary>
@@ -63,36 +63,36 @@ public class PlayerAI
     /// </summary>
     public void UpdateLogic()
     {
-        if (m_Player == null || m_Player.m_PlayerData == null || m_Player.m_PlayerData.m_Type == 1)
+        if (m_Monster == null || m_Monster.m_MonsterData == null)
             return;
-        if (m_Player.m_IsDie)
+        if (m_Monster.m_IsDie)
             return;
-        if (m_Player.m_IsAttack)
+        if (m_Monster.m_IsAttack)
             return;
-        if (m_Player.m_IsSkill)
+        if (m_Monster.m_IsSkill)
             return;
-        if (m_Player.m_IsHit)
+        if (m_Monster.m_IsHit)
             return;
-        m_Player.m_SkillNode = m_Player.m_PlayerData.GetSkillNode(1);
-        Player targetPlayer = m_Player.FindTarget(m_Player.m_SkillNode);
-        Tower targetTower = m_Player.FindTowerTarget(m_Player.m_SkillNode);
-        if (targetPlayer != null || targetTower != null)
+        m_Monster.m_SkillNode = m_Monster.m_MonsterData.GetSkillNode(1);
+        Fix64 attackDistance = (Fix64)m_Monster.m_SkillNode.aoe_long;
+        BaseObject target = m_Monster.FindTarget(attackDistance);
+        if (target != null)
         {
-            m_Player.m_State = new AttackState();
-            m_Player.m_State.OnInit(m_Player, "1");
-            m_Player.m_State.OnEnter();
+            m_Monster.m_State = new AttackState();
+            m_Monster.m_State.OnInit(m_Monster, "1");
+            m_Monster.m_State.OnEnter();
         }
         else
         {
-            m_Player.m_State = new MoveState();
-            m_Player.m_State.OnInit(m_Player, m_Parameter);
-            m_Player.m_State.OnEnter();
-            Fix64 distince = FixVector3.Distance(m_Player.m_PlayerData.m_NaviPos, m_Player.m_Pos);
+            m_Monster.m_State = new MoveState();
+            m_Monster.m_State.OnInit(m_Monster, m_Parameter);
+            m_Monster.m_State.OnEnter();
+            Fix64 distince = FixVector3.Distance(m_Monster.m_MonsterData.m_NaviPos, m_Monster.m_Pos);
             if (distince <= m_distince)
             {
-                m_Player.m_State = new MoveEndState();
-                m_Player.m_State.OnInit(m_Player);
-                m_Player.m_State.OnEnter();
+                m_Monster.m_State = new MoveEndState();
+                m_Monster.m_State.OnInit(m_Monster);
+                m_Monster.m_State.OnEnter();
             }
         }
     }
