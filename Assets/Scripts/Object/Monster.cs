@@ -49,7 +49,7 @@ public class Monster : BaseObject
         m_MonsterData = new MonsterData(monsterData.m_MonsterId, monsterData.m_CampId, monsterData.m_Type);
         m_Data = m_MonsterData;
         GameObject posGo = null;
-        posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/JinZhan{0}", monsterData.m_CampId));
+        posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/JinZhan{0}", (int)monsterData.m_CampId));
         m_Pos = (FixVector3)posGo.transform.position;
         m_Rotation = (FixVector3)(posGo.transform.rotation.eulerAngles);
         m_Angles = (FixVector3)(new Vector3(posGo.transform.forward.normalized.x, 0, posGo.transform.forward.normalized.z));

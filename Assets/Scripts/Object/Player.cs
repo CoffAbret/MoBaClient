@@ -62,7 +62,7 @@ public class Player : BaseObject
         m_PlayerData = new PlayerData(playerData.m_RoleId, playerData.m_HeroId, playerData.m_RoleName, playerData.m_CampId, playerData.m_Type);
         m_Data = m_PlayerData;
         GameObject posGo = null;
-        posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/Pos{0}", playerData.m_CampId));
+        posGo = GameObject.Find(string.Format("203_SceneCtrl_Moba_1/Pos{0}", (int)playerData.m_CampId));
         m_Pos = (FixVector3)posGo.transform.position;
         m_Rotation = (FixVector3)(posGo.transform.rotation.eulerAngles);
         m_Angles = (FixVector3)(new Vector3(posGo.transform.forward.normalized.x, 0, posGo.transform.forward.normalized.z));
@@ -86,7 +86,7 @@ public class Player : BaseObject
                 GameData.m_CampId = playerData.m_CampId;
                 GameData.m_CurrentPlayer = this;
                 m_VGo.tag = "Player";
-                GameObject cameraPosGo = GameObject.Find(string.Format("CameraPos{0}", playerData.m_CampId));
+                GameObject cameraPosGo = GameObject.Find(string.Format("CameraPos{0}", (int)playerData.m_CampId));
                 Camera.main.transform.localPosition = cameraPosGo.transform.localPosition;
                 Camera.main.transform.localRotation = cameraPosGo.transform.localRotation;
                 Camera.main.transform.localScale = cameraPosGo.transform.localScale;

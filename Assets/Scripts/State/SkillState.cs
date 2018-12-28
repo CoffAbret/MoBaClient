@@ -141,8 +141,7 @@ public class SkillState : BaseState
             #endregion
         }
         #endregion
-        //创建子弹
-        #region
+        #region 创建子弹
         if (m_SkillNode.bullet_id != null && m_SkillNode.bullet_id.Length > 0)
         {
             count_temp = 0;
@@ -294,85 +293,8 @@ public class SkillState : BaseState
         if (m_SkillNode == null)
             return;
         m_IntervalTime += GameData.m_FixFrameLen;
-        //if (m_SkillNode.skill_type == SkillCastType.FrontSprintSkill || m_SkillNode.skill_type == SkillCastType.FrontSprintSkill2)
-        //{
-        //    //技能位移直接设置方向即可
-        //    FixVector3 pos = FixVector3.Zero;
-        //    if (m_SkillNode.skill_type == SkillCastType.FrontSprintSkill)
-        //    {
-        //        pos = m_Player.m_Pos + ((Fix64)m_SkillNode.flight_speed * m_Player.m_Angles * GameData.m_FixFrameLen);
-        //    }
-        //    else if (m_SkillNode.skill_type == SkillCastType.FrontSprintSkill2)
-        //    {
-        //        m_Player.m_VGo.transform.LookAt(new Vector3(5, 4.8f, 5));
-        //        pos = m_Player.m_Pos + FramePos * (Fix64)m_SkillNode.flight_speed * GameData.m_FixFrameLen;
-        //    }
-        //    Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(pos.ToVector3());
-        //    bool IsSkillMove = false;
-        //    bool IsWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
-        //    if (m_SkillNode.skill_type == SkillCastType.FrontSprintSkill)
-        //    {
-        //        IsSkillMove = IsWalk;
-        //    }
-        //    else
-        //    {
-        //        bool isTargetPos = FixVector3.Distance(m_Player.m_Pos, m_TargetPos) > GameData.m_FixFrameLen * (Fix64)20;
-        //        IsSkillMove = IsWalk && isTargetPos;
-        //    }
-        //    if (IsSkillMove)
-        //    {
-        //        m_Player.m_Pos = pos;
-        //        #region 显示层
-        //        if (GameData.m_IsExecuteViewLogic)
-        //        {
-        //            m_Player.m_VGo.transform.position = m_Player.m_Pos.ToVector3();
-        //        }
-        //        #endregion
-        //    }
-        //}
         if (!m_BaseObject.m_IsSkill)
             return;
-        //if (m_Player.m_IntervalTime == (GameData.m_FixFrameLen * (Fix64)5))
-        //{
-        //    #region 显示层
-        //    if (GameData.m_IsExecuteViewLogic)
-        //    {
-        //        GameObject effecGo = Resources.Load<GameObject>(string.Format("{0}/{1}/{2}/{3}", GameData.m_EffectPath, "Heros", m_Player.m_PlayerData.m_HeroName, m_SkillNode.spell_motion));
-        //        if (effecGo == null)
-        //            return;
-        //        m_AniEffect = GameObject.Instantiate(effecGo);
-        //        //带位移的技能需要特效也跟着角色位置移动
-        //        if (m_SkillNode.skill_type == SkillCastType.FrontSprintSkill || m_SkillNode.skill_type == SkillCastType.FrontSprintSkill2)
-        //        {
-        //            m_AniEffect.transform.parent = m_Player.m_VGo.transform;
-        //            m_AniEffect.transform.localPosition = Vector3.zero;
-        //            m_AniEffect.transform.localRotation = Quaternion.Euler(Vector3.zero);
-        //        }
-        //        else
-        //        {
-        //            m_AniEffect.transform.localPosition = m_Player.m_VGo.transform.localPosition;
-        //            m_AniEffect.transform.localRotation = m_Player.m_VGo.transform.localRotation;
-        //        }
-        //        m_AniEffect.transform.localScale = Vector3.one;
-        //        m_AniEffect.SetActive(true);
-        //        if (m_SkillNode.skill_type == SkillCastType.CenterSkill)
-        //        {
-        //            Delay delay = new Delay();
-        //            delay.InitDestory(m_AniEffect, (Fix64)m_SkillNode.efficiency_time);
-        //            GameData.m_GameManager.m_DelayManager.m_DelayList.Add(delay);
-        //        }
-        //    }
-        //    #endregion
-        //}
-        if (!m_BaseObject.m_IsSkill)
-            return;
-        //if (m_Player.m_IntervalTime >= (((Fix64)m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsLaunchAttack)
-        //{
-        //    PlayerAttack attack = new PlayerAttack();
-        //    attack.Create(m_Player, m_SkillNode);
-        //    GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
-        //    m_Player.m_IsLaunchAttack = true;
-        //}
         if (m_IntervalTime >= (Fix64)m_SkillNode.animatorTime)
             OnExit();
     }

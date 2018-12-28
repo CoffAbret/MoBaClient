@@ -285,15 +285,6 @@ public class AttackState : BaseState
         if (m_SkillNode == null)
             return;
         m_IntervalTime += GameData.m_FixFrameLen;
-
-        //if (m_Player.m_IntervalTime >= (((Fix64)m_SkillNode.animatorTime * m_CalcDamageTime)) && !m_Player.m_IsLaunchAttack)
-        //{
-        //    PlayerAttack attack = new PlayerAttack();
-        //    attack.Create(m_Player, m_SkillNode);
-        //    GameData.m_GameManager.m_AttackManager.m_AttackList.Add(attack);
-        //    m_Player.m_IsLaunchAttack = true;
-        //}
-
         if (m_IntervalTime >= (Fix64)m_SkillNode.animatorTime)
             OnExit();
     }

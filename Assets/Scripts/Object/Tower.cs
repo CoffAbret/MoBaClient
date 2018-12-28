@@ -96,7 +96,7 @@ public class Tower : BaseObject
     /// <summary>
     /// 销毁
     /// </summary>
-    public void Destroy()
+    public override void Destroy()
     {
         GameData.m_GameManager.m_GridManager.SetWalkable(this);
         GameData.m_ObjectList.Remove(this);
