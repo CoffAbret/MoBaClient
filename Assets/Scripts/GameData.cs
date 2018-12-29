@@ -63,4 +63,5 @@ public class GameData
     public static int m_AttackClickIndex = 0;
     //日志写入路径
     public static string m_logFilePath = string.Empty;
+    public static bool m_IsClick = false;
 }

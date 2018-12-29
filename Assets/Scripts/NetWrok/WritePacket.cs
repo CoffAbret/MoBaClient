@@ -39,6 +39,12 @@ public class CWritePacket : CPacket
         stream.Write(bDataListT, 0, bDataListT.Length);
         ChangeLength(nSize);
 
+
+
+        //byte[] temp = BitConverter.GetBytes(nValue);
+        //Array.Reverse(temp);
+        //stream.Write(temp, 0, temp.Length);
+        //ChangeLength(nSize);
         return true;
     }
 

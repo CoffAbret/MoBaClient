@@ -35,8 +35,6 @@ public class AsyncUdpClient
         point = new IPEndPoint(address, port);
         m_Client = new UdpClient();
         m_Client.Connect(point);
-        CWritePacket writePacket = new CWritePacket(NetProtocol.CONNECT);
-        AsyncSendData(writePacket);
         AsyncReceiveData();
     }
 
@@ -70,18 +68,50 @@ public class AsyncUdpClient
             byte[] data = m_Client.EndReceive(result, ref m_RemoteEP);
             if (data == null || data.Length < 1)
                 return;
-            CReadPacket readPacket = new CReadPacket(data, data.Length);
-            readPacket.ReadData();
-            m_ReceivePacketList.Add(readPacket);
+            IoBuffer Io = new IoBuffer(data);
+            while (Io.RemainingBytes() > KCP.IKCP_OVERHEAD)
+            {
+                KcpPacket seg = new KcpPacket();
+                seg.m_Cmd = Io.ReadByte();
+                seg.m_Win = Io.ReadByte();
+                seg.m_Sn = Io.ReadInt();
+                seg.m_NextSn = Io.ReadInt();
+                seg.m_Ts = Io.ReadLong();
+                int len = Io.ReadInt();
+                if (len > Io.RemainingBytes())
+                {
+                    // 如果消息内容不够，则重置，相当于不读取size
+                    Io.Position = 0;
+                }
+                else
+                {
+                    byte[] bytes = Io.ReadBytes(len);
+                    seg.m_Data = bytes;
+                    GameData.m_GameManager.m_NetManager.m_KCPClient.recv(seg);
+                }
+            }
+            //CReadPacket readPacket = new CReadPacket(data, data.Length);
+            //readPacket.ReadData();
+            //GameData.m_GameManager.m_NetManager.m_KCPClient.recv
+            //m_ReceivePacketList.Add(readPacket);
         }
         catch (Exception ex)
         {
-            throw ex;
+            UnityEngine.Debug.LogError(ex.Message);
         }
         finally
         {
             m_Client.BeginReceive(ReceiveCallback, null);
         }
+    }
+
+    /// <summary>
+    /// 开始回调
+    /// </summary>
+    /// <param name="result"></param>
+    public void Receive(CReadPacket packet)
+    {
+        m_ReceivePacketList.Add(packet);
     }
 
     /// <summary>
@@ -92,7 +122,37 @@ public class AsyncUdpClient
     {
         if (m_Client == null)
             return;
-        m_Client.BeginSend(data.GetPacketByte(), data.GetPacketByte().Length, new AsyncCallback(SendCallback), null);
+        if (GameData.m_GameManager.m_NetManager.m_KCPClient == null)
+            return;
+        GameData.m_GameManager.m_NetManager.m_KCPClient.send(data);
+        //m_Client.BeginSend(data.GetPacketByte(), data.GetPacketByte().Length, new AsyncCallback(SendCallback), null);
+    }
+
+
+    /// <summary>
+    /// 发送数据
+    /// </summary>
+    /// <param name="data"></param>
+    public void AsyncSendKcpData(KcpPacket kcpData)
+    {
+        if (m_Client == null)
+            return;
+        int dataLen = 0;
+        IoBuffer buffer = new IoBuffer();
+        byte[] bytes = kcpData.m_Data;
+        dataLen = bytes == null ? 0 : bytes.Length;
+        buffer.Position = 0;
+        buffer.WriteByte(kcpData.m_Cmd);
+        buffer.WriteByte(kcpData.m_Win);
+        buffer.WriteInt(kcpData.m_Sn);
+        buffer.WriteInt(kcpData.m_NextSn);
+        buffer.WriteLong(kcpData.m_Ts);
+        buffer.WriteInt(dataLen);
+        if (dataLen > 0)
+            buffer.WriteBytes(bytes);
+        UnityEngine.Debug.LogError(string.Format("发送：m_Sn:{0},m_Ts:{1}", kcpData.m_Sn, kcpData.m_Ts));
+        //GameData.m_GameManager.m_LogMessage.text += string.Format("m_Sn:{0},m_Ts:{1}", kcpData.m_Sn, kcpData.m_Ts);
+        m_Client.BeginSend(buffer.ToBytes(), buffer.ToBytes().Length, new AsyncCallback(SendCallback), null);
     }
 
     /// <summary>
@@ -101,13 +161,13 @@ public class AsyncUdpClient
     /// <param name="data"></param>
     public void AsyncSendPing()
     {
-        IDictionary<string, object> packet = new Dictionary<string, object>();
-        packet.Add("msgid", NetProtocol.PING);
-        CWritePacket writePacket = new CWritePacket(NetProtocol.PING);
-        StringBuilder builder = Jsontext.WriteData(packet);
-        string json_Str = builder.ToString();
-        writePacket.WriteString(json_Str);
-        m_Client.BeginSend(writePacket.GetPacketByte(), writePacket.GetPacketByte().Length, new AsyncCallback(SendCallback), null);
+        //IDictionary<string, object> packet = new Dictionary<string, object>();
+        //packet.Add("msgid", NetProtocol.PING);
+        //CWritePacket writePacket = new CWritePacket(NetProtocol.PING);
+        //StringBuilder builder = Jsontext.WriteData(packet);
+        //string json_Str = builder.ToString();
+        //writePacket.WriteString(json_Str);
+        //m_Client.BeginSend(writePacket.GetPacketByte(), writePacket.GetPacketByte().Length, new AsyncCallback(SendCallback), null);
     }
 
     /// <summary>

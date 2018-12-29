@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class GameManager
@@ -389,24 +390,24 @@ public class GameManager
 
     public void InitLog()
     {
-        //        GameData.m_logFilePath = string.Format("{0}/{1}_Log.txt", Application.dataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
-        //#if UNITY_IOS || UNITY_ANDROID
-        //        GameData.m_logFilePath = string.Format("{0}/{1}_Log.txt", Application.persistentDataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
-        //#endif
-        //        System.IO.FileStream fs = new System.IO.FileStream(GameData.m_logFilePath, System.IO.FileMode.Create, System.IO.FileAccess.Write);
-        //        fs.Dispose();
-        //        fs.Close();
+        GameData.m_logFilePath = string.Format("{0}/{1}_Log.txt", Application.dataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
+#if UNITY_IOS || UNITY_ANDROID
+                GameData.m_logFilePath = string.Format("{0}/{1}_Log.txt", Application.persistentDataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
+#endif
+        System.IO.FileStream fs = new System.IO.FileStream(GameData.m_logFilePath, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+        fs.Dispose();
+        fs.Close();
     }
 
     public void LogMsg(string log)
     {
-        //System.IO.FileStream fs = new System.IO.FileStream(GameData.m_logFilePath, System.IO.FileMode.Append, System.IO.FileAccess.Write);
-        //System.IO.StreamWriter sw = new System.IO.StreamWriter(fs);
-        //sw.WriteLine(log);
-        //sw.Dispose();
-        //sw.Close();
-        //fs.Dispose();
-        //fs.Close();
+        System.IO.FileStream fs = new System.IO.FileStream(GameData.m_logFilePath, System.IO.FileMode.Append, System.IO.FileAccess.Write);
+        System.IO.StreamWriter sw = new System.IO.StreamWriter(fs);
+        sw.WriteLine(log);
+        sw.Dispose();
+        sw.Close();
+        fs.Dispose();
+        fs.Close();
     }
     /// <summary>
     /// 加载游戏数据

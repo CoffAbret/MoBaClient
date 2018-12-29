@@ -118,6 +118,7 @@ public class MainBehaviour : MonoBehaviour
         UIEventListener.Get(m_SettlemengExitGameButton).onClick = OnExitGameClick;
     }
 
+    float timesCount = 0;
     /// <summary>
     /// 每帧接收网络数据
     /// </summary>
@@ -127,9 +128,14 @@ public class MainBehaviour : MonoBehaviour
             return;
         if (GameData.m_GameManager.m_NetManager == null)
             return;
-        GameData.m_GameManager.UpdateTcpNet();
-        GameData.m_GameManager.UpdateUdpNet();
-        GameData.m_GameManager.UpdateTcpGame();
+        timesCount += Time.deltaTime;
+        if (timesCount >= 0.033)
+        {
+            GameData.m_GameManager.UpdateTcpNet();
+            GameData.m_GameManager.UpdateUdpNet();
+            GameData.m_GameManager.UpdateTcpGame();
+            timesCount = 0;
+        }
     }
 
     /// <summary>
@@ -213,6 +219,11 @@ public class MainBehaviour : MonoBehaviour
                 GameData.m_HeroId = item.m_HeroId;
             }
         }
+        GameData.m_IsClick = true;
+        for (int i = 0; i <1000; i++)
+        {
+            GameData.m_GameManager.InputReady();
+        }
     }
 
     /// <summary>
@@ -222,7 +233,6 @@ public class MainBehaviour : MonoBehaviour
     private void OnJoinGameClick(GameObject go)
     {
         GameData.m_GameManager.InitUdpNet();
-        GameData.m_GameManager.InputReady();
         GameData.m_GameManager.InitUdpGame();
     }
 

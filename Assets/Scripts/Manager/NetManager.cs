@@ -13,6 +13,8 @@ public class NetManager
     public AsyncTcpClient m_TcpClient;
     //Udp网络连接
     public AsyncUdpClient m_UdpClient;
+    //KCP 网络连接
+    public KCP m_KCPClient;
 
     /// <summary>
     /// 初始化Tcp网络连接
@@ -28,9 +30,11 @@ public class NetManager
     /// </summary>
     public void InitUdpClient()
     {
-        m_UdpClient = new AsyncUdpClient(GameData.m_UdpIP, GameData.m_UdpPort);
+        m_KCPClient = new KCP();
+        m_UdpClient = new AsyncUdpClient("192.168.3.88", 8888);
         m_UdpClient.OnMessage += OnUdpMessage;
     }
+
 
     /// <summary>
     /// 每帧处理Tcp网络数据
@@ -47,6 +51,7 @@ public class NetManager
     {
         if (m_UdpClient == null)
             return;
+        m_KCPClient.update();
         m_UdpClient.UpdateNet();
         GameData.m_PingTime += GameData.m_FixFrameLen;
         if (GameData.m_PingTime >= Fix64.FromRaw(10000))
