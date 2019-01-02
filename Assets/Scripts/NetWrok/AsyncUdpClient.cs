@@ -34,7 +34,15 @@ public class AsyncUdpClient
         address = IPAddress.Parse(ip);
         point = new IPEndPoint(address, port);
         m_Client = new UdpClient();
-        m_Client.Connect(point);
+        try
+        {
+            m_Client.Connect(point);
+        }
+        catch (Exception ex)
+        {
+            string parameter = string.Format("[ip:{0},port:{1}]", ip, port);
+            GameData.m_GameManager.LogMsgError("AsyncUdpClient", "AsyncUdpClient", parameter, ex.Message);
+        }
         CWritePacket writePacket = new CWritePacket(NetProtocol.CONNECT);
         AsyncSendData(writePacket);
         AsyncReceiveData();
@@ -53,7 +61,8 @@ public class AsyncUdpClient
         }
         catch (Exception ex)
         {
-            throw ex;
+            string parameter = "";
+            GameData.m_GameManager.LogMsgError("AsyncUdpClient", "AsyncReceiveData", parameter, ex.Message);
         }
     }
 
@@ -76,7 +85,8 @@ public class AsyncUdpClient
         }
         catch (Exception ex)
         {
-            throw ex;
+            string parameter = "";
+            GameData.m_GameManager.LogMsgError("AsyncUdpClient", "ReceiveCallback", parameter, ex.Message);
         }
         finally
         {
@@ -92,7 +102,15 @@ public class AsyncUdpClient
     {
         if (m_Client == null)
             return;
-        m_Client.BeginSend(data.GetPacketByte(), data.GetPacketByte().Length, new AsyncCallback(SendCallback), null);
+        try
+        {
+            m_Client.BeginSend(data.GetPacketByte(), data.GetPacketByte().Length, new AsyncCallback(SendCallback), null);
+        }
+        catch (Exception ex)
+        {
+            string parameter = string.Format("[m_nPacketID:{0}]", data.GetPacketID());
+            GameData.m_GameManager.LogMsgError("AsyncUdpClient", "AsyncSendData", parameter, ex.Message);
+        }
     }
 
     /// <summary>
@@ -124,7 +142,8 @@ public class AsyncUdpClient
         }
         catch (Exception ex)
         {
-            throw ex;
+            string parameter = "";
+            GameData.m_GameManager.LogMsgError("AsyncUdpClient", "SendCallback", parameter, ex.Message);
         }
     }
 

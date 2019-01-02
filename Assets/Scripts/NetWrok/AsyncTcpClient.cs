@@ -53,7 +53,15 @@ public class AsyncTcpClient
         m_Client.SendTimeout = 1000;
         m_Client.ReceiveTimeout = 1000;
         m_Client.NoDelay = true;
-        m_Client.BeginConnect(ip, port, new AsyncCallback(OnConnect), null);
+        try
+        {
+            m_Client.BeginConnect(ip, port, new AsyncCallback(OnConnect), null);
+        }
+        catch (Exception ex)
+        {
+            string parameter = string.Format("[ip:{0},port:{1}]", ip, port);
+            GameData.m_GameManager.LogMsgError("AsyncTcpClient", "AsyncTcpClient", parameter, ex.Message);
+        }
     }
 
     /// <summary>
@@ -62,11 +70,18 @@ public class AsyncTcpClient
     /// <param name="result"></param>
     private void OnConnect(IAsyncResult result)
     {
-
         if (m_Client == null || !m_Client.Connected)
             return;
         m_Buffer = new byte[m_MaxLength];
-        m_Client.GetStream().BeginRead(m_Buffer, 0, m_MaxLength, new AsyncCallback(OnRead), null);
+        try
+        {
+            m_Client.GetStream().BeginRead(m_Buffer, 0, m_MaxLength, new AsyncCallback(OnRead), null);
+        }
+        catch (Exception ex)
+        {
+            string parameter = "";
+            GameData.m_GameManager.LogMsgError("AsyncTcpClient", "OnConnect", parameter, ex.Message);
+        }
     }
 
     /// <summary>
@@ -77,7 +92,7 @@ public class AsyncTcpClient
     {
         if (m_Client == null || !m_Client.Connected)
             return;
-        int readLength;
+        int readLength = 0;
         try
         {
             lock (m_Client.GetStream())
@@ -91,44 +106,32 @@ public class AsyncTcpClient
             while ((m_MemoryStream.Length - m_MemoryStream.Position) > sizeof(int))
             {
                 int messageLength = IPAddress.NetworkToHostOrder(m_BinaryReader.ReadInt32());
-                m_MemoryStream.Position = m_MemoryStream.Position - sizeof(int);
+                m_MemoryStream.Seek(-sizeof(int), SeekOrigin.Current);
                 if (m_MemoryStream.Length - m_MemoryStream.Position >= messageLength)
                 {
-                    MemoryStream stream = new MemoryStream();
-                    BinaryWriter write = new BinaryWriter(stream);
-                    write.Write(m_BinaryReader.ReadBytes(messageLength));
-                    stream.Seek(0, SeekOrigin.Begin);
-                    BinaryReader reader = new BinaryReader(stream);
-                    byte[] message = reader.ReadBytes((int)(stream.Length - stream.Position));
+                    byte[] message = m_BinaryReader.ReadBytes(messageLength);
                     CReadPacket readPacket = new CReadPacket(message, message.Length);
                     readPacket.ReadData();
                     m_ReceivePacketList.Add(readPacket);
-                    reader.Close();
-                    reader = null;
-                    write.Close();
-                    write = null;
-                    stream.Close();
-                    stream = null;
                 }
-                else
-                {
-                    m_MemoryStream.Position = m_MemoryStream.Position - sizeof(int);
-                }
-
             }
             //剩余数据写入数据存储对象
             byte[] surplusByte = m_BinaryReader.ReadBytes((int)(m_MemoryStream.Length - m_MemoryStream.Position));
             m_MemoryStream.SetLength(0);
             m_MemoryStream.Write(surplusByte, 0, surplusByte.Length);
-            lock (m_Client.GetStream())
-            {
-                Array.Clear(m_Buffer, 0, readLength);
-                m_Client.GetStream().BeginRead(m_Buffer, 0, m_MaxLength, new AsyncCallback(OnRead), null);
-            }
         }
         catch (Exception ex)
         {
-            throw ex;
+            string parameter = string.Format("[readLength:{0}]", readLength);
+            GameData.m_GameManager.LogMsgError("AsyncTcpClient", "OnRead", parameter, ex.Message);
+        }
+        finally
+        {
+            lock (m_Client.GetStream())
+            {
+                Array.Clear(m_Buffer, 0, m_MaxLength);
+                m_Client.GetStream().BeginRead(m_Buffer, 0, m_MaxLength, new AsyncCallback(OnRead), null);
+            }
         }
     }
 
@@ -139,24 +142,17 @@ public class AsyncTcpClient
     /// <param name="data"></param>
     public void AsyncSendData(CWritePacket data)
     {
-        if (m_Client == null || !m_Client.Connected)
+        if (m_Client == null || !m_Client.Connected || data == null)
             return;
-        m_Client.GetStream().BeginWrite(data.GetPacketByte(), 0, data.GetPacketByte().Length, new AsyncCallback(OnWrite), null);
-    }
-
-    /// <summary>
-    /// 发送ping包
-    /// </summary>
-    /// <param name="data"></param>
-    public void AsyncSendPing()
-    {
-        IDictionary<string, object> packet = new Dictionary<string, object>();
-        packet.Add("msgid", NetProtocol.PING);
-        CWritePacket writePacket = new CWritePacket(NetProtocol.PING);
-        StringBuilder builder = Jsontext.WriteData(packet);
-        string json_Str = builder.ToString();
-        writePacket.WriteString(json_Str);
-        m_Client.GetStream().BeginWrite(writePacket.GetPacketByte(), 0, writePacket.GetPacketByte().Length, new AsyncCallback(OnWrite), null);
+        try
+        {
+            m_Client.GetStream().BeginWrite(data.GetPacketByte(), 0, data.GetPacketByte().Length, new AsyncCallback(OnWrite), null);
+        }
+        catch (Exception ex)
+        {
+            string parameter = string.Format("[m_nPacketID:{0}]", data.GetPacketID());
+            GameData.m_GameManager.LogMsgError("AsyncTcpClient", "AsyncSendData", parameter, ex.Message);
+        }
     }
 
     /// <summary>
@@ -173,7 +169,8 @@ public class AsyncTcpClient
         }
         catch (Exception ex)
         {
-            throw ex;
+            string parameter = string.Format("[result:{0}]", result);
+            GameData.m_GameManager.LogMsgError("AsyncTcpClient", "OnWrite", parameter, ex.Message);
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class GameManager
@@ -250,7 +251,6 @@ public class GameManager
             CreateTower((CampType)campId, ObjectType.CRYSTAL_TOWER);
         }
         m_GridManager.InitTowerGrid();
-        InitLog();
     }
 
     public void SyncKey(Dictionary<string, object> data)
@@ -323,7 +323,7 @@ public class GameManager
         GameData.m_CampId = (CampType)data.TryGetInt("teamId");
         GameData.m_MatchPos = data.TryGetInt("pos");
         GameData.m_MatchKey = matchKey;
-        if (data["teamInfo"] == null)
+        if (!data.ContainsKey("teamInfo"))
             return;
         object[] teamInfoArray = data["teamInfo"] as object[];
         List<MatchPlayerData> matchPlayerList = new List<MatchPlayerData>();
@@ -389,24 +389,58 @@ public class GameManager
 
     public void InitLog()
     {
-        //        GameData.m_logFilePath = string.Format("{0}/{1}_Log.txt", Application.dataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
-        //#if UNITY_IOS || UNITY_ANDROID
-        //        GameData.m_logFilePath = string.Format("{0}/{1}_Log.txt", Application.persistentDataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
-        //#endif
-        //        System.IO.FileStream fs = new System.IO.FileStream(GameData.m_logFilePath, System.IO.FileMode.Create, System.IO.FileAccess.Write);
-        //        fs.Dispose();
-        //        fs.Close();
+        GameData.m_LogFilePath = string.Format("{0}/{1}_Log.txt", Application.dataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
+#if UNITY_IOS || UNITY_ANDROID
+                GameData.m_LogFilePath = string.Format("{0}/{1}_Log.txt", Application.persistentDataPath, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
+#endif
+        FileStream fs = new FileStream(GameData.m_LogFilePath, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+        fs.Dispose();
+        fs.Close();
     }
 
+    /// <summary>
+    /// 普通日志
+    /// </summary>
+    /// <param name="log"></param>
     public void LogMsg(string log)
     {
-        //System.IO.FileStream fs = new System.IO.FileStream(GameData.m_logFilePath, System.IO.FileMode.Append, System.IO.FileAccess.Write);
-        //System.IO.StreamWriter sw = new System.IO.StreamWriter(fs);
-        //sw.WriteLine(log);
-        //sw.Dispose();
-        //sw.Close();
-        //fs.Dispose();
-        //fs.Close();
+        string logStr = string.Format("log:{0}", log);
+        GameData.m_LogList.Add(logStr);
+    }
+
+    /// <summary>
+    /// 错误日志
+    /// </summary>
+    /// <param name="className"></param>
+    /// <param name="line"></param>
+    /// <param name="parameter"></param>
+    /// <param name="log"></param>
+    public void LogMsgError(string className, string methodName, string parameter, string message)
+    {
+        string logStr = string.Format("error:class:{0},method:{1},parameter:{2},message:{3}", className, methodName, parameter, message);
+        GameData.m_LogList.Add(logStr);
+    }
+
+    /// <summary>
+    /// 把log写入日志文件
+    /// </summary>
+    public void WriteLog()
+    {
+        if (GameData.m_GameManager == null)
+            return;
+        if (GameData.m_LogList.Count < 1)
+            return;
+        for (int i = 0; i < GameData.m_LogList.Count; i++)
+        {
+            FileStream fs = new FileStream(GameData.m_LogFilePath, FileMode.Append, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine(GameData.m_LogList[i]);
+            sw.Dispose();
+            sw.Close();
+            fs.Dispose();
+            fs.Close();
+        }
+        GameData.m_LogList.Clear();
     }
     /// <summary>
     /// 加载游戏数据

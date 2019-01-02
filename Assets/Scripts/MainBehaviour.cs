@@ -79,6 +79,8 @@ public class MainBehaviour : MonoBehaviour
     public GameObject m_MoBa1v1SceneBlueAddHpPos;
     public GameObject m_MoBa1v1SceneRedResurrectionPos;
     public GameObject m_MoBa1v1SceneBlueResurrectionPos;
+    //Update累计时间
+    private Fix64 m_UpdateCumulativeTime = Fix64.Zero;
     /// <summary>
     /// 初始化
     /// </summary>
@@ -90,6 +92,8 @@ public class MainBehaviour : MonoBehaviour
         Application.targetFrameRate = 50;
         //初始化游戏管理器
         GameData.m_GameManager = new GameManager();
+        //创建日志文件
+        GameData.m_GameManager.InitLog();
     }
     /// <summary>
     /// 初始化UI
@@ -127,9 +131,16 @@ public class MainBehaviour : MonoBehaviour
             return;
         if (GameData.m_GameManager.m_NetManager == null)
             return;
-        GameData.m_GameManager.UpdateTcpNet();
-        GameData.m_GameManager.UpdateUdpNet();
-        GameData.m_GameManager.UpdateTcpGame();
+        //保证逻辑更新频率固定
+        m_UpdateCumulativeTime += (Fix64)Time.deltaTime;
+        if (m_UpdateCumulativeTime >= GameData.m_FixFrameLen)
+        {
+            GameData.m_GameManager.UpdateTcpNet();
+            GameData.m_GameManager.UpdateUdpNet();
+            GameData.m_GameManager.UpdateTcpGame();
+            GameData.m_GameManager.WriteLog();
+            m_UpdateCumulativeTime = Fix64.Zero;
+        }
     }
 
     /// <summary>
