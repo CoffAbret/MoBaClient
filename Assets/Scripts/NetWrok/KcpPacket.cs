@@ -39,12 +39,10 @@ public class KcpPacket
             if (m_Data == null || m_Data.Length == 0)
                 return null;
             List<CReadPacket> ret = new List<CReadPacket>();
-            IoBuffer io = new IoBuffer();
-            io.WriteBytes(m_Data);
-            io.SeekBegin();
+            IoBuffer io = new IoBuffer(m_Data);
             while (io.RemainingBytes() > sizeof(int))
             {
-                int messageLength = IPAddress.NetworkToHostOrder(io.ReadInt());
+                int messageLength = io.ReadInt();
                 io.Position = io.Position - sizeof(int);
                 if (io.RemainingBytes() >= messageLength)
                 {

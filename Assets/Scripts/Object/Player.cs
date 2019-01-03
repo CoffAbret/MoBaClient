@@ -11,16 +11,6 @@ public class Player : BaseObject
 {
     //角色数据
     public PlayerData m_PlayerData;
-    //是否移动
-    public bool m_IsMove = false;
-    //是否普攻
-    public bool m_IsAttack = false;
-    //是否技能
-    public bool m_IsSkill = false;
-    //是否死亡
-    public bool m_IsDie = false;
-    //是否后仰
-    public bool m_IsHit = false;
     //当前状态
     public BaseState m_State;
     //技能间隔时间

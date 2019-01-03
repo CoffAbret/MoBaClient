@@ -35,6 +35,8 @@ public class AsyncUdpClient
         point = new IPEndPoint(address, port);
         m_Client = new UdpClient();
         m_Client.Connect(point);
+        CWritePacket writePacket = new CWritePacket(NetProtocol.CONNECT);
+        AsyncSendData(writePacket);
         AsyncReceiveData();
     }
 
@@ -85,15 +87,14 @@ public class AsyncUdpClient
                 }
                 else
                 {
-                    byte[] bytes = Io.ReadBytes(len);
-                    seg.m_Data = bytes;
-                    GameData.m_GameManager.m_NetManager.m_KCPClient.recv(seg);
+                    if (len > 0)
+                    {
+                        byte[] bytes = Io.ReadBytes(len);
+                        seg.m_Data = bytes;
+                        GameData.m_GameManager.m_NetManager.m_KCPClient.recv(seg);
+                    }
                 }
             }
-            //CReadPacket readPacket = new CReadPacket(data, data.Length);
-            //readPacket.ReadData();
-            //GameData.m_GameManager.m_NetManager.m_KCPClient.recv
-            //m_ReceivePacketList.Add(readPacket);
         }
         catch (Exception ex)
         {
@@ -150,7 +151,6 @@ public class AsyncUdpClient
         buffer.WriteInt(dataLen);
         if (dataLen > 0)
             buffer.WriteBytes(bytes);
-        UnityEngine.Debug.LogError(string.Format("发送：m_Sn:{0},m_Ts:{1}", kcpData.m_Sn, kcpData.m_Ts));
         //GameData.m_GameManager.m_LogMessage.text += string.Format("m_Sn:{0},m_Ts:{1}", kcpData.m_Sn, kcpData.m_Ts);
         m_Client.BeginSend(buffer.ToBytes(), buffer.ToBytes().Length, new AsyncCallback(SendCallback), null);
     }

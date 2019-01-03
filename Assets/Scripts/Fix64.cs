@@ -9,7 +9,7 @@ public struct Fix64 : System.IEquatable<Fix64>
     private readonly long m_rawValue;
     public static readonly long FloatPrecision = 1000;
     public static readonly float PrecisionFactor = 0.001F;
-    public static readonly Fix64 Zero = new Fix64();
+    public static readonly Fix64 Zero = new Fix64(0);
     public static readonly Fix64 One = new Fix64(FloatPrecision);
     public Fix64(long value)
     {

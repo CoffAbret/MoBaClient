@@ -20,20 +20,14 @@ public class IoBuffer
     {
         stream = new MemoryStream();
         writer = new BinaryWriter(stream);
+        reader = new BinaryReader(stream);
     }
 
     public IoBuffer(byte[] data)
     {
-        if (data != null)
-        {
-            stream = new MemoryStream(data);
-            reader = new BinaryReader(stream);
-        }
-        else
-        {
-            stream = new MemoryStream();
-            writer = new BinaryWriter(stream);
-        }
+        stream = new MemoryStream(data);
+        writer = new BinaryWriter(stream);
+        reader = new BinaryReader(stream);
     }
 
     public void Close()

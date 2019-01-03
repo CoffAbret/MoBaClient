@@ -31,7 +31,7 @@ public class NetManager
     public void InitUdpClient()
     {
         m_KCPClient = new KCP();
-        m_UdpClient = new AsyncUdpClient("192.168.3.88", 8888);
+        m_UdpClient = new AsyncUdpClient(GameData.m_UdpIP, GameData.m_UdpPort);
         m_UdpClient.OnMessage += OnUdpMessage;
     }
 

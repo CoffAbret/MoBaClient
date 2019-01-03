@@ -75,17 +75,17 @@ public class MoveState : BaseState
         if (!m_BaseObject.m_IsMove)
             return;
         FixVector3 fixPos = FixVector3.Zero;
-        if(m_BaseObject is Player)
-            m_BaseObject.m_Pos += ((Fix64)(m_BaseObject as Player).m_PlayerData.m_HeroAttrNode.movement_speed * m_BaseObject.m_Angles * GameData.m_FixFrameLen);
+        if (m_BaseObject is Player)
+            fixPos = m_BaseObject.m_Pos + ((Fix64)(m_BaseObject as Player).m_PlayerData.m_HeroAttrNode.movement_speed * m_BaseObject.m_Angles * GameData.m_FixFrameLen);
         if (m_BaseObject is Monster)
-            m_BaseObject.m_Pos += ((Fix64)(m_BaseObject as Monster).m_MonsterData.m_MonsterAttrNode.movement_speed * m_BaseObject.m_Angles * GameData.m_FixFrameLen);
+            fixPos = m_BaseObject.m_Pos + ((Fix64)(m_BaseObject as Monster).m_MonsterData.m_MonsterAttrNode.movement_speed * m_BaseObject.m_Angles * GameData.m_FixFrameLen);
         Vector2 gridPos = GameData.m_GameManager.m_GridManager.MapPosToGrid(fixPos.ToVector3());
         bool isWalk = GameData.m_GameManager.m_GridManager.GetWalkable(gridPos);
         if (isWalk)
         {
             m_IntervalTime += GameData.m_FixFrameLen;
             m_BaseObject.m_Pos = fixPos;
-            if (m_BaseObject.m_Data.m_Type ==ObjectType.PLAYER)
+            if (m_BaseObject.m_Data.m_Type == ObjectType.PLAYER)
                 GameData.m_GameManager.LogMsg(string.Format("移动后坐标：{0}", m_BaseObject.m_Pos));
             else
                 GameData.m_GameManager.LogMsg(string.Format("小兵移动后坐标：{0}", m_BaseObject.m_Pos));

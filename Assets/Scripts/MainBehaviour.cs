@@ -202,6 +202,8 @@ public class MainBehaviour : MonoBehaviour
         GameData.m_GameManager.InputJoinMatchRoom();
     }
 
+
+    int index = 0;
     /// <summary>
     /// 选择英雄
     /// </summary>
@@ -219,11 +221,6 @@ public class MainBehaviour : MonoBehaviour
                 GameData.m_HeroId = item.m_HeroId;
             }
         }
-        GameData.m_IsClick = true;
-        for (int i = 0; i <1000; i++)
-        {
-            GameData.m_GameManager.InputReady();
-        }
     }
 
     /// <summary>
@@ -232,8 +229,10 @@ public class MainBehaviour : MonoBehaviour
     /// <param name="go"></param>
     private void OnJoinGameClick(GameObject go)
     {
+        GameData.m_IsClick = true;
         GameData.m_GameManager.InitUdpNet();
         GameData.m_GameManager.InitUdpGame();
+        GameData.m_GameManager.InputReady();
     }
 
     //普攻切换时间

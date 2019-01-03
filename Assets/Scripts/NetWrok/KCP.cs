@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class KCP
 {
-    //运行标记
-    private bool running = false;
     //发送窗口大小
     private int IKCP_SEND_WND = 32;
     //接收窗口大小
@@ -17,9 +15,22 @@ public class KCP
     public static byte IKCP_CMD_PUSH = 1;
     //确认包
     public static byte IKCP_CMD_ACK = 2;
+    //问寻接收窗口大小
+    public static byte IKCP_CMD_WASK = 83;
+    //告之接收窗口大小
+    public static byte IKCP_CMD_WINS = 84;
+    //最小7秒问寻一次接收窗口大小
+    public static long IKCP_PROBE_INIT = 7000;
+    //最大60 * 5 秒时长
+    public static long IKCP_PROBE_LIMIT = 60 * 1000 * 5;
     //重传时间
     private int IKCP_RTO_MIN = 100;
     private int IKCP_RTO_MAX = 1000 * 60;
+    public static long THREAD_INTERVAL = 33;
+    //问寻间隔
+    private long probeWait = 01;
+    //问寻目标时间
+    private long tsProbe = 01;
     //输入队列
     private Queue<KcpPacket> received;
     //输出队列
@@ -29,9 +40,9 @@ public class KCP
     //接收消息的队列
     private List<KcpPacket> rcvQueue = new List<KcpPacket>();
     // 发送缓存  ，数据的sn 可能是间隔的
-    private Dictionary<int, KcpPacket> sndBuf = new Dictionary<int, KcpPacket>();
+    private SortedDictionary<int, KcpPacket> sndBuf = new SortedDictionary<int, KcpPacket>();
     //接收缓存  ，数据的sn 可能是间隔的
-    private Dictionary<int, KcpPacket> rcvBuf = new Dictionary<int, KcpPacket>();
+    private SortedDictionary<int, KcpPacket> rcvBuf = new SortedDictionary<int, KcpPacket>();
     //确认包数据  SN
     private List<int> ackSnList = new List<int>();
     //确认包数据  TS
@@ -68,7 +79,6 @@ public class KCP
         this.sendList = new Queue<KcpPacket>();
         this.sendWnd = IKCP_SEND_WND;
         this.recvWnd = IKCP_RECV_WND;
-        this.running = true;
         this.sendNext = 0;
         this.recvNext = 0;
         this.kcpStartTime = GetTimestamp();
@@ -96,10 +106,42 @@ public class KCP
         processRecv();
         //处理要发的确认包
         processAck();
+        //问寻窗口
+        processWask();
         //处理要发送的	
         processSend();
         //处理状态
         processStatus();
+    }
+
+    private void processWask()
+    {
+        if (sendWnd == 0)
+        {
+            if (probeWait == 0)
+            {
+                probeWait = IKCP_PROBE_INIT;
+                tsProbe = currTime + probeWait;
+            }
+            else if (currTime - tsProbe >= 0)
+            {
+                if (probeWait < IKCP_PROBE_INIT)
+                {
+                    probeWait = IKCP_PROBE_INIT;
+                }
+                probeWait += probeWait / 2;
+                if (probeWait > IKCP_PROBE_LIMIT)
+                {
+                    probeWait = IKCP_PROBE_LIMIT;
+                }
+                tsProbe = currTime + probeWait;
+            }
+        }
+        else
+        {
+            tsProbe = 0;
+            probeWait = 0;
+        }
     }
 
     public void processRecv()
@@ -111,20 +153,26 @@ public class KCP
             rcvQueue.RemoveAt(0);
             if (kpt.m_Cmd == IKCP_CMD_PUSH)
             {
-                if (kpt.m_Sn >= recvNext)
+                if (kpt.m_Sn >= recvNext && !rcvBuf.ContainsKey(kpt.m_Sn))
                 { //必需要大等于最后一个可收号才是有效的					
                     rcvBuf.Add(kpt.m_Sn, kpt);
                     checkSendWnd(kpt.m_Win);
                     //加到确认列表中
                     addAckList(kpt.m_Sn, kpt.m_Ts);
-                    recvWnd--;
-                    recvWnd = recvWnd < 0 ? 1 : recvWnd;
                 }
             }
             else if (kpt.m_Cmd == IKCP_CMD_ACK)
             {
                 parseAck(kpt);
                 checkSendWnd(kpt.m_Win);
+            }
+            else if (kpt.m_Cmd == IKCP_CMD_WASK)
+            {
+                parseWask();
+            }
+            else if (kpt.m_Cmd == IKCP_CMD_WINS)
+            {
+                parseWins(kpt);
             }
 
             if (kpt.m_NextSn > remoteSn)
@@ -149,21 +197,29 @@ public class KCP
         count = rcvBuf.Count;
         for (int i = recvNext; i < recvNext + count; i++)
         {
-            KcpPacket kpt = rcvBuf[recvNext];
-            if (kpt != null)
+            if (rcvBuf.ContainsKey(recvNext))
             {
-                rcvBuf.Remove(kpt.m_Sn);
-                recvKcp(kpt);
-                checkSendWnd(kpt.m_Win);
-                recvNext++;
+                KcpPacket kpt = rcvBuf[recvNext];
+                if (kpt != null)
+                {
+                    rcvBuf.Remove(kpt.m_Sn);
+                    recvKcp(kpt);
+                    checkSendWnd(kpt.m_Win);
+                    recvNext++;
+                }
             }
         }
         //设置当前窗口大小
         recvWnd = IKCP_SEND_WND - rcvBuf.Count;
-        if (recvWnd == 0)
-        {
-            recvWnd = 1;
-        }
+    }
+
+    private void parseWask()
+    {
+        KcpPacket kpt = new KcpPacket();
+        kpt.m_Cmd = IKCP_CMD_WINS;
+        kpt.m_Win = (byte)recvWnd;
+        kpt.m_NextSn = recvNext;
+        sendKcp(kpt);
     }
 
     public void processAck()
@@ -187,6 +243,15 @@ public class KCP
         sendKcp(kpt);
         ackSnList.Clear();
         ackTsList.Clear();
+    }
+
+    /// <summary>
+    /// 收到窗口问寻返回包
+    /// </summary>
+    /// <param name="kpt"></param>
+    private void parseWins(KcpPacket kpt)
+    {
+        checkSendWnd(kpt.m_Win);
     }
 
     public void processSend()
@@ -224,10 +289,8 @@ public class KCP
         //已经确认，不用再重发的包sn
         List<int> removeSnLst = new List<int>();
         //处理发送，重发
-        UnityEngine.Debug.LogError("数组长度:" + sndBuf.Count);
         foreach (KeyValuePair<int, KcpPacket> item in sndBuf)
         {
-            UnityEngine.Debug.LogError("数组长度:" + item.Value.m_Sn);
             item.Value.m_Win = (byte)recvWnd;//这里是告之接收方，当前发送方的可接收窗口大小
             item.Value.m_NextSn = recvNext;
             //如果序号小于远程最大确认包，说明这个确认晚了，远程已经有此包，不用重发
@@ -239,7 +302,7 @@ public class KCP
             if (item.Value.m_Ts >= currTime && item.Value.m_Rto == 0)
             {//新包直接发送
                 sendKcp(item.Value);
-                //UnityEngine.Debug.LogError(string.Format("发送：m_Sn:{0},m_Ts:{1}", item.Value.m_Sn, item.Value.m_Ts));
+                UnityEngine.Debug.LogError(string.Format("新包发送：m_Sn:{0},m_Ts:{1}", item.Value.m_Sn, item.Value.m_Ts));
             }
             else
             {
@@ -250,7 +313,7 @@ public class KCP
                         item.Value.m_Ts = currTime;
                         item.Value.m_Skip = 0;
                         sendKcp(item.Value);
-                        //UnityEngine.Debug.LogError(string.Format("重发：m_Sn:{0},m_Ts:{1}", item.Value.m_Sn, item.Value.m_Ts));
+                        UnityEngine.Debug.LogError(string.Format("重发：m_Sn:{0},m_Ts:{1}", item.Value.m_Sn, item.Value.m_Ts));
                         continue;
                     }
                 }
@@ -264,7 +327,7 @@ public class KCP
                 {
                     item.Value.m_Ts = currTime;
                     sendKcp(item.Value);
-                    //UnityEngine.Debug.LogError(string.Format("超时重发：m_Sn:{0},m_Ts:{1}", item.Value.m_Sn, item.Value.m_Ts));
+                    UnityEngine.Debug.LogError(string.Format("超时重发：m_Sn:{0},m_Ts:{1}", item.Value.m_Sn, item.Value.m_Ts));
                     item.Value.IncreaRto();
                     item.Value.m_Skip = 0;
                 }
@@ -282,7 +345,6 @@ public class KCP
     {
         if (currTime - this.kcpEndTime > 1000 * 60)
         {
-            this.running = false;
             GameData.m_GameManager.m_NetManager.m_UdpClient.Disconnect();
         }
     }
@@ -293,6 +355,7 @@ public class KCP
         kpt.m_Cmd = KCP.IKCP_CMD_PUSH;
         kpt.m_Data = pk.GetPacketByte();
         sendList.Enqueue(kpt);
+        UnityEngine.Debug.LogError(string.Format("加入发送：m_Cmd:{0},m_Ts:{1}", kpt.m_Cmd, kpt.m_Ts));
     }
 
     /// <summary>
@@ -392,6 +455,7 @@ public class KCP
         {
             foreach (CReadPacket item in lst)
             {
+                UnityEngine.Debug.LogError("收到协议:" + item.GetMessageID());
                 GameData.m_GameManager.m_NetManager.m_UdpClient.Receive(item);
             }
         }
@@ -453,6 +517,6 @@ public class KCP
     public long GetTimestamp()
     {
         TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-        return Convert.ToInt64(ts.TotalSeconds);
+        return Convert.ToInt64(ts.TotalMilliseconds);
     }
 }
